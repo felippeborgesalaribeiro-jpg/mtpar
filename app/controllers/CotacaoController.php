@@ -5,11 +5,14 @@ require_once __DIR__ . '/../models/Lote.php';
 require_once __DIR__ . '/../models/Servidor.php';
 require_once __DIR__ . '/../models/AnalisePrecos.php';
 require_once __DIR__ . '/../models/Parametro.php';
+require_once __DIR__ . '/../helpers/auth.php';
 
 class CotacaoController
 {
     public function criar(): void
     {
+        exigirLogin();
+
         $numeroProcesso = trim($_POST['numero_processo'] ?? '');
         $orgaoSetor = trim($_POST['orgao_setor'] ?? '');
         $procedimento = trim($_POST['procedimento'] ?? '');
@@ -40,6 +43,8 @@ class CotacaoController
 
     public function mostrar(int $id): void
     {
+        exigirLogin();
+
         $cotacao = Cotacao::buscarPorId($id);
 
         if ($cotacao === null) {
@@ -56,6 +61,8 @@ class CotacaoController
 
     public function finalizar(): void
     {
+        exigirLogin();
+
         $id = (int) ($_GET['id'] ?? 0);
         $cotacao = Cotacao::buscarPorId($id);
 
@@ -73,6 +80,8 @@ class CotacaoController
 
     public function excluir(): void
     {
+        exigirLogin();
+
         $id = (int) ($_GET['id'] ?? 0);
         $cotacao = Cotacao::buscarPorId($id);
 

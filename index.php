@@ -1,6 +1,9 @@
 <?php
 
 require_once __DIR__ . '/app/helpers/formatacao.php';
+require_once __DIR__ . '/app/helpers/auth.php';
+require_once __DIR__ . '/app/controllers/AuthController.php';
+require_once __DIR__ . '/app/controllers/PerfilController.php';
 require_once __DIR__ . '/app/controllers/DashboardController.php';
 require_once __DIR__ . '/app/controllers/ServidorController.php';
 require_once __DIR__ . '/app/controllers/CotacaoController.php';
@@ -13,6 +16,31 @@ require_once __DIR__ . '/app/controllers/RelatorioController.php';
 $action = $_GET['action'] ?? 'dashboard';
 
 switch ($action) {
+    case 'login':
+        $controller = new AuthController();
+        $controller->mostrarLogin();
+        break;
+
+    case 'fazer_login':
+        $controller = new AuthController();
+        $controller->login();
+        break;
+
+    case 'logout':
+        $controller = new AuthController();
+        $controller->logout();
+        break;
+
+    case 'perfil':
+        $controller = new PerfilController();
+        $controller->mostrar();
+        break;
+
+    case 'atualizar_perfil':
+        $controller = new PerfilController();
+        $controller->atualizar();
+        break;
+
     case 'dashboard':
         $controller = new DashboardController();
         $controller->mostrar();
@@ -31,6 +59,11 @@ switch ($action) {
     case 'editar_servidor':
         $controller = new ServidorController();
         $controller->editar();
+        break;
+
+    case 'resetar_senha_servidor':
+        $controller = new ServidorController();
+        $controller->resetarSenha();
         break;
 
     case 'excluir_servidor':

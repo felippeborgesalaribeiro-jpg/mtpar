@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/../../helpers/auth.php';
+$servidorLogado = usuarioLogado();
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -15,15 +19,26 @@
             <i class="ti ti-building-bank" aria-hidden="true" style="font-size: 18px; vertical-align: -2px; margin-right: 6px;"></i>
             MT Participações e Projetos S.A. — MT Par
         </a>
-        <div>
+        <div class="d-flex align-items-center gap-2">
             <a href="index.php?action=parametros" class="btn btn-sm btn-outline-light">
                 <i class="ti ti-list-details" aria-hidden="true" style="font-size: 14px; vertical-align: -1px;"></i>
                 Parâmetros
             </a>
-            <a href="index.php?action=servidores" class="btn btn-sm btn-outline-light">
-                <i class="ti ti-users" aria-hidden="true" style="font-size: 14px; vertical-align: -1px;"></i>
-                Servidores
-            </a>
+            <?php if ($servidorLogado !== null && $servidorLogado->ehAdmin()): ?>
+                <a href="index.php?action=servidores" class="btn btn-sm btn-outline-light">
+                    <i class="ti ti-users" aria-hidden="true" style="font-size: 14px; vertical-align: -1px;"></i>
+                    Servidores
+                </a>
+            <?php endif; ?>
+            <?php if ($servidorLogado !== null): ?>
+                <a href="index.php?action=perfil" class="btn btn-sm btn-outline-light">
+                    <i class="ti ti-user-circle" aria-hidden="true" style="font-size: 14px; vertical-align: -1px;"></i>
+                    <?= htmlspecialchars($servidorLogado->nome) ?>
+                </a>
+                <a href="index.php?action=logout" class="btn btn-sm btn-outline-light">
+                    <i class="ti ti-logout" aria-hidden="true" style="font-size: 14px; vertical-align: -1px;"></i>
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 </nav>

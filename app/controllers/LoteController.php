@@ -3,11 +3,14 @@
 require_once __DIR__ . '/../models/Lote.php';
 require_once __DIR__ . '/../models/Item.php';
 require_once __DIR__ . '/../models/Cotacao.php';
+require_once __DIR__ . '/../helpers/auth.php';
 
 class LoteController
 {
     public function criar(): void
     {
+        exigirLogin();
+
         $cotacaoId = (int) ($_POST['cotacao_id'] ?? 0);
 
         $cotacao = Cotacao::buscarPorId($cotacaoId);
@@ -26,6 +29,8 @@ class LoteController
 
     public function excluir(): void
     {
+        exigirLogin();
+
         $id = (int) ($_GET['id'] ?? 0);
         $lote = Lote::buscarPorId($id);
 
@@ -43,6 +48,8 @@ class LoteController
 
     public function adicionarItem(): void
     {
+        exigirLogin();
+
         $loteId = (int) ($_POST['lote_id'] ?? 0);
         $descricao = trim($_POST['descricao'] ?? '');
         $unidade = trim($_POST['unidade'] ?? 'UN');
@@ -64,6 +71,8 @@ class LoteController
 
     public function editarItem(): void
     {
+        exigirLogin();
+
         $itemId = (int) ($_POST['item_id'] ?? 0);
         $descricao = trim($_POST['descricao'] ?? '');
         $unidade = trim($_POST['unidade'] ?? 'UN');
@@ -89,6 +98,8 @@ class LoteController
 
     public function excluirItem(): void
     {
+        exigirLogin();
+
         $itemId = (int) ($_GET['id'] ?? 0);
 
         $item = Item::buscarPorId($itemId);

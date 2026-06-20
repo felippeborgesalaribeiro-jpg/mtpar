@@ -3,11 +3,14 @@
 require_once __DIR__ . '/../models/Cotacao.php';
 require_once __DIR__ . '/../models/Servidor.php';
 require_once __DIR__ . '/../helpers/config.php';
+require_once __DIR__ . '/../helpers/auth.php';
 
 class RelatorioController
 {
     public function formulario(): void
     {
+        exigirLogin();
+
         $cotacaoId = (int) ($_GET['id'] ?? 0);
         $cotacao = Cotacao::buscarPorId($cotacaoId);
 
@@ -35,6 +38,8 @@ class RelatorioController
 
     public function gerar(): void
     {
+        exigirLogin();
+
         $cotacaoId = (int) ($_POST['cotacao_id'] ?? 0);
         $elaboradoPorId = (int) ($_POST['elaborado_por_id'] ?? 0);
         $numeroDfd = trim($_POST['numero_dfd'] ?? '');
@@ -61,6 +66,8 @@ class RelatorioController
 
     public function gerarPesquisa(): void
     {
+        exigirLogin();
+
         $cotacaoId = (int) ($_GET['id'] ?? 0);
         $cotacao = Cotacao::buscarPorId($cotacaoId);
 

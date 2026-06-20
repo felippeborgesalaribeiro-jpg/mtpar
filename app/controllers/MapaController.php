@@ -2,11 +2,14 @@
 
 require_once __DIR__ . '/../models/Cotacao.php';
 require_once __DIR__ . '/../models/AnalisePrecos.php';
+require_once __DIR__ . '/../helpers/auth.php';
 
 class MapaController
 {
     public function mostrar(int $cotacaoId): void
     {
+        exigirLogin();
+
         $cotacao = Cotacao::buscarPorId($cotacaoId);
 
         if ($cotacao === null) {

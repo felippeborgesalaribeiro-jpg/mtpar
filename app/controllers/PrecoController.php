@@ -4,11 +4,14 @@ require_once __DIR__ . '/../models/Database.php';
 require_once __DIR__ . '/../models/Item.php';
 require_once __DIR__ . '/../models/Preco.php';
 require_once __DIR__ . '/../models/Lote.php';
+require_once __DIR__ . '/../helpers/auth.php';
 
 class PrecoController
 {
     public function adicionar(): void
     {
+        exigirLogin();
+
         $itemId = (int) ($_POST['item_id'] ?? 0);
         $valor = (float) str_replace(',', '.', $_POST['valor'] ?? '0');
         $parametro = trim($_POST['parametro'] ?? '');
@@ -32,6 +35,8 @@ class PrecoController
 
     public function editar(): void
     {
+        exigirLogin();
+
         $precoId = (int) ($_POST['preco_id'] ?? 0);
         $valor = (float) str_replace(',', '.', $_POST['valor'] ?? '0');
         $parametro = trim($_POST['parametro'] ?? '');
@@ -58,6 +63,8 @@ class PrecoController
 
     public function excluir(): void
     {
+        exigirLogin();
+
         $precoId = (int) ($_GET['id'] ?? 0);
 
         $preco = Preco::buscarPorId($precoId);

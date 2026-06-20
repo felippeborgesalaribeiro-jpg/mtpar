@@ -1,0 +1,138 @@
+@import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.navbar-brand {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.card {
+    border: 1px solid #e3e6ea;
+    border-radius: 10px;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.card-link-hover {
+    text-decoration: none;
+    display: block;
+}
+
+.card-link-hover:hover .card {
+    box-shadow: 0 6px 18px rgba(31, 56, 100, 0.12);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    font-size: 14px;
+}
+
+.table thead.table-dark th {
+    background-color: #1F3864;
+    border-color: #1F3864;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f4f7fb;
+}
+
+.badge {
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 6px;
+}
+
+.btn {
+    border-radius: 7px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: #1F3864;
+    border-color: #1F3864;
+}
+
+.btn-primary:hover {
+    background-color: #16294A;
+    border-color: #16294A;
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-danger:hover {
+    transform: translateY(-1px);
+}
+
+.icon-stat {
+    font-size: 18px;
+    color: #1F3864;
+    opacity: 0.7;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1F3864;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: #8a8f98;
+}
+
+.empty-state i {
+    font-size: 40px;
+    opacity: 0.4;
+    margin-bottom: 12px;
+    display: block;
+}
+
+@media print {
+    .navbar,
+    .btn,
+    form,
+    .no-print {
+        display: none !important;
+    }
+
+    body {
+        background: white !important;
+    }
+
+    .container {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+    }
+
+    .table {
+        font-size: 11px;
+    }
+
+    .table-responsive {
+        overflow: visible !important;
+    }
+
+    table {
+        width: 100% !important;
+    }
+
+    @page {
+        size: A4 landscape;
+        margin: 10mm;
+    }
+}

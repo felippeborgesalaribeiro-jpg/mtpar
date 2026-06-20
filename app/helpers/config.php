@@ -1,0 +1,3 @@
+<?php
+
+const SERVIDOR_VALIDADOR_PADRAO_ID = 1;

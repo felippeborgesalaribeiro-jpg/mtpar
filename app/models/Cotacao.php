@@ -18,6 +18,7 @@ class Cotacao
     public int $servidorId;
     public string $criterioConsolidacao;
     public string $status;
+    public string $criadoEm;
 
     public function __construct(
         string $numeroProcesso,
@@ -28,7 +29,8 @@ class Cotacao
         int $servidorId,
         string $criterioConsolidacao = AnalisePrecos::CRITERIO_MEDIANA,
         string $status = self::STATUS_EM_ANDAMENTO,
-        ?int $id = null
+        ?int $id = null,
+        string $criadoEm = ''
     ) {
         $this->id = $id;
         $this->numeroProcesso = $numeroProcesso;
@@ -39,6 +41,7 @@ class Cotacao
         $this->servidorId = $servidorId;
         $this->criterioConsolidacao = $criterioConsolidacao;
         $this->status = $status;
+        $this->criadoEm = $criadoEm;
     }
 
     public function salvar(): int
@@ -138,6 +141,22 @@ class Cotacao
         return $cotacoes;
     }
 
+    public static function buscarEmAndamentoPorServidor(int $servidorId): array
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare(
+            'SELECT * FROM cotacoes WHERE servidor_id = :servidor_id AND status = :status ORDER BY id DESC'
+        );
+        $stmt->execute(['servidor_id' => $servidorId, 'status' => self::STATUS_EM_ANDAMENTO]);
+
+        $cotacoes = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $linha) {
+            $cotacoes[] = self::fromArray($linha);
+        }
+
+        return $cotacoes;
+    }
+
     private static function fromArray(array $linha): Cotacao
     {
         return new Cotacao(
@@ -149,7 +168,8 @@ class Cotacao
             (int) $linha['servidor_id'],
             $linha['criterio_consolidacao'],
             $linha['status'],
-            (int) $linha['id']
+            (int) $linha['id'],
+            $linha['criado_em'] ?? ''
         );
     }
 }

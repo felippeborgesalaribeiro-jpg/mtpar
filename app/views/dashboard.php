@@ -2,127 +2,187 @@
 $titulo = 'Dashboard - MT Par';
 require __DIR__ . '/partials/header.php';
 
-$statusLabel = [
-    Cotacao::STATUS_EM_ANDAMENTO => ['Em andamento', 'bg-primary'],
-    Cotacao::STATUS_FINALIZADA => ['Finalizada', 'bg-success'],
+$coresAvatar = ['bg-success-subtle text-success', 'bg-primary-subtle text-primary', 'bg-warning-subtle text-warning', 'bg-danger-subtle text-danger', 'bg-info-subtle text-info'];
+
+$coresStatus = [
+    'EM ANDAMENTO' => 'text-primary',
+    'ELABORAÇÃO DE TR' => 'text-warning',
+    'ELABORAÇÃO DE PESQUISA DE PREÇO' => 'text-warning',
+    'AVISO DE LICITAÇÃO' => 'text-info',
+    'AVISO DE DISPENSA DE LICITAÇÃO' => 'text-info',
+    'EMISSÃO DE PED RESERVA' => 'text-info',
+    'FASE DE HABILITAÇÃO' => 'text-danger',
+    'ENVIADO PARA CONDES' => 'text-secondary',
+    'ENVIADO PARA PARECER JURÍDICO' => 'text-secondary',
+    'ENVIADO PARA PGE' => 'text-secondary',
+    'Cotação em andamento' => 'text-primary',
 ];
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <span class="section-title">
-        <i class="ti ti-clipboard-list" aria-hidden="true" style="font-size: 20px; vertical-align: -3px;"></i>
-        Cotações
-    </span>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaCotacao">
-        <i class="ti ti-plus" aria-hidden="true" style="font-size: 14px; vertical-align: -1px;"></i>
-        Nova cotação
-    </button>
-</div>
-
-<?php if (count($cotacoes) === 0): ?>
-    <div class="card shadow-sm">
-        <div class="empty-state">
-            <i class="ti ti-clipboard-off" aria-hidden="true"></i>
-            <p class="mb-0">Nenhuma cotação criada ainda.</p>
-            <p class="mb-0">Clique em "Nova cotação" para começar.</p>
+<div class="row g-3 mb-4">
+    <div class="col">
+        <div class="card shadow-sm h-100" style="border-left: 4px solid #1F3864;">
+            <div class="card-body py-3">
+                <p class="text-muted small mb-1">Processos em andamento</p>
+                <p class="fs-4 fw-bold m-0"><?= $processosEmAndamento ?></p>
+            </div>
         </div>
     </div>
-<?php endif; ?>
-
-<div class="row g-3">
-    <?php foreach ($cotacoes as $cotacao): ?>
-        <?php
-        $servidor = $cotacao->buscarServidor();
-        [$label, $classeBadge] = $statusLabel[$cotacao->status] ?? ['Indefinido', 'bg-secondary'];
-        ?>
-        <div class="col-md-4">
-            <a href="index.php?action=cotacao&id=<?= $cotacao->id ?>" class="card-link-hover">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h6 class="card-title mb-0">
-                                <i class="ti ti-file-text icon-stat" aria-hidden="true"></i>
-                                Processo <?= htmlspecialchars($cotacao->numeroProcesso) ?>
-                            </h6>
-                            <span class="badge <?= $classeBadge ?>"><?= $label ?></span>
-                        </div>
-                        <p class="card-text text-muted small mb-1">
-                            <?= htmlspecialchars($cotacao->orgaoSetor) ?>
-                        </p>
-                        <p class="card-text small mb-0">
-                            <i class="ti ti-user" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
-                            <?= $servidor ? htmlspecialchars($servidor->nome) : '—' ?>
-                        </p>
-                        <p class="card-text small text-muted mb-0">
-                            <i class="ti ti-package" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
-                            <?= count($cotacao->buscarLotes()) ?> lote(s) — <?= $cotacao->contarItens() ?> item(ns)
-                        </p>
-                    </div>
-                </div>
-            </a>
+    <div class="col">
+        <div class="card shadow-sm h-100" style="border-left: 4px solid #1F3864;">
+            <div class="card-body py-3">
+                <p class="text-muted small mb-1">Cotações em andamento</p>
+                <p class="fs-4 fw-bold m-0"><?= $cotacoesEmAndamento ?></p>
+            </div>
         </div>
-    <?php endforeach; ?>
+    </div>
+    <div class="col">
+        <div class="card shadow-sm h-100" style="border-left: 4px solid #1F3864;">
+            <div class="card-body py-3">
+                <p class="text-muted small mb-1">Licitações publicadas</p>
+                <p class="fs-4 fw-bold m-0"><?= $licitacoesPublicadas ?></p>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card shadow-sm h-100" style="border-left: 4px solid #1F3864;">
+            <div class="card-body py-3">
+                <p class="text-muted small mb-1">Licitações homologadas</p>
+                <p class="fs-4 fw-bold m-0"><?= $licitacoesHomologadas ?></p>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card shadow-sm h-100" style="background-color: #1F3864; border-left: 4px solid #FFC107;">
+            <div class="card-body py-3">
+                <p class="small mb-1" style="color: rgba(255,255,255,0.75);">Valor homologado</p>
+                <p class="fs-5 fw-bold m-0" style="color: #FFFFFF;"><?= formatarMoeda($valorHomologadas) ?></p>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="modal fade" id="modalNovaCotacao" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="post" action="index.php?action=criar_cotacao">
-                <div class="modal-header">
-                    <h5 class="modal-title">Nova cotação</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<p class="fs-6 fw-semibold mb-3" style="color: #1F3864;">
+    <i class="ti ti-apps" aria-hidden="true" style="font-size: 18px; vertical-align: -3px;"></i>
+    Módulos
+</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <a href="index.php?action=demandas" class="text-decoration-none">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="rounded-3 bg-primary-subtle d-inline-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="ti ti-folder text-primary" aria-hidden="true" style="font-size: 20px;"></i>
+                    </div>
+                    <p class="fw-semibold mb-1 mt-3 text-dark">Demandas</p>
+                    <p class="text-muted small mb-0">Controle de processos do setor</p>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Número do processo</label>
-                        <input type="text" name="numero_processo" class="form-control" required>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="index.php?action=licitacoes" class="text-decoration-none">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="rounded-3 bg-success-subtle d-inline-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="ti ti-gavel text-success" aria-hidden="true" style="font-size: 20px;"></i>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Órgão / Setor</label>
-                        <input type="text" name="orgao_setor" class="form-control">
+                    <p class="fw-semibold mb-1 mt-3 text-dark">Licitações</p>
+                    <p class="text-muted small mb-0">Acompanhamento e economicidade</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="index.php?action=cotacoes" class="text-decoration-none">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="rounded-3 bg-info-subtle d-inline-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="ti ti-clipboard-list text-info" aria-hidden="true" style="font-size: 20px;"></i>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Procedimento</label>
-                        <input type="text" name="procedimento" class="form-control" placeholder="Ex: Pregão Eletrônico">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Tipo de julgamento</label>
-                        <input type="text" name="tipo_julgamento" class="form-control" placeholder="Ex: Menor Preço">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Objeto</label>
-                        <textarea name="objeto" class="form-control" rows="2"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Servidor responsável</label>
-                        <select name="servidor_id" class="form-select" required>
-                            <option value="">Selecione...</option>
-                            <?php foreach ($servidores as $servidor): ?>
-                                <option value="<?= $servidor->id ?>"><?= htmlspecialchars($servidor->nome) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <?php if (count($servidores) === 0): ?>
-                            <div class="form-text text-danger">
-                                Nenhum servidor cadastrado. <a href="index.php?action=servidores">Cadastre um aqui</a> antes de continuar.
+                    <p class="fw-semibold mb-1 mt-3 text-dark">Cotações</p>
+                    <p class="text-muted small mb-0">Pesquisa de preços e mapas</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-7">
+        <div class="card shadow-sm h-100" style="border-top: 3px solid #1F3864;">
+            <div class="card-body">
+                <p class="text-muted small mb-1 text-uppercase" style="letter-spacing: 0.05em; font-size: 11px;">MT Par</p>
+                <h4 class="mb-1">Bem-vindo, <?= htmlspecialchars(explode(' ', $servidorLogado->nome)[0]) ?></h4>
+                <p class="text-muted small mb-3">Suas pendências em aberto:</p>
+
+                <?php if (count($minhasPendenciasExibidas) === 0): ?>
+                    <p class="text-muted small mb-0">
+                        <i class="ti ti-mood-smile" aria-hidden="true" style="font-size: 14px; vertical-align: -1px;"></i>
+                        Nenhuma pendência em seu nome.
+                    </p>
+                <?php else: ?>
+                    <?php foreach ($minhasPendenciasExibidas as $indice => $pendencia): ?>
+                        <?php
+                        $corStatus = $coresStatus[$pendencia['status']] ?? 'text-secondary';
+                        $ehUltimo = $indice === count($minhasPendenciasExibidas) - 1;
+                        $iconeTipo = $pendencia['tipo'] === 'cotacao' ? 'ti-clipboard-list' : 'ti-folder';
+                        ?>
+                        <a href="<?= $pendencia['link'] ?>" class="text-decoration-none d-block">
+                            <div class="d-flex align-items-center gap-3 py-2 <?= $ehUltimo ? '' : 'border-bottom' ?>">
+                                <i class="ti <?= $iconeTipo ?> text-muted flex-shrink-0" aria-hidden="true" style="font-size: 15px;"></i>
+                                <span class="small fst-italic flex-shrink-0 <?= $corStatus ?>" style="width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    <?= htmlspecialchars($pendencia['status']) ?>
+                                </span>
+                                <span class="flex-grow-1 text-dark"><?= htmlspecialchars($pendencia['numero_processo']) ?></span>
+                                <span class="small text-muted flex-shrink-0"><?= date('d/m', strtotime($pendencia['data'])) ?></span>
                             </div>
-                        <?php endif; ?>
+                        </a>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
+                <?php if ($totalMinhasPendencias > count($minhasPendenciasExibidas)): ?>
+                    <div class="text-end border-top pt-2 mt-2">
+                        <a href="index.php?action=demandas" class="small fw-semibold text-decoration-none">
+                            Ver todas as pendências
+                            <i class="ti ti-chevron-right" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+                        </a>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Critério de consolidação</label>
-                        <select name="criterio_consolidacao" class="form-select">
-                            <option value="MEDIANA">Mediana</option>
-                            <option value="MEDIA">Média</option>
-                            <option value="MENOR_PRECO">Menor preço</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="ti ti-check" aria-hidden="true" style="font-size: 14px; vertical-align: -1px;"></i>
-                        Criar cotação
-                    </button>
-                </div>
-            </form>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <p class="fw-semibold mb-3">
+                    <i class="ti ti-users" aria-hidden="true" style="font-size: 16px; vertical-align: -2px; color: #6c757d;"></i>
+                    Servidores do setor
+                </p>
+                <?php if (count($servidores) === 0): ?>
+                    <p class="text-muted small mb-0">Nenhum servidor cadastrado.</p>
+                <?php else: ?>
+                    <?php foreach ($servidores as $indice => $servidor): ?>
+                        <?php
+                        $iniciais = mb_strtoupper(mb_substr($servidor->nome, 0, 1));
+                        $corAvatar = $coresAvatar[$indice % count($coresAvatar)];
+                        $ehUltimo = $indice === count($servidores) - 1;
+                        ?>
+                        <div class="d-flex align-items-center gap-3 py-2 <?= $ehUltimo ? '' : 'border-bottom' ?>">
+                            <span class="rounded-circle <?= $corAvatar ?> d-flex align-items-center justify-content-center fw-semibold flex-shrink-0"
+                                  style="width: 30px; height: 30px; font-size: 12px;">
+                                <?= htmlspecialchars($iniciais) ?>
+                            </span>
+                            <div>
+                                <p class="mb-0 small fw-medium"><?= htmlspecialchars($servidor->nome) ?></p>
+                                <p class="mb-0" style="font-size: 11px; color: #6c757d;"><?= $servidor->cargo !== '' ? htmlspecialchars($servidor->cargo) : '—' ?></p>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>

@@ -7,6 +7,13 @@ $statusLabel = [
     Cotacao::STATUS_FINALIZADA => ['Finalizada', 'bg-success'],
 ];
 [$labelStatus, $classeBadgeStatus] = $statusLabel[$cotacao->status] ?? ['Indefinido', 'bg-secondary'];
+
+$classesBadgeResultado = [
+    'APROVADO' => 'bg-success',
+    'EXCESSIVAMENTE ELEVADO' => 'bg-danger',
+    'INEXEQUÍVEL' => 'bg-danger',
+    'EXCEÇÃO - PREÇO PÚBLICO' => 'bg-warning text-dark',
+];
 ?>
 
 <div class="d-flex justify-content-between align-items-start mb-3">
@@ -19,9 +26,9 @@ $statusLabel = [
         <p class="text-muted mb-0"><?= htmlspecialchars($cotacao->orgaoSetor) ?></p>
     </div>
     <div>
-        <a href="index.php?action=dashboard" class="btn btn-sm btn-secondary">
+        <a href="index.php?action=cotacoes" class="btn btn-sm btn-secondary">
             <i class="ti ti-arrow-left" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
-            Voltar ao dashboard
+            Voltar às cotações
         </a>
         <a href="index.php?action=mapa&id=<?= $cotacao->id ?>" class="btn btn-sm btn-info text-white">
             <i class="ti ti-table" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
@@ -58,19 +65,19 @@ $statusLabel = [
     <div class="card-body">
         <div class="row small">
             <div class="col-md-3">
-                <i class="ti ti-clipboard-list icon-stat" aria-hidden="true"></i>
+                <i class="ti ti-clipboard-list" aria-hidden="true" style="font-size: 18px; color: #1F3864; opacity: 0.7;"></i>
                 <b>Procedimento:</b> <?= htmlspecialchars($cotacao->procedimento) ?>
             </div>
             <div class="col-md-3">
-                <i class="ti ti-gavel icon-stat" aria-hidden="true"></i>
+                <i class="ti ti-gavel" aria-hidden="true" style="font-size: 18px; color: #1F3864; opacity: 0.7;"></i>
                 <b>Tipo de julgamento:</b> <?= htmlspecialchars($cotacao->tipoJulgamento) ?>
             </div>
             <div class="col-md-3">
-                <i class="ti ti-user icon-stat" aria-hidden="true"></i>
+                <i class="ti ti-user" aria-hidden="true" style="font-size: 18px; color: #1F3864; opacity: 0.7;"></i>
                 <b>Servidor:</b> <?= htmlspecialchars($servidor->nome ?? '—') ?>
             </div>
             <div class="col-md-3">
-                <i class="ti ti-calculator icon-stat" aria-hidden="true"></i>
+                <i class="ti ti-calculator" aria-hidden="true" style="font-size: 18px; color: #1F3864; opacity: 0.7;"></i>
                 <b>Critério:</b> <?= $cotacao->criterioConsolidacao ?>
             </div>
         </div>
@@ -81,7 +88,7 @@ $statusLabel = [
 </div>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <span class="section-title">
+    <span class="fs-6 fw-semibold" style="color: #1F3864;">
         <i class="ti ti-package" aria-hidden="true" style="font-size: 18px; vertical-align: -3px;"></i>
         Lotes
     </span>
@@ -96,7 +103,7 @@ $statusLabel = [
 
 <?php if (count($lotes) === 0): ?>
     <div class="card shadow-sm">
-        <div class="empty-state">
+        <div class="empty-state text-muted">
             <i class="ti ti-package-off" aria-hidden="true"></i>
             <p class="mb-0">Nenhum lote criado ainda.</p>
         </div>

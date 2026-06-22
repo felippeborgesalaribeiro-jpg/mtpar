@@ -9,6 +9,16 @@ require_once __DIR__ . '/../helpers/auth.php';
 
 class CotacaoController
 {
+    public function listar(): void
+    {
+        exigirLogin();
+
+        $cotacoes = Cotacao::buscarTodas();
+        $servidores = Servidor::buscarTodos();
+
+        require __DIR__ . '/../views/cotacoes.php';
+    }
+
     public function criar(): void
     {
         exigirLogin();
@@ -89,7 +99,7 @@ class CotacaoController
             $cotacao->excluir();
         }
 
-        header('Location: index.php?action=dashboard');
+        header('Location: index.php?action=cotacoes');
         exit;
     }
 }

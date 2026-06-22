@@ -12,6 +12,8 @@ require_once __DIR__ . '/app/controllers/PrecoController.php';
 require_once __DIR__ . '/app/controllers/MapaController.php';
 require_once __DIR__ . '/app/controllers/ParametroController.php';
 require_once __DIR__ . '/app/controllers/RelatorioController.php';
+require_once __DIR__ . '/app/controllers/DemandaController.php';
+require_once __DIR__ . '/app/controllers/LicitacaoController.php';
 
 $action = $_GET['action'] ?? 'dashboard';
 
@@ -89,6 +91,11 @@ switch ($action) {
     case 'excluir_parametro':
         $controller = new ParametroController();
         $controller->excluir();
+        break;
+
+    case 'cotacoes':
+        $controller = new CotacaoController();
+        $controller->listar();
         break;
 
     case 'criar_cotacao':
@@ -171,6 +178,41 @@ switch ($action) {
     case 'gerar_relatorio_pesquisa':
         $controller = new RelatorioController();
         $controller->gerarPesquisa();
+        break;
+
+    case 'demandas':
+        $controller = new DemandaController();
+        $controller->listar();
+        break;
+
+    case 'criar_demanda':
+        $controller = new DemandaController();
+        $controller->criar();
+        break;
+
+    case 'editar_demanda':
+        $controller = new DemandaController();
+        $controller->editar();
+        break;
+
+    case 'excluir_demanda':
+        $controller = new DemandaController();
+        $controller->excluir();
+        break;
+
+    case 'licitacoes':
+        $controller = new LicitacaoController();
+        $controller->listar();
+        break;
+
+    case 'editar_licitacao':
+        $controller = new LicitacaoController();
+        $controller->editar();
+        break;
+
+    case 'excluir_licitacao':
+        $controller = new LicitacaoController();
+        $controller->excluir();
         break;
 
     default:

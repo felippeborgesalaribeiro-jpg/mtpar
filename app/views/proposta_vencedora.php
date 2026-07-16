@@ -13,7 +13,10 @@ require __DIR__ . '/partials/header.php';
         Conferência de Proposta Vencedora
     </span>
     <?php if ($cotacao !== null): ?>
-        <span class="text-muted small">Referência: mapa comparativo da Cotação <?= htmlspecialchars($cotacao->numeroProcesso) ?></span>
+        <span class="text-muted small">
+            <i class="ti ti-info-circle" aria-hidden="true" style="font-size: 12px; vertical-align: -1px;"></i>
+            Os valores de referência vêm direto do mapa comparativo da Cotação <?= htmlspecialchars($cotacao->numeroProcesso) ?> — nenhum item foi redigitado.
+        </span>
     <?php endif; ?>
 </div>
 
@@ -33,10 +36,13 @@ require __DIR__ . '/partials/header.php';
     <input type="hidden" name="operacao" id="campoOperacao" value="salvar">
 
     <!-- Empresa vencedora -->
-    <div class="card shadow-sm mb-3">
+    <div class="card shadow-sm mb-3" style="border-left: 3px solid var(--brand-blue);">
+        <div class="card-header bg-white d-flex align-items-center gap-2 py-2">
+            <i class="ti ti-building" aria-hidden="true" style="font-size:16px; color: var(--brand-blue-dark);"></i>
+            <span class="fw-semibold small">Empresa vencedora</span>
+        </div>
         <div class="card-body">
-            <div id="empresaSearchWrap" style="<?= $empresaVencedora !== null ? 'display:none;' : '' ?>">
-                <label class="form-label small fw-semibold" for="empresaInput">Empresa vencedora</label>
+            <div id="empresaSearchWrap" class="<?= $empresaVencedora !== null ? 'd-none' : '' ?>">
                 <div class="position-relative">
                     <i class="ti ti-search text-muted position-absolute" aria-hidden="true" style="font-size: 14px; left: 12px; top: 10px;"></i>
                     <input type="text" id="empresaInput" class="form-control form-control-sm" style="padding-left: 32px;"
@@ -68,7 +74,7 @@ require __DIR__ . '/partials/header.php';
                     </div>
                 </div>
             </div>
-            <div id="empresaSelected" class="d-flex align-items-center gap-3" style="<?= $empresaVencedora === null ? 'display:none;' : '' ?>">
+            <div id="empresaSelected" class="align-items-center gap-3 <?= $empresaVencedora !== null ? 'd-flex' : 'd-none' ?>">
                 <div class="rounded-3 bg-primary-subtle d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 38px; height: 38px;">
                     <i class="ti ti-building text-primary" aria-hidden="true" style="font-size: 18px;"></i>
                 </div>
@@ -83,11 +89,11 @@ require __DIR__ . '/partials/header.php';
     </div>
 
     <!-- Resumo -->
-    <div class="position-sticky mb-3" style="top: 0; z-index: 5;">
-        <div class="card shadow-sm" id="cardResumo">
+    <div class="position-sticky mb-3" style="top: 10px; z-index: 5;">
+        <div class="card shadow-sm" id="cardResumo" style="border-left: 4px solid #198754;">
             <div class="card-body d-flex flex-wrap align-items-center gap-3">
                 <div class="d-flex align-items-center gap-2 flex-grow-1">
-                    <span class="rounded-circle flex-shrink-0" id="verdictDot" style="width: 10px; height: 10px; background: #198754;"></span>
+                    <span class="rounded-circle flex-shrink-0" id="verdictDot" style="width: 11px; height: 11px; background: #198754; box-shadow: 0 0 0 4px rgba(25,135,84,.16);"></span>
                     <div>
                         <p class="text-muted mb-0" style="font-size:10px; text-transform:uppercase; letter-spacing:.05em;">Resultado geral</p>
                         <p class="mb-0 small fw-semibold" id="verdictText">Aguardando propostas</p>
@@ -122,7 +128,10 @@ require __DIR__ . '/partials/header.php';
         <?php $itens = $lote->buscarItens(); ?>
         <div class="card shadow-sm mb-3" data-lote>
             <div class="card-header bg-white d-flex align-items-center justify-content-between py-2">
-                <span class="fw-semibold small">Lote <?= htmlspecialchars($lote->numero) ?></span>
+                <span class="fw-semibold small">
+                    <i class="ti ti-package" aria-hidden="true" style="font-size:15px; color: var(--brand-blue-dark); vertical-align: -2px;"></i>
+                    Lote <?= htmlspecialchars($lote->numero) ?>
+                </span>
                 <span class="text-muted small"><?= count($itens) ?> ite<?= count($itens) === 1 ? 'm' : 'ns' ?></span>
             </div>
             <div class="table-responsive">
@@ -191,12 +200,11 @@ require __DIR__ . '/partials/header.php';
 
 <style>
 .tabular-nums { font-variant-numeric: tabular-nums; }
-tr.row-alert td.total { color: #dc3545; }
+tr.row-alert td.total { color: #dc3545; font-weight: 600; }
 tr.lote-subtotal.alert td { background-color: #f8d7da; }
-tr.lote-subtotal.ok td.subtotal-proposto { color: #198754; }
-#cardResumo.status-alert { border: 1px solid #dc3545; }
-#cardResumo.status-ok { border: 1px solid #198754; }
+tr.lote-subtotal.ok td { background-color: #d1e7dd; }
 .border-dashed { border-style: dashed !important; }
+#cardResumo { transition: border-color .2s ease; }
 </style>
 
 <script>
@@ -233,7 +241,7 @@ tr.lote-subtotal.ok td.subtotal-proposto { color: #198754; }
 
                 if (propostoUnit === null) {
                     chip.className = 'badge bg-secondary';
-                    chip.textContent = 'Aguardando';
+                    chip.innerHTML = '<i class="ti ti-clock" aria-hidden="true" style="font-size:11px; vertical-align:-1px;"></i> Aguardando';
                     totalCell.textContent = '—';
                     row.classList.remove('row-alert');
                     subTemPendente = true;
@@ -246,12 +254,12 @@ tr.lote-subtotal.ok td.subtotal-proposto { color: #198754; }
 
                 if (propostoUnit > ref) {
                     chip.className = 'badge bg-danger';
-                    chip.textContent = 'Acima da referência';
+                    chip.innerHTML = '<i class="ti ti-alert-triangle" aria-hidden="true" style="font-size:11px; vertical-align:-1px;"></i> Acima da referência';
                     row.classList.add('row-alert');
                     subAlerta = true;
                 } else {
                     chip.className = 'badge bg-success';
-                    chip.textContent = 'Dentro do valor';
+                    chip.innerHTML = '<i class="ti ti-check" aria-hidden="true" style="font-size:11px; vertical-align:-1px;"></i> Dentro do valor';
                     row.classList.remove('row-alert');
                 }
             });
@@ -293,8 +301,10 @@ tr.lote-subtotal.ok td.subtotal-proposto { color: #198754; }
         var cardResumo = document.getElementById('cardResumo');
         var verdictText = document.getElementById('verdictText');
         var verdictDot = document.getElementById('verdictDot');
-        cardResumo.className = 'card shadow-sm ' + (algumAlerta ? 'status-alert' : 'status-ok');
-        verdictDot.style.background = algumAlerta ? '#dc3545' : '#198754';
+        var corEstado = algumAlerta ? '#dc3545' : '#198754';
+        cardResumo.style.borderLeftColor = corEstado;
+        verdictDot.style.background = corEstado;
+        verdictDot.style.boxShadow = '0 0 0 4px ' + (algumAlerta ? 'rgba(220,53,69,.16)' : 'rgba(25,135,84,.16)');
         verdictText.textContent = algumAlerta ? 'Existem itens acima do valor de referência' : 'Proposta dentro do estimado';
     }
 
@@ -334,8 +344,9 @@ tr.lote-subtotal.ok td.subtotal-proposto { color: #198754; }
         document.getElementById('selCnpj').textContent = 'CNPJ ' + maskCnpj(empresa.cnpj);
         campoEmpresaVencedoraId.value = empresa.id;
 
-        empresaSearchWrap.style.display = 'none';
-        empresaSelected.style.display = 'flex';
+        empresaSearchWrap.classList.add('d-none');
+        empresaSelected.classList.remove('d-none');
+        empresaSelected.classList.add('d-flex');
         empresaInput.value = '';
         empresaResults.style.display = 'none';
         empresaNotFound.classList.add('d-none');
@@ -430,8 +441,9 @@ tr.lote-subtotal.ok td.subtotal-proposto { color: #198754; }
     });
 
     document.getElementById('btnTrocarEmpresa').addEventListener('click', function () {
-        empresaSelected.style.display = 'none';
-        empresaSearchWrap.style.display = 'block';
+        empresaSelected.classList.remove('d-flex');
+        empresaSelected.classList.add('d-none');
+        empresaSearchWrap.classList.remove('d-none');
         empresaInput.focus();
     });
 

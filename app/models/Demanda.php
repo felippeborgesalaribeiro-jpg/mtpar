@@ -21,6 +21,8 @@ class Demanda
         'ENVIADO PARA CONDES',
         'ENVIADO PARA PARECER JURÍDICO',
         'ENVIADO PARA PGE',
+        'SANEAMENTO DE PROCESSO',
+        'PUBLICADO',
     ];
 
     public ?int $id;
@@ -31,6 +33,7 @@ class Demanda
     public string $objeto;
     public ?int $servidorResponsavelId;
     public string $status;
+    public ?string $deletedAt;
 
     public function __construct(
         string $numeroProcesso,
@@ -40,7 +43,8 @@ class Demanda
         string $objeto = '',
         ?int $servidorResponsavelId = null,
         string $status = self::STATUS_EM_ANDAMENTO,
-        ?int $id = null
+        ?int $id = null,
+        ?string $deletedAt = null
     ) {
         $this->id = $id;
         $this->numeroProcesso = $numeroProcesso;
@@ -50,6 +54,7 @@ class Demanda
         $this->objeto = $objeto;
         $this->servidorResponsavelId = $servidorResponsavelId;
         $this->status = $status;
+        $this->deletedAt = $deletedAt;
     }
 
     public function salvar(): int
@@ -80,16 +85,32 @@ class Demanda
     {
         return [
             'numero_processo' => $this->numeroProcesso,
-            'link_sigadoc' => $this->linkSigadoc,
+            'link_sigadoc'    => $this->linkSigadoc,
             'setor_demandante' => $this->setorDemandante,
             'data_recebimento' => $this->dataRecebimento,
-            'objeto' => $this->objeto,
+            'objeto'           => $this->objeto,
             'servidor_responsavel_id' => $this->servidorResponsavelId,
-            'status' => $this->status,
+            'status'           => $this->status,
         ];
     }
 
     public function excluir(): void
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare("UPDATE demandas SET deleted_at = datetime('now') WHERE id = :id");
+        $stmt->execute(['id' => $this->id]);
+        $this->deletedAt = date('Y-m-d H:i:s');
+    }
+
+    public function restaurar(): void
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare('UPDATE demandas SET deleted_at = NULL WHERE id = :id');
+        $stmt->execute(['id' => $this->id]);
+        $this->deletedAt = null;
+    }
+
+    public function excluirDefinitivamente(): void
     {
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare('DELETE FROM demandas WHERE id = :id');
@@ -107,16 +128,40 @@ class Demanda
         return Servidor::buscarPorId($this->servidorResponsavelId);
     }
 
+    public function buscarCotacaoVinculada(): ?Cotacao
+    {
+        require_once __DIR__ . '/Cotacao.php';
+
+        return Cotacao::buscarPorDemandaId($this->id);
+    }
+
+    public function buscarVantajosidadeVinculada(): ?ProcessoVantajosidade
+    {
+        require_once __DIR__ . '/ProcessoVantajosidade.php';
+
+        return ProcessoVantajosidade::buscarPorDemandaId($this->id);
+    }
+
     public static function buscarPorId(int $id): ?Demanda
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare('SELECT * FROM demandas WHERE id = :id');
+        $stmt = $pdo->prepare('SELECT * FROM demandas WHERE id = :id AND deleted_at IS NULL');
         $stmt->execute(['id' => $id]);
         $linha = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$linha) {
-            return null;
-        }
+        if (!$linha) return null;
+
+        return self::fromArray($linha);
+    }
+
+    public static function buscarExcluidaPorId(int $id): ?Demanda
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare('SELECT * FROM demandas WHERE id = :id AND deleted_at IS NOT NULL');
+        $stmt->execute(['id' => $id]);
+        $linha = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$linha) return null;
 
         return self::fromArray($linha);
     }
@@ -124,7 +169,40 @@ class Demanda
     public static function buscarTodas(): array
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->query('SELECT * FROM demandas ORDER BY data_recebimento DESC');
+        $stmt = $pdo->query('SELECT * FROM demandas WHERE deleted_at IS NULL ORDER BY data_recebimento DESC');
+
+        $demandas = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $linha) {
+            $demandas[] = self::fromArray($linha);
+        }
+
+        return $demandas;
+    }
+
+    public static function buscarExcluidas(): array
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->query('SELECT * FROM demandas WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC');
+
+        $demandas = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $linha) {
+            $demandas[] = self::fromArray($linha);
+        }
+
+        return $demandas;
+    }
+
+    public static function buscarEmAndamentoSemVinculo(): array
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->query(
+            "SELECT d.* FROM demandas d
+             WHERE d.deleted_at IS NULL
+             AND d.status NOT IN ('" . self::STATUS_CONCLUIDO . "', '" . self::STATUS_CANCELADO . "')
+             AND d.id NOT IN (SELECT demanda_id FROM cotacoes WHERE demanda_id IS NOT NULL)
+             AND d.id NOT IN (SELECT demanda_id FROM processos_vantajosidade WHERE demanda_id IS NOT NULL)
+             ORDER BY d.data_recebimento DESC"
+        );
 
         $demandas = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $linha) {
@@ -140,6 +218,7 @@ class Demanda
         $stmt = $pdo->prepare(
             "SELECT * FROM demandas
              WHERE servidor_responsavel_id = :servidor_id
+             AND deleted_at IS NULL
              AND status NOT IN ('" . self::STATUS_CONCLUIDO . "', '" . self::STATUS_CANCELADO . "')
              ORDER BY data_recebimento DESC
              LIMIT :limite"
@@ -162,6 +241,7 @@ class Demanda
         $stmt = $pdo->prepare(
             "SELECT COUNT(*) FROM demandas
              WHERE servidor_responsavel_id = :servidor_id
+             AND deleted_at IS NULL
              AND status NOT IN ('" . self::STATUS_CONCLUIDO . "', '" . self::STATUS_CANCELADO . "')"
         );
         $stmt->execute(['servidor_id' => $servidorId]);
@@ -173,10 +253,18 @@ class Demanda
     {
         $pdo = Database::getConnection();
         $stmt = $pdo->query(
-            "SELECT COUNT(*) FROM demandas WHERE status NOT IN ('" . self::STATUS_CONCLUIDO . "', '" . self::STATUS_CANCELADO . "')"
+            "SELECT COUNT(*) FROM demandas
+             WHERE deleted_at IS NULL
+             AND status NOT IN ('" . self::STATUS_CONCLUIDO . "', '" . self::STATUS_CANCELADO . "')"
         );
 
         return (int) $stmt->fetchColumn();
+    }
+
+    public static function contarExcluidas(): int
+    {
+        $pdo = Database::getConnection();
+        return (int) $pdo->query('SELECT COUNT(*) FROM demandas WHERE deleted_at IS NOT NULL')->fetchColumn();
     }
 
     private static function fromArray(array $linha): Demanda
@@ -189,7 +277,8 @@ class Demanda
             $linha['objeto'] ?? '',
             $linha['servidor_responsavel_id'] !== null ? (int) $linha['servidor_responsavel_id'] : null,
             $linha['status'] ?? self::STATUS_EM_ANDAMENTO,
-            (int) $linha['id']
+            (int) $linha['id'],
+            $linha['deleted_at'] ?? null
         );
     }
 }

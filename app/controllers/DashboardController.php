@@ -39,7 +39,7 @@ class DashboardController
                 'status' => $demanda->status,
                 'numero_processo' => $demanda->numeroProcesso,
                 'data' => $demanda->dataRecebimento,
-                'link' => 'index.php?action=demandas',
+                'link' => 'index.php?action=ver_demanda&id=' . $demanda->id,
             ];
         }
 

@@ -4,7 +4,7 @@ require __DIR__ . '/partials/header.php';
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4 no-print">
-    <span class="section-title">
+    <span class="fs-6 fw-semibold" style="color: #1F3864;">
         <i class="ti ti-table" aria-hidden="true" style="font-size: 18px; vertical-align: -3px;"></i>
         Mapa comparativo de preços (detalhado)
     </span>
@@ -43,7 +43,6 @@ require __DIR__ . '/partials/header.php';
 
     <div class="card shadow-sm mb-4">
         <div class="card-header text-white fw-bold" style="background-color: #1F3864;">
-            <i class="ti ti-box" aria-hidden="true" style="font-size: 15px; vertical-align: -2px;"></i>
             Resumo: Lote <?= htmlspecialchars($lote->numero) ?>
         </div>
         <div class="card-body p-0">
@@ -98,6 +97,17 @@ require __DIR__ . '/partials/header.php';
         </div>
     </div>
 <?php endforeach; ?>
+
+<div class="card shadow-sm mb-4" style="border: 2px solid #1F3864;">
+    <div class="card-body text-end">
+        <span class="fs-4">
+            <b>Valor global da cotação:</b>
+            <span class="badge fs-5" style="background-color: #1F3864;">
+                <?= formatarMoeda($valorGlobalCotacao) ?>
+            </span>
+        </span>
+    </div>
+</div>
 
 <div class="card shadow-sm mb-4">
     <div class="card-body">

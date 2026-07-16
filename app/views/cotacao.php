@@ -4,16 +4,9 @@ require __DIR__ . '/partials/header.php';
 
 $statusLabel = [
     Cotacao::STATUS_EM_ANDAMENTO => ['Em andamento', 'bg-primary'],
-    Cotacao::STATUS_FINALIZADA => ['Finalizada', 'bg-success'],
+    Cotacao::STATUS_FINALIZADA   => ['Finalizada', 'bg-success'],
 ];
 [$labelStatus, $classeBadgeStatus] = $statusLabel[$cotacao->status] ?? ['Indefinido', 'bg-secondary'];
-
-$classesBadgeResultado = [
-    'APROVADO' => 'bg-success',
-    'EXCESSIVAMENTE ELEVADO' => 'bg-danger',
-    'INEXEQUÍVEL' => 'bg-danger',
-    'EXCEÇÃO - PREÇO PÚBLICO' => 'bg-warning text-dark',
-];
 ?>
 
 <div class="d-flex justify-content-between align-items-start mb-3">
@@ -24,12 +17,31 @@ $classesBadgeResultado = [
             <span class="badge <?= $classeBadgeStatus ?>"><?= $labelStatus ?></span>
         </h4>
         <p class="text-muted mb-0"><?= htmlspecialchars($cotacao->orgaoSetor) ?></p>
+        <?php if ($demandaVinculada !== null): ?>
+            <p class="small mb-0">
+                <i class="ti ti-link" aria-hidden="true" style="font-size: 13px; vertical-align: -1px; color: #1F3864;"></i>
+                Vinculada à Demanda nº <?= htmlspecialchars($demandaVinculada->numeroProcesso) ?>
+                <a href="index.php?action=demandas" class="text-decoration-none">
+                    (ver demandas <i class="ti ti-arrow-right" aria-hidden="true" style="font-size: 11px;"></i>)
+                </a>
+            </p>
+        <?php else: ?>
+            <p class="small mb-0 text-muted">
+                <i class="ti ti-link-off" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+                Sem vínculo com demanda
+            </p>
+        <?php endif; ?>
     </div>
     <div>
         <a href="index.php?action=cotacoes" class="btn btn-sm btn-secondary">
             <i class="ti ti-arrow-left" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
             Voltar às cotações
         </a>
+        <button type="button" class="btn btn-sm btn-outline-primary"
+                data-bs-toggle="modal" data-bs-target="#modalEditarCotacao">
+            <i class="ti ti-edit" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+            Editar
+        </button>
         <a href="index.php?action=mapa&id=<?= $cotacao->id ?>" class="btn btn-sm btn-info text-white">
             <i class="ti ti-table" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
             Ver mapa comparativo
@@ -138,7 +150,7 @@ $classesBadgeResultado = [
             <?php foreach ($itens as $item): ?>
                 <?php
                 $resultado = $item->analisar($cotacao->criterioConsolidacao);
-                $precos = $item->buscarPrecos();
+                $precos    = $item->buscarPrecos();
                 ?>
 
                 <div class="border rounded p-3 mb-3" style="background-color: #fafbfc;">
@@ -236,7 +248,8 @@ $classesBadgeResultado = [
                                                             <select name="parametro" class="form-select">
                                                                 <option value="">Nenhum</option>
                                                                 <?php foreach ($parametros as $parametroOpcao): ?>
-                                                                    <option value="<?= htmlspecialchars($parametroOpcao->nome) ?>" <?= $preco->parametro === $parametroOpcao->nome ? 'selected' : '' ?>>
+                                                                    <option value="<?= htmlspecialchars($parametroOpcao->nome) ?>"
+                                                                        <?= $preco->parametro === $parametroOpcao->nome ? 'selected' : '' ?>>
                                                                         <?= htmlspecialchars($parametroOpcao->nome) ?>
                                                                     </option>
                                                                 <?php endforeach; ?>
@@ -360,5 +373,80 @@ $classesBadgeResultado = [
         </div>
     </div>
 <?php endforeach; ?>
+
+<!-- ================================================================ -->
+<!--  MODAL — Editar cotação                                            -->
+<!-- ================================================================ -->
+<div class="modal fade" id="modalEditarCotacao" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="index.php?action=editar_cotacao">
+                <input type="hidden" name="cotacao_id" value="<?= $cotacao->id ?>">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="ti ti-edit" aria-hidden="true" style="font-size: 16px; vertical-align: -2px;"></i>
+                        Editar cotação
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nº processo</label>
+                            <input type="text" name="numero_processo" class="form-control"
+                                   value="<?= htmlspecialchars($cotacao->numeroProcesso) ?>" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Órgão / Setor</label>
+                            <input type="text" name="orgao_setor" class="form-control"
+                                   value="<?= htmlspecialchars($cotacao->orgaoSetor) ?>">
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Procedimento</label>
+                            <input type="text" name="procedimento" class="form-control"
+                                   value="<?= htmlspecialchars($cotacao->procedimento) ?>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo de julgamento</label>
+                            <input type="text" name="tipo_julgamento" class="form-control"
+                                   value="<?= htmlspecialchars($cotacao->tipoJulgamento) ?>">
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Servidor responsável</label>
+                            <select name="servidor_id" class="form-select">
+                                <?php foreach ($servidores as $srv): ?>
+                                    <option value="<?= $srv->id ?>"
+                                        <?= $cotacao->servidorId === $srv->id ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($srv->nome) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Critério de consolidação</label>
+                            <select name="criterio_consolidacao" class="form-select">
+                                <option value="MEDIANA" <?= $cotacao->criterioConsolidacao === 'MEDIANA' ? 'selected' : '' ?>>Mediana</option>
+                                <option value="MEDIA"   <?= $cotacao->criterioConsolidacao === 'MEDIA'   ? 'selected' : '' ?>>Média</option>
+                                <option value="MENOR_PRECO" <?= $cotacao->criterioConsolidacao === 'MENOR_PRECO' ? 'selected' : '' ?>>Menor preço</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label">Objeto</label>
+                        <textarea name="objeto" class="form-control" rows="3"><?= htmlspecialchars($cotacao->objeto) ?></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <?php require __DIR__ . '/partials/footer.php'; ?>

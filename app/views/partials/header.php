@@ -8,7 +8,8 @@ $servidorLogado = usuarioLogado();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= $titulo ?? 'MT Par' ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="public/css/style.css">
 </head>
 <body class="bg-light">
@@ -28,6 +29,10 @@ $servidorLogado = usuarioLogado();
                 <a href="index.php?action=servidores" class="btn btn-sm btn-outline-light">
                     <i class="ti ti-users" aria-hidden="true" style="font-size: 14px; vertical-align: -1px;"></i>
                     Servidores
+                </a>
+                <a href="index.php?action=admin" class="btn btn-sm btn-outline-light">
+                    <i class="ti ti-shield-lock" aria-hidden="true" style="font-size: 14px; vertical-align: -1px;"></i>
+                    Administração
                 </a>
             <?php endif; ?>
             <?php if ($servidorLogado !== null): ?>

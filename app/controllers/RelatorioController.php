@@ -40,14 +40,14 @@ class RelatorioController
     {
         exigirLogin();
 
-        $cotacaoId = (int) ($_POST['cotacao_id'] ?? 0);
-        $elaboradoPorId = (int) ($_POST['elaborado_por_id'] ?? 0);
-        $numeroDfd = trim($_POST['numero_dfd'] ?? '');
+        $cotacaoId             = (int) ($_POST['cotacao_id'] ?? 0);
+        $elaboradoPorId        = (int) ($_POST['elaborado_por_id'] ?? 0);
+        $numeroDfd             = trim($_POST['numero_dfd'] ?? '');
         $numeroTermoReferencia = trim($_POST['numero_termo_referencia'] ?? '');
 
-        $cotacao = Cotacao::buscarPorId($cotacaoId);
+        $cotacao      = Cotacao::buscarPorId($cotacaoId);
         $elaboradoPor = Servidor::buscarPorId($elaboradoPorId);
-        $validador = Servidor::buscarPorId(SERVIDOR_VALIDADOR_PADRAO_ID);
+        $validador    = Servidor::buscarPorId(SERVIDOR_VALIDADOR_PADRAO_ID);
 
         if ($cotacao === null || $elaboradoPor === null || $validador === null) {
             echo 'Dados insuficientes para gerar o relatório.';
@@ -56,10 +56,9 @@ class RelatorioController
 
         require_once __DIR__ . '/../models/GeradorAnaliseCritica.php';
 
-        $gerador = new GeradorAnaliseCritica($cotacao, $elaboradoPor, $validador, $numeroDfd, $numeroTermoReferencia);
+        $gerador        = new GeradorAnaliseCritica($cotacao, $elaboradoPor, $validador, $numeroDfd, $numeroTermoReferencia);
         $caminhoArquivo = $gerador->gerar();
-
-        $nomeArquivo = 'Analise_Critica_' . preg_replace('/[^A-Za-z0-9]/', '_', $cotacao->numeroProcesso) . '.docx';
+        $nomeArquivo    = 'Analise_Critica_' . preg_replace('/[^A-Za-z0-9]/', '_', $cotacao->numeroProcesso) . '.docx';
 
         $this->enviarArquivo($caminhoArquivo, $nomeArquivo);
     }
@@ -69,7 +68,7 @@ class RelatorioController
         exigirLogin();
 
         $cotacaoId = (int) ($_GET['id'] ?? 0);
-        $cotacao = Cotacao::buscarPorId($cotacaoId);
+        $cotacao   = Cotacao::buscarPorId($cotacaoId);
 
         if ($cotacao === null) {
             echo 'Cotação não encontrada.';
@@ -90,16 +89,17 @@ class RelatorioController
 
         require_once __DIR__ . '/../models/GeradorRelatorioPesquisa.php';
 
-        $gerador = new GeradorRelatorioPesquisa($cotacao, $elaboradoPor);
+        $gerador        = new GeradorRelatorioPesquisa($cotacao, $elaboradoPor);
         $caminhoArquivo = $gerador->gerar();
-
-        $nomeArquivo = 'Relatorio_Pesquisa_Precos_' . preg_replace('/[^A-Za-z0-9]/', '_', $cotacao->numeroProcesso) . '.docx';
+        $nomeArquivo    = 'Relatorio_Pesquisa_Precos_' . preg_replace('/[^A-Za-z0-9]/', '_', $cotacao->numeroProcesso) . '.docx';
 
         $this->enviarArquivo($caminhoArquivo, $nomeArquivo);
     }
 
     private function enviarArquivo(string $caminhoArquivo, string $nomeArquivo): void
     {
+        session_write_close();
+
         header('Content-Description: File Transfer');
         header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
         header('Content-Disposition: attachment; filename="' . $nomeArquivo . '"');

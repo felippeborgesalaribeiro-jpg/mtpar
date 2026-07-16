@@ -1,221 +1,316 @@
 <?php
 
-require_once __DIR__ . '/app/helpers/formatacao.php';
+session_start();
+
 require_once __DIR__ . '/app/helpers/auth.php';
+require_once __DIR__ . '/app/helpers/formatacao.php';
 require_once __DIR__ . '/app/controllers/AuthController.php';
-require_once __DIR__ . '/app/controllers/PerfilController.php';
 require_once __DIR__ . '/app/controllers/DashboardController.php';
-require_once __DIR__ . '/app/controllers/ServidorController.php';
+require_once __DIR__ . '/app/controllers/DemandaController.php';
+require_once __DIR__ . '/app/controllers/LicitacaoController.php';
+require_once __DIR__ . '/app/controllers/OrcamentoController.php';
 require_once __DIR__ . '/app/controllers/CotacaoController.php';
 require_once __DIR__ . '/app/controllers/LoteController.php';
 require_once __DIR__ . '/app/controllers/PrecoController.php';
 require_once __DIR__ . '/app/controllers/MapaController.php';
-require_once __DIR__ . '/app/controllers/ParametroController.php';
 require_once __DIR__ . '/app/controllers/RelatorioController.php';
-require_once __DIR__ . '/app/controllers/DemandaController.php';
-require_once __DIR__ . '/app/controllers/LicitacaoController.php';
+require_once __DIR__ . '/app/controllers/VantajosidadeController.php';
+require_once __DIR__ . '/app/controllers/ParametroController.php';
+require_once __DIR__ . '/app/controllers/ServidorController.php';
+require_once __DIR__ . '/app/controllers/PerfilController.php';
+require_once __DIR__ . '/app/controllers/AdminController.php';
 
-$action = $_GET['action'] ?? 'dashboard';
+$action = $_GET['action'] ?? 'login';
+
+$rotasPublicas = ['login', 'fazer_login'];
+
+if (usuarioLogado() === null && !in_array($action, $rotasPublicas)) {
+    header('Location: index.php?action=login');
+    exit;
+}
+
+if (usuarioLogado() !== null && $action === 'login') {
+    header('Location: index.php?action=dashboard');
+    exit;
+}
 
 switch ($action) {
+
     case 'login':
-        $controller = new AuthController();
-        $controller->mostrarLogin();
+        (new AuthController())->mostrarLogin();
         break;
 
     case 'fazer_login':
-        $controller = new AuthController();
-        $controller->login();
+        (new AuthController())->login();
         break;
 
     case 'logout':
-        $controller = new AuthController();
-        $controller->logout();
-        break;
-
-    case 'perfil':
-        $controller = new PerfilController();
-        $controller->mostrar();
-        break;
-
-    case 'atualizar_perfil':
-        $controller = new PerfilController();
-        $controller->atualizar();
+        (new AuthController())->logout();
         break;
 
     case 'dashboard':
-        $controller = new DashboardController();
-        $controller->mostrar();
+        (new DashboardController())->mostrar();
         break;
 
-    case 'servidores':
-        $controller = new ServidorController();
-        $controller->listar();
+    case 'demandas':
+        (new DemandaController())->listar();
         break;
 
-    case 'criar_servidor':
-        $controller = new ServidorController();
-        $controller->criar();
+    case 'ver_demanda':
+        (new DemandaController())->mostrar();
         break;
 
-    case 'editar_servidor':
-        $controller = new ServidorController();
-        $controller->editar();
+    case 'criar_demanda':
+        (new DemandaController())->criar();
         break;
 
-    case 'resetar_senha_servidor':
-        $controller = new ServidorController();
-        $controller->resetarSenha();
+    case 'editar_demanda':
+        (new DemandaController())->editar();
         break;
 
-    case 'excluir_servidor':
-        $controller = new ServidorController();
-        $controller->excluir();
+    case 'editar_demanda_inline':
+        (new DemandaController())->editarInline();
         break;
 
-    case 'parametros':
-        $controller = new ParametroController();
-        $controller->listar();
+    case 'excluir_demanda':
+        (new DemandaController())->excluir();
         break;
 
-    case 'criar_parametro':
-        $controller = new ParametroController();
-        $controller->criar();
+    case 'licitacoes':
+        (new LicitacaoController())->listar();
         break;
 
-    case 'editar_parametro':
-        $controller = new ParametroController();
-        $controller->editar();
+    case 'editar_licitacao':
+        (new LicitacaoController())->editar();
         break;
 
-    case 'excluir_parametro':
-        $controller = new ParametroController();
-        $controller->excluir();
+    case 'excluir_licitacao':
+        (new LicitacaoController())->excluir();
+        break;
+
+    case 'orcamentos':
+        (new OrcamentoController())->listar();
         break;
 
     case 'cotacoes':
-        $controller = new CotacaoController();
-        $controller->listar();
-        break;
-
-    case 'criar_cotacao':
-        $controller = new CotacaoController();
-        $controller->criar();
+        (new CotacaoController())->listar();
         break;
 
     case 'cotacao':
         $id = (int) ($_GET['id'] ?? 0);
-        $controller = new CotacaoController();
-        $controller->mostrar($id);
+        (new CotacaoController())->mostrar($id);
+        break;
+
+    case 'criar_cotacao':
+        (new CotacaoController())->criar();
+        break;
+
+    case 'criar_cotacao_com_demanda':
+        (new CotacaoController())->criarComDemandaNova();
         break;
 
     case 'finalizar_cotacao':
-        $controller = new CotacaoController();
-        $controller->finalizar();
+        (new CotacaoController())->finalizar();
         break;
 
     case 'excluir_cotacao':
-        $controller = new CotacaoController();
-        $controller->excluir();
+        (new CotacaoController())->excluir();
         break;
 
     case 'criar_lote':
-        $controller = new LoteController();
-        $controller->criar();
+        (new LoteController())->criar();
         break;
 
     case 'excluir_lote':
-        $controller = new LoteController();
-        $controller->excluir();
+        (new LoteController())->excluir();
         break;
 
     case 'adicionar_item':
-        $controller = new LoteController();
-        $controller->adicionarItem();
+        (new LoteController())->adicionarItem();
         break;
 
     case 'editar_item':
-        $controller = new LoteController();
-        $controller->editarItem();
+        (new LoteController())->editarItem();
         break;
 
     case 'excluir_item':
-        $controller = new LoteController();
-        $controller->excluirItem();
+        (new LoteController())->excluirItem();
         break;
 
     case 'adicionar_preco':
-        $controller = new PrecoController();
-        $controller->adicionar();
+        (new PrecoController())->adicionar();
         break;
 
     case 'editar_preco':
-        $controller = new PrecoController();
-        $controller->editar();
+        (new PrecoController())->editar();
         break;
 
     case 'excluir_preco':
-        $controller = new PrecoController();
-        $controller->excluir();
+        (new PrecoController())->excluir();
         break;
 
     case 'mapa':
         $id = (int) ($_GET['id'] ?? 0);
-        $controller = new MapaController();
-        $controller->mostrar($id);
+        (new MapaController())->mostrar($id);
         break;
 
+    case 'relatorio':
     case 'relatorio_formulario':
-        $controller = new RelatorioController();
-        $controller->formulario();
+        (new RelatorioController())->formulario();
         break;
 
     case 'gerar_relatorio':
-        $controller = new RelatorioController();
-        $controller->gerar();
+        (new RelatorioController())->gerar();
         break;
 
+    case 'gerar_pesquisa':
     case 'gerar_relatorio_pesquisa':
-        $controller = new RelatorioController();
-        $controller->gerarPesquisa();
+        (new RelatorioController())->gerarPesquisa();
         break;
 
-    case 'demandas':
-        $controller = new DemandaController();
-        $controller->listar();
+    case 'vantajosidades':
+        (new VantajosidadeController())->listar();
         break;
 
-    case 'criar_demanda':
-        $controller = new DemandaController();
-        $controller->criar();
+    case 'vantajosidade':
+        $id = (int) ($_GET['id'] ?? 0);
+        (new VantajosidadeController())->mostrar($id);
         break;
 
-    case 'editar_demanda':
-        $controller = new DemandaController();
-        $controller->editar();
+    case 'criar_vantajosidade':
+        (new VantajosidadeController())->criar();
         break;
 
-    case 'excluir_demanda':
-        $controller = new DemandaController();
-        $controller->excluir();
+    case 'criar_vantajosidade_com_demanda':
+        (new VantajosidadeController())->criarComDemandaNova();
         break;
 
-    case 'licitacoes':
-        $controller = new LicitacaoController();
-        $controller->listar();
+    case 'finalizar_vantajosidade':
+        (new VantajosidadeController())->finalizar();
         break;
 
-    case 'editar_licitacao':
-        $controller = new LicitacaoController();
-        $controller->editar();
+    case 'excluir_vantajosidade':
+        (new VantajosidadeController())->excluir();
         break;
 
-    case 'excluir_licitacao':
-        $controller = new LicitacaoController();
-        $controller->excluir();
+    case 'adicionar_item_vantajosidade':
+        (new VantajosidadeController())->adicionarItem();
+        break;
+
+    case 'editar_item_vantajosidade':
+        (new VantajosidadeController())->editarItem();
+        break;
+
+    case 'excluir_item_vantajosidade':
+        (new VantajosidadeController())->excluirItem();
+        break;
+
+    case 'adicionar_preco_vantajosidade':
+        (new VantajosidadeController())->adicionarPreco();
+        break;
+
+    case 'editar_preco_vantajosidade':
+        (new VantajosidadeController())->editarPreco();
+        break;
+
+    case 'excluir_preco_vantajosidade':
+        (new VantajosidadeController())->excluirPreco();
+        break;
+
+    case 'mapa_vantajosidade':
+        (new VantajosidadeController())->mapa();
+        break;
+
+    case 'parametros':
+        (new ParametroController())->listar();
+        break;
+
+    case 'criar_parametro':
+        (new ParametroController())->criar();
+        break;
+
+    case 'editar_parametro':
+        (new ParametroController())->editar();
+        break;
+
+    case 'excluir_parametro':
+        (new ParametroController())->excluir();
+        break;
+
+    case 'servidores':
+        (new ServidorController())->listar();
+        break;
+
+    case 'criar_servidor':
+        (new ServidorController())->criar();
+        break;
+
+    case 'editar_servidor':
+        (new ServidorController())->editar();
+        break;
+
+    case 'resetar_senha':
+    case 'resetar_senha_servidor':
+        (new ServidorController())->resetarSenha();
+        break;
+
+    case 'excluir_servidor':
+        (new ServidorController())->excluir();
+        break;
+
+    case 'perfil':
+        (new PerfilController())->mostrar();
+        break;
+
+    case 'atualizar_perfil':
+        (new PerfilController())->atualizar();
+        break;
+
+    case 'admin':
+        (new AdminController())->index();
+        break;
+
+    case 'admin_lixeira':
+        (new AdminController())->lixeira();
+        break;
+
+    case 'admin_restaurar_demanda':
+        (new AdminController())->restaurarDemanda();
+        break;
+
+    case 'admin_restaurar_cotacao':
+        (new AdminController())->restaurarCotacao();
+        break;
+
+    case 'admin_restaurar_vantajosidade':
+        (new AdminController())->restaurarVantajosidade();
+        break;
+
+    case 'admin_excluir_definitivo_demanda':
+        (new AdminController())->excluirDefinitivamenteDemanda();
+        break;
+
+    case 'admin_excluir_definitivo_cotacao':
+        (new AdminController())->excluirDefinitivamenteCotacao();
+        break;
+
+    case 'admin_excluir_definitivo_vantajosidade':
+        (new AdminController())->excluirDefinitivamenteVantajosidade();
+        break;
+
+    case 'admin_backup_criar':
+        (new AdminController())->criarBackup();
+        break;
+
+    case 'admin_backup_excluir':
+        (new AdminController())->excluirBackup();
+        break;
+
+    case 'editar_cotacao':
+        (new CotacaoController())->editar();
         break;
 
     default:
-        echo 'Página não encontrada.';
-        break;
+        header('Location: index.php?action=dashboard');
+        exit;
 }

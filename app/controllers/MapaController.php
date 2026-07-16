@@ -21,6 +21,7 @@ class MapaController
         $lotes = $cotacao->buscarLotes();
 
         $mapaLotes = [];
+        $valorGlobalCotacao = 0.0;
 
         foreach ($lotes as $lote) {
             $itens = $lote->buscarItens();
@@ -59,6 +60,8 @@ class MapaController
                 'itens' => $mapaItens,
                 'valor_total' => $valorTotalLote,
             ];
+
+            $valorGlobalCotacao += $valorTotalLote;
         }
 
         require __DIR__ . '/../views/mapa.php';

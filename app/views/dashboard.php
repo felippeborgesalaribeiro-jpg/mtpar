@@ -95,14 +95,14 @@ $coresStatus = [
         </a>
     </div>
     <div class="col-md-4">
-        <a href="index.php?action=cotacoes" class="text-decoration-none">
+        <a href="index.php?action=orcamentos" class="text-decoration-none">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
                     <div class="rounded-3 bg-info-subtle d-inline-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
-                        <i class="ti ti-clipboard-list text-info" aria-hidden="true" style="font-size: 20px;"></i>
+                        <i class="ti ti-calculator text-info" aria-hidden="true" style="font-size: 20px;"></i>
                     </div>
-                    <p class="fw-semibold mb-1 mt-3 text-dark">Cotações</p>
-                    <p class="text-muted small mb-0">Pesquisa de preços e mapas</p>
+                    <p class="fw-semibold mb-1 mt-3 text-dark">Orçamentos</p>
+                    <p class="text-muted small mb-0">Pesquisa de preço e vantajosidade de ata</p>
                 </div>
             </div>
         </a>

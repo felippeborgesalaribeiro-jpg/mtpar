@@ -1,0 +1,11 @@
+.idea/
+.vscode/
+*.swp
+.DS_Store
+vendor/
+composer.lock
+evals/results/
+
+# Python bytecode caches
+__pycache__/
+*.pyc

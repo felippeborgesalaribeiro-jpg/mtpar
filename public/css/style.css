@@ -1,7 +1,32 @@
 @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+    /* Cores da marca MT Par, extraidas do logo */
+    --brand-blue: #0FBAF3;
+    --brand-blue-dark: #0B93C2;
+    --brand-blue-soft: #E4F7FD;
+    --brand-green: #63E04D;
+    --brand-green-dark: #128235;
+    --brand-green-soft: #EAFBE6;
+    --brand-deep: #0E2E3D;
+
+    /* Neutros com leve tom azulado, nao cinza puro */
+    --ink: #26282B;
+    --ink-soft: #58585B;
+    --ink-faint: #9498A0;
+    --paper: #F5F7FA;
+    --paper-raised: #FFFFFF;
+    --line: #E6E9ED;
+}
 
 body {
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: 'Manrope', 'Segoe UI', Arial, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: -0.01em;
 }
 
 .card {
@@ -44,6 +69,142 @@ a:hover > .card {
     opacity: 0.4;
     margin-bottom: 12px;
     display: block;
+}
+
+/* Tela de login */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--paper);
+    position: relative;
+    overflow: hidden;
+    padding: 24px;
+}
+
+.login-page::before,
+.login-page::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.login-page::before {
+    top: -220px;
+    right: -220px;
+    width: 520px;
+    height: 520px;
+    background: radial-gradient(circle at 30% 30%, var(--brand-blue-soft), transparent 70%);
+}
+
+.login-page::after {
+    bottom: -240px;
+    left: -240px;
+    width: 560px;
+    height: 560px;
+    background: radial-gradient(circle at 70% 70%, var(--brand-green-soft), transparent 70%);
+}
+
+.login-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 380px;
+    background: var(--paper-raised);
+    border-radius: 20px;
+    padding: 44px 36px 36px;
+    box-shadow: 0 24px 60px rgba(14, 46, 61, 0.12), 0 2px 8px rgba(14, 46, 61, 0.06);
+}
+
+/* Marca temporaria (arcos), ate o arquivo real do logo ser adicionado em public/img/ */
+.login-mark {
+    position: relative;
+    width: 140px;
+    height: 70px;
+    margin: 0 auto 20px;
+}
+
+.login-mark .arc {
+    position: absolute;
+    border-radius: 999px 999px 0 0;
+    box-sizing: border-box;
+    border-bottom: none;
+}
+
+.login-mark .arc-outer {
+    width: 140px;
+    height: 70px;
+    left: 0;
+    top: 0;
+    border: 16px solid var(--brand-green);
+}
+
+.login-mark .arc-inner {
+    width: 78px;
+    height: 39px;
+    left: 45px;
+    top: 31px;
+    border: 14px solid var(--brand-blue);
+}
+
+.login-wordmark {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--ink-soft);
+    margin: 0 0 2px;
+    letter-spacing: -0.02em;
+}
+
+.login-tagline {
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-bottom: 30px;
+}
+
+.login-card .form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+}
+
+.login-card .form-control {
+    border-radius: 10px;
+    border-color: var(--line);
+    padding: 10px 14px;
+    font-size: 14.5px;
+}
+
+.login-card .form-control:focus {
+    border-color: var(--brand-blue);
+    box-shadow: 0 0 0 3px var(--brand-blue-soft);
+}
+
+.login-card .btn-login {
+    background: var(--brand-blue);
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 11px;
+    transition: background 0.15s ease;
+    width: 100%;
+}
+
+.login-card .btn-login:hover {
+    background: var(--brand-blue-dark);
+    color: #fff;
+}
+
+.login-footer-note {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    margin-top: 22px;
 }
 
 @media print {

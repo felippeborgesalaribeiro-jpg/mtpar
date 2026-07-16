@@ -22,14 +22,19 @@
 
 body {
     font-family: 'Manrope', 'Segoe UI', Arial, sans-serif;
+    background-color: var(--paper);
+    color: var(--ink);
 }
 
 h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     letter-spacing: -0.01em;
+    color: var(--ink);
 }
 
 .card {
+    border-color: var(--line);
+    border-radius: 14px;
     transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
@@ -40,23 +45,51 @@ h1, h2, h3, h4, h5, h6 {
 
 .card-link-hover:hover .card,
 a:hover > .card {
-    box-shadow: 0 8px 20px rgba(31, 56, 100, 0.12) !important;
+    box-shadow: 0 10px 24px rgba(14, 46, 61, 0.1) !important;
     transform: translateY(-2px);
 }
 
+.app-navbar {
+    background-color: var(--paper-raised);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 0;
+}
+
+.app-brand {
+    display: flex;
+    align-items: center;
+}
+
+.app-nav-btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    font-weight: 600;
+}
+
+.app-nav-btn:hover {
+    background: var(--brand-blue-soft);
+    border-color: var(--brand-blue);
+    color: var(--brand-blue-dark);
+}
+
 .table thead.table-dark th {
-    background-color: #1F3864;
-    border-color: #1F3864;
+    background-color: var(--brand-deep);
+    border-color: var(--brand-deep);
+    color: #fff;
 }
 
 .btn-primary {
-    background-color: #1F3864;
-    border-color: #1F3864;
+    background-color: var(--brand-blue);
+    border-color: var(--brand-blue);
+    color: #fff;
+    font-weight: 600;
 }
 
 .btn-primary:hover {
-    background-color: #16294A;
-    border-color: #16294A;
+    background-color: var(--brand-blue-dark);
+    border-color: var(--brand-blue-dark);
+    color: #fff;
 }
 
 .empty-state {

@@ -1,2 +1,14 @@
 app/backups/
 backups/
+.phpunit.cache/
+
+# Dependencias de desenvolvimento (testes) - reproduziveis via "composer install",
+# nao commitadas por causa de binarios internos grandes que vem com elas.
+vendor/bin/
+vendor/phpunit/
+vendor/sebastian/
+vendor/phar-io/
+vendor/myclabs/
+vendor/nikic/
+vendor/theseer/
+vendor/staabm/

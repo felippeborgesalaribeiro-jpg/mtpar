@@ -77,7 +77,7 @@ $modoEdicao = ($modo === 'editar');
 
     <div class="card shadow-sm mb-3">
         <div class="card-header bg-white d-flex align-items-center gap-2 py-2">
-            <i class="ti ti-folder" aria-hidden="true" style="font-size:16px; color:#1F3864;"></i>
+            <i class="ti ti-folder" aria-hidden="true" style="font-size:16px; color: var(--brand-blue-dark);"></i>
             <span class="fw-semibold small">Dados da demanda</span>
             <span class="badge bg-warning text-dark ms-auto" style="font-size:10px;">editando</span>
         </div>
@@ -143,7 +143,7 @@ $modoEdicao = ($modo === 'editar');
 <!-- ================================================================ -->
 <div class="card shadow-sm mb-3">
     <div class="card-header bg-white d-flex align-items-center gap-2 py-2">
-        <i class="ti ti-folder" aria-hidden="true" style="font-size:16px; color:#1F3864;"></i>
+        <i class="ti ti-folder" aria-hidden="true" style="font-size:16px; color: var(--brand-blue-dark);"></i>
         <span class="fw-semibold small">Dados da demanda</span>
     </div>
     <div class="card-body">
@@ -179,9 +179,9 @@ $modoEdicao = ($modo === 'editar');
 <!--  LICITAÇÃO VINCULADA (sempre somente leitura)                     -->
 <!-- ================================================================ -->
 <?php if ($licitacao !== null): ?>
-<div class="card shadow-sm mb-3" style="border-left: 3px solid #1F3864;">
+<div class="card shadow-sm mb-3" style="border-left: 3px solid var(--brand-blue);">
     <div class="card-header bg-white d-flex align-items-center gap-2 py-2">
-        <i class="ti ti-gavel" aria-hidden="true" style="font-size:16px; color:#1F3864;"></i>
+        <i class="ti ti-gavel" aria-hidden="true" style="font-size:16px; color: var(--brand-blue-dark);"></i>
         <span class="fw-semibold small">Licitação vinculada</span>
         <span class="text-muted small ms-1">— somente leitura</span>
     </div>
@@ -259,8 +259,8 @@ $modoEdicao = ($modo === 'editar');
             </div>
             <div class="col-md-4">
                 <p class="text-muted mb-1" style="font-size:10px; text-transform:uppercase; letter-spacing:.05em;">Status</p>
-                <span class="badge <?= $cotacao->status === 'FINALIZADA' ? 'bg-success' : 'bg-primary' ?>">
-                    <?= $cotacao->status === 'FINALIZADA' ? 'Finalizada' : 'Em andamento' ?>
+                <span class="badge <?= $cotacao->status === StatusCotacao::Finalizada ? 'bg-success' : 'bg-primary' ?>">
+                    <?= $cotacao->status === StatusCotacao::Finalizada ? 'Finalizada' : 'Em andamento' ?>
                 </span>
             </div>
             <div class="col-md-4">

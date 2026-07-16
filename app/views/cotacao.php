@@ -3,23 +3,31 @@ $titulo = 'Cotação ' . $cotacao->numeroProcesso . ' - MT Par';
 require __DIR__ . '/partials/header.php';
 
 $statusLabel = [
-    Cotacao::STATUS_EM_ANDAMENTO => ['Em andamento', 'bg-primary'],
-    Cotacao::STATUS_FINALIZADA   => ['Finalizada', 'bg-success'],
+    StatusCotacao::EmAndamento->value => ['Em andamento', 'bg-primary'],
+    StatusCotacao::Finalizada->value  => ['Finalizada', 'bg-success'],
 ];
-[$labelStatus, $classeBadgeStatus] = $statusLabel[$cotacao->status] ?? ['Indefinido', 'bg-secondary'];
+[$labelStatus, $classeBadgeStatus] = $statusLabel[$cotacao->status->value] ?? ['Indefinido', 'bg-secondary'];
 ?>
+
+<div class="print-header">
+    <img src="public/img/logo.png" alt="MT Par">
+    <div class="print-header-info">
+        Processo <?= htmlspecialchars($cotacao->numeroProcesso) ?> — Etapas de análise de preços (70/30)<br>
+        Impresso em <?= date('d/m/Y H:i') ?>
+    </div>
+</div>
 
 <div class="d-flex justify-content-between align-items-start mb-3">
     <div>
         <h4 class="m-0">
-            <i class="ti ti-file-text" aria-hidden="true" style="font-size: 22px; vertical-align: -3px; color: #1F3864;"></i>
+            <i class="ti ti-file-text" aria-hidden="true" style="font-size: 22px; vertical-align: -3px; color: var(--brand-blue-dark);"></i>
             Processo <?= htmlspecialchars($cotacao->numeroProcesso) ?>
             <span class="badge <?= $classeBadgeStatus ?>"><?= $labelStatus ?></span>
         </h4>
         <p class="text-muted mb-0"><?= htmlspecialchars($cotacao->orgaoSetor) ?></p>
         <?php if ($demandaVinculada !== null): ?>
             <p class="small mb-0">
-                <i class="ti ti-link" aria-hidden="true" style="font-size: 13px; vertical-align: -1px; color: #1F3864;"></i>
+                <i class="ti ti-link" aria-hidden="true" style="font-size: 13px; vertical-align: -1px; color: var(--brand-blue-dark);"></i>
                 Vinculada à Demanda nº <?= htmlspecialchars($demandaVinculada->numeroProcesso) ?>
                 <a href="index.php?action=demandas" class="text-decoration-none">
                     (ver demandas <i class="ti ti-arrow-right" aria-hidden="true" style="font-size: 11px;"></i>)
@@ -42,11 +50,15 @@ $statusLabel = [
             <i class="ti ti-edit" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
             Editar
         </button>
+        <button onclick="window.print()" class="btn btn-sm btn-primary">
+            <i class="ti ti-printer" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+            Imprimir
+        </button>
         <a href="index.php?action=mapa&id=<?= $cotacao->id ?>" class="btn btn-sm btn-info text-white">
             <i class="ti ti-table" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
             Ver mapa comparativo
         </a>
-        <?php if ($cotacao->status === Cotacao::STATUS_FINALIZADA): ?>
+        <?php if ($cotacao->status === StatusCotacao::Finalizada): ?>
             <a href="index.php?action=gerar_relatorio_pesquisa&id=<?= $cotacao->id ?>" class="btn btn-sm btn-info text-white">
                 <i class="ti ti-clipboard-data" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
                 Relatório de pesquisa de preços
@@ -56,7 +68,7 @@ $statusLabel = [
                 Gerar análise crítica
             </a>
         <?php endif; ?>
-        <?php if ($cotacao->status === Cotacao::STATUS_EM_ANDAMENTO): ?>
+        <?php if ($cotacao->status === StatusCotacao::EmAndamento): ?>
             <a href="index.php?action=finalizar_cotacao&id=<?= $cotacao->id ?>"
                class="btn btn-sm btn-success"
                onclick="return confirm('Finalizar esta cotação?')">
@@ -77,19 +89,19 @@ $statusLabel = [
     <div class="card-body">
         <div class="row small">
             <div class="col-md-3">
-                <i class="ti ti-clipboard-list" aria-hidden="true" style="font-size: 18px; color: #1F3864; opacity: 0.7;"></i>
+                <i class="ti ti-clipboard-list" aria-hidden="true" style="font-size: 18px; color: var(--brand-blue-dark); opacity: 0.7;"></i>
                 <b>Procedimento:</b> <?= htmlspecialchars($cotacao->procedimento) ?>
             </div>
             <div class="col-md-3">
-                <i class="ti ti-gavel" aria-hidden="true" style="font-size: 18px; color: #1F3864; opacity: 0.7;"></i>
+                <i class="ti ti-gavel" aria-hidden="true" style="font-size: 18px; color: var(--brand-blue-dark); opacity: 0.7;"></i>
                 <b>Tipo de julgamento:</b> <?= htmlspecialchars($cotacao->tipoJulgamento) ?>
             </div>
             <div class="col-md-3">
-                <i class="ti ti-user" aria-hidden="true" style="font-size: 18px; color: #1F3864; opacity: 0.7;"></i>
+                <i class="ti ti-user" aria-hidden="true" style="font-size: 18px; color: var(--brand-blue-dark); opacity: 0.7;"></i>
                 <b>Servidor:</b> <?= htmlspecialchars($servidor->nome ?? '—') ?>
             </div>
             <div class="col-md-3">
-                <i class="ti ti-calculator" aria-hidden="true" style="font-size: 18px; color: #1F3864; opacity: 0.7;"></i>
+                <i class="ti ti-calculator" aria-hidden="true" style="font-size: 18px; color: var(--brand-blue-dark); opacity: 0.7;"></i>
                 <b>Critério:</b> <?= $cotacao->criterioConsolidacao ?>
             </div>
         </div>
@@ -100,7 +112,7 @@ $statusLabel = [
 </div>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <span class="fs-6 fw-semibold" style="color: #1F3864;">
+    <span class="fs-6 fw-semibold" style="color: var(--brand-blue-dark);">
         <i class="ti ti-package" aria-hidden="true" style="font-size: 18px; vertical-align: -3px;"></i>
         Lotes
     </span>
@@ -124,7 +136,7 @@ $statusLabel = [
 
 <?php foreach ($lotes as $lote): ?>
     <div class="card shadow-sm mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center text-white" style="background-color: #1F3864;">
+        <div class="card-header d-flex justify-content-between align-items-center text-white" style="background-color: var(--brand-deep);">
             <span class="fw-bold">
                 <i class="ti ti-box" aria-hidden="true" style="font-size: 15px; vertical-align: -2px;"></i>
                 Lote <?= htmlspecialchars($lote->numero) ?>
@@ -305,7 +317,7 @@ $statusLabel = [
                     </form>
 
                     <p class="mb-0 mt-3 small">
-                        <i class="ti ti-target-arrow" aria-hidden="true" style="font-size: 14px; vertical-align: -1px; color: #1F3864;"></i>
+                        <i class="ti ti-target-arrow" aria-hidden="true" style="font-size: 14px; vertical-align: -1px; color: var(--brand-blue-dark);"></i>
                         <b>Valor de referência (<?= $cotacao->criterioConsolidacao ?>):</b>
                         <?= formatarMoeda($resultado['valor_referencia'] ?? 0) ?>
                         &nbsp;—&nbsp;

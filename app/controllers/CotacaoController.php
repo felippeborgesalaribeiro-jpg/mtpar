@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../models/Cotacao.php';
+require_once __DIR__ . '/../models/StatusCotacao.php';
 require_once __DIR__ . '/../models/Lote.php';
 require_once __DIR__ . '/../models/Servidor.php';
 require_once __DIR__ . '/../models/Demanda.php';
@@ -47,7 +48,7 @@ class CotacaoController
             $objeto,
             $servidorId,
             $criterio,
-            Cotacao::STATUS_EM_ANDAMENTO,
+            StatusCotacao::EmAndamento,
             null,
             '',
             $demandaId
@@ -96,7 +97,7 @@ class CotacaoController
             $objeto !== '' ? $objeto : $objetoDemanda,
             $servidorId,
             $criterio,
-            Cotacao::STATUS_EM_ANDAMENTO,
+            StatusCotacao::EmAndamento,
             null,
             '',
             $demanda->id
@@ -165,7 +166,7 @@ class CotacaoController
             return;
         }
 
-        $cotacao->status = Cotacao::STATUS_FINALIZADA;
+        $cotacao->status = StatusCotacao::Finalizada;
         $cotacao->salvar();
 
         header('Location: index.php?action=cotacao&id=' . $cotacao->id);

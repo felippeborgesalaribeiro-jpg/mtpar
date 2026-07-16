@@ -3,8 +3,16 @@ $titulo = 'Mapa Comparativo - ' . $cotacao->numeroProcesso;
 require __DIR__ . '/partials/header.php';
 ?>
 
+<div class="print-header">
+    <img src="public/img/logo.png" alt="MT Par">
+    <div class="print-header-info">
+        Mapa comparativo de preços — Processo <?= htmlspecialchars($cotacao->numeroProcesso) ?><br>
+        Impresso em <?= date('d/m/Y H:i') ?>
+    </div>
+</div>
+
 <div class="d-flex justify-content-between align-items-center mb-4 no-print">
-    <span class="fs-6 fw-semibold" style="color: #1F3864;">
+    <span class="fs-6 fw-semibold" style="color: var(--brand-blue-dark);">
         <i class="ti ti-table" aria-hidden="true" style="font-size: 18px; vertical-align: -3px;"></i>
         Mapa comparativo de preços (detalhado)
     </span>
@@ -42,7 +50,7 @@ require __DIR__ . '/partials/header.php';
     ?>
 
     <div class="card shadow-sm mb-4">
-        <div class="card-header text-white fw-bold" style="background-color: #1F3864;">
+        <div class="card-header text-white fw-bold" style="background-color: var(--brand-deep);">
             Resumo: Lote <?= htmlspecialchars($lote->numero) ?>
         </div>
         <div class="card-body p-0">
@@ -98,11 +106,11 @@ require __DIR__ . '/partials/header.php';
     </div>
 <?php endforeach; ?>
 
-<div class="card shadow-sm mb-4" style="border: 2px solid #1F3864;">
+<div class="card shadow-sm mb-4" style="border: 2px solid var(--brand-blue);">
     <div class="card-body text-end">
         <span class="fs-4">
             <b>Valor global da cotação:</b>
-            <span class="badge fs-5" style="background-color: #1F3864;">
+            <span class="badge fs-5" style="background-color: var(--brand-deep);">
                 <?= formatarMoeda($valorGlobalCotacao) ?>
             </span>
         </span>

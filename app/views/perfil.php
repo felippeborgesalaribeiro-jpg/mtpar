@@ -27,7 +27,7 @@ $iniciais = mb_strtoupper(mb_substr($servidorLogado->nome, 0, 1));
 <div class="card shadow-sm">
     <div class="card-body">
         <div class="d-flex align-items-center mb-4">
-            <div style="width: 64px; height: 64px; border-radius: 50%; background: #1F3864; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--brand-deep); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600;">
                 <?= htmlspecialchars($iniciais) ?>
             </div>
             <div class="ms-3">

@@ -1,10 +1,40 @@
 @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+    /* Cores da marca MT Par, extraidas por pixel do arquivo real do logo */
+    --brand-blue: #00C8FF;
+    --brand-blue-dark: #0090BD;
+    --brand-blue-soft: #E1F8FF;
+    --brand-green: #75F953;
+    --brand-green-dark: #009000;
+    --brand-green-soft: #EBFEE6;
+    --brand-deep: #0E2E3D;
+
+    /* Neutros com leve tom azulado, nao cinza puro */
+    --ink: #2B2B2B;
+    --ink-soft: #646464;
+    --ink-faint: #9498A0;
+    --paper: #F5F7FA;
+    --paper-raised: #FFFFFF;
+    --line: #E6E9ED;
+}
 
 body {
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: 'Manrope', 'Segoe UI', Arial, sans-serif;
+    background-color: var(--paper);
+    color: var(--ink);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--ink);
 }
 
 .card {
+    border-color: var(--line);
+    border-radius: 14px;
     transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
@@ -15,23 +45,123 @@ body {
 
 .card-link-hover:hover .card,
 a:hover > .card {
-    box-shadow: 0 8px 20px rgba(31, 56, 100, 0.12) !important;
+    box-shadow: 0 10px 24px rgba(14, 46, 61, 0.1) !important;
     transform: translateY(-2px);
 }
 
+.app-navbar {
+    background-color: var(--paper-raised);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 0;
+}
+
+.app-brand {
+    display: flex;
+    align-items: center;
+}
+
+.app-nav-btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    font-weight: 600;
+}
+
+.app-nav-btn:hover {
+    background: var(--brand-blue-soft);
+    border-color: var(--brand-blue);
+    color: var(--brand-blue-dark);
+}
+
 .table thead.table-dark th {
-    background-color: #1F3864;
-    border-color: #1F3864;
+    background-color: var(--brand-deep);
+    border-color: var(--brand-deep);
+    color: #fff;
 }
 
 .btn-primary {
-    background-color: #1F3864;
-    border-color: #1F3864;
+    background-color: var(--brand-blue);
+    border-color: var(--brand-blue);
+    color: #fff;
+    font-weight: 600;
 }
 
 .btn-primary:hover {
-    background-color: #16294A;
-    border-color: #16294A;
+    background-color: var(--brand-blue-dark);
+    border-color: var(--brand-blue-dark);
+    color: #fff;
+}
+
+/* Formularios e modais, no sistema inteiro (nao so no login) */
+.form-control,
+.form-select {
+    border-radius: 8px;
+    border-color: var(--line);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--brand-blue);
+    box-shadow: 0 0 0 3px var(--brand-blue-soft);
+}
+
+.form-label {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--ink-soft);
+}
+
+.modal-content {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(14, 46, 61, 0.18);
+}
+
+.modal-header {
+    border-bottom-color: var(--line);
+}
+
+.modal-footer {
+    border-top-color: var(--line);
+}
+
+/* Alinha os tons "subtle" do Bootstrap as cores da marca em vez do azul/verde padrao */
+.bg-primary-subtle {
+    background-color: var(--brand-blue-soft) !important;
+}
+
+.text-primary {
+    color: var(--brand-blue-dark) !important;
+}
+
+.bg-success-subtle {
+    background-color: var(--brand-green-soft) !important;
+}
+
+.text-success {
+    color: var(--brand-green-dark) !important;
+}
+
+.btn-success {
+    background-color: var(--brand-green-dark);
+    border-color: var(--brand-green-dark);
+}
+
+.btn-success:hover {
+    background-color: #007300;
+    border-color: #007300;
+}
+
+.btn-info {
+    background-color: var(--brand-blue);
+    border-color: var(--brand-blue);
+    color: #fff;
+}
+
+.btn-info:hover {
+    background-color: var(--brand-blue-dark);
+    border-color: var(--brand-blue-dark);
+    color: #fff;
 }
 
 .empty-state {
@@ -46,12 +176,147 @@ a:hover > .card {
     display: block;
 }
 
+/* Tela de login */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--paper);
+    position: relative;
+    overflow: hidden;
+    padding: 24px;
+}
+
+.login-page::before,
+.login-page::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.login-page::before {
+    top: -220px;
+    right: -220px;
+    width: 520px;
+    height: 520px;
+    background: radial-gradient(circle at 30% 30%, var(--brand-blue-soft), transparent 70%);
+}
+
+.login-page::after {
+    bottom: -240px;
+    left: -240px;
+    width: 560px;
+    height: 560px;
+    background: radial-gradient(circle at 70% 70%, var(--brand-green-soft), transparent 70%);
+}
+
+.login-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 380px;
+    background: var(--paper-raised);
+    border-radius: 20px;
+    padding: 44px 36px 36px;
+    box-shadow: 0 24px 60px rgba(14, 46, 61, 0.12), 0 2px 8px rgba(14, 46, 61, 0.06);
+}
+
+.login-mark {
+    display: block;
+    margin: 0 auto 22px;
+    width: 260px;
+    height: auto;
+}
+
+.login-tagline {
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-bottom: 30px;
+}
+
+.login-card .form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+}
+
+.login-card .form-control {
+    border-radius: 10px;
+    border-color: var(--line);
+    padding: 10px 14px;
+    font-size: 14.5px;
+}
+
+.login-card .form-control:focus {
+    border-color: var(--brand-blue);
+    box-shadow: 0 0 0 3px var(--brand-blue-soft);
+}
+
+.login-card .btn-login {
+    background: var(--brand-blue);
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 11px;
+    transition: background 0.15s ease;
+    width: 100%;
+}
+
+.login-card .btn-login:hover {
+    background: var(--brand-blue-dark);
+    color: #fff;
+}
+
+.login-footer-note {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    margin-top: 22px;
+}
+
+/* Cabecalho de impressao - some na tela, aparece so no papel/PDF */
+.print-header {
+    display: none;
+}
+
 @media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
     .navbar,
     .btn,
     form,
+    .modal,
     .no-print {
         display: none !important;
+    }
+
+    .print-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        border-bottom: 2px solid var(--brand-deep);
+        padding-bottom: 10px;
+        margin-bottom: 16px;
+    }
+
+    .print-header img {
+        height: 34px;
+    }
+
+    .print-header .print-header-info {
+        margin-left: auto;
+        text-align: right;
+        font-size: 11px;
+        color: var(--ink-soft);
     }
 
     .container {
@@ -65,6 +330,12 @@ a:hover > .card {
         border: 1px solid #ccc !important;
         box-shadow: none !important;
         page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .border.rounded {
+        page-break-inside: avoid;
+        break-inside: avoid;
     }
 
     .table-responsive {
@@ -73,6 +344,10 @@ a:hover > .card {
 
     table {
         width: 100% !important;
+    }
+
+    .badge {
+        border: 1px solid rgba(0, 0, 0, 0.15);
     }
 
     @page {

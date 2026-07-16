@@ -1,19 +1,17 @@
 <?php
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/NivelAcesso.php';
 
 class Servidor
 {
-    const NIVEL_ADMIN = 'ADMIN';
-    const NIVEL_COMUM = 'COMUM';
-
     public ?int $id;
     public string $nome;
     public string $matricula;
     public string $cargo;
     public string $usuario;
     public string $senhaHash;
-    public string $nivelAcesso;
+    public NivelAcesso $nivelAcesso;
 
     public function __construct(
         string $nome,
@@ -21,7 +19,7 @@ class Servidor
         string $cargo = '',
         string $usuario = '',
         string $senhaHash = '',
-        string $nivelAcesso = self::NIVEL_COMUM,
+        NivelAcesso $nivelAcesso = NivelAcesso::Comum,
         ?int $id = null
     ) {
         $this->id = $id;
@@ -48,7 +46,7 @@ class Servidor
                 'cargo' => $this->cargo,
                 'usuario' => $this->usuario,
                 'senha_hash' => $this->senhaHash,
-                'nivel_acesso' => $this->nivelAcesso,
+                'nivel_acesso' => $this->nivelAcesso->value,
             ]);
             $this->id = (int) $pdo->lastInsertId();
         } else {
@@ -63,7 +61,7 @@ class Servidor
                 'cargo' => $this->cargo,
                 'usuario' => $this->usuario,
                 'senha_hash' => $this->senhaHash,
-                'nivel_acesso' => $this->nivelAcesso,
+                'nivel_acesso' => $this->nivelAcesso->value,
                 'id' => $this->id,
             ]);
         }
@@ -89,7 +87,7 @@ class Servidor
 
     public function ehAdmin(): bool
     {
-        return $this->nivelAcesso === self::NIVEL_ADMIN;
+        return $this->nivelAcesso === NivelAcesso::Admin;
     }
 
     public function excluir(): void
@@ -148,7 +146,7 @@ class Servidor
             $linha['cargo'] ?? '',
             $linha['usuario'] ?? '',
             $linha['senha_hash'] ?? '',
-            $linha['nivel_acesso'] ?? self::NIVEL_COMUM,
+            NivelAcesso::tryFrom($linha['nivel_acesso'] ?? '') ?? NivelAcesso::Comum,
             (int) $linha['id']
         );
     }

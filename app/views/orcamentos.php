@@ -4,7 +4,7 @@ require __DIR__ . '/partials/header.php';
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <span class="fs-6 fw-semibold" style="color: #1F3864;">
+    <span class="fs-6 fw-semibold" style="color: var(--brand-blue-dark);">
         <i class="ti ti-calculator" aria-hidden="true" style="font-size: 20px; vertical-align: -3px;"></i>
         Orçamentos
     </span>

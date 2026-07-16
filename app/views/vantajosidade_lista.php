@@ -9,7 +9,7 @@ $statusLabel = [
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <span class="fs-6 fw-semibold" style="color: #1F3864;">
+    <span class="fs-6 fw-semibold" style="color: var(--brand-blue-dark);">
         <i class="ti ti-scale" aria-hidden="true" style="font-size: 20px; vertical-align: -3px;"></i>
         Comprovação de Vantajosidade
     </span>
@@ -45,7 +45,7 @@ $statusLabel = [
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h6 class="card-title mb-0">
-                                    <i class="ti ti-scale" aria-hidden="true" style="font-size: 16px; color: #1F3864; vertical-align: -2px;"></i>
+                                    <i class="ti ti-scale" aria-hidden="true" style="font-size: 16px; color: var(--brand-blue-dark); vertical-align: -2px;"></i>
                                     Ata <?= htmlspecialchars($processo->numeroAta) ?>
                                 </h6>
                                 <span class="badge <?= $classeBadge ?>"><?= $label ?></span>

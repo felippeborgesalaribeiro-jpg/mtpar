@@ -48,7 +48,7 @@ require __DIR__ . '/../partials/header.php';
     <?php if (count($demandasExcluidas) > 0): ?>
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-white d-flex align-items-center gap-2 py-2">
-            <i class="ti ti-folder" aria-hidden="true" style="font-size:16px; color:#1F3864;"></i>
+            <i class="ti ti-folder" aria-hidden="true" style="font-size:16px; color: var(--brand-blue-dark);"></i>
             <span class="fw-semibold small">Demandas</span>
             <span class="badge bg-secondary ms-1"><?= count($demandasExcluidas) ?></span>
         </div>
@@ -122,8 +122,8 @@ require __DIR__ . '/../partials/header.php';
                         <td class="fw-semibold"><?= htmlspecialchars($c->numeroProcesso) ?></td>
                         <td><?= htmlspecialchars($c->orgaoSetor ?: '—') ?></td>
                         <td>
-                            <span class="badge <?= $c->status === 'FINALIZADA' ? 'bg-success' : 'bg-primary' ?>" style="font-size:10px;">
-                                <?= $c->status === 'FINALIZADA' ? 'Finalizada' : 'Em andamento' ?>
+                            <span class="badge <?= $c->status === StatusCotacao::Finalizada ? 'bg-success' : 'bg-primary' ?>" style="font-size:10px;">
+                                <?= $c->status === StatusCotacao::Finalizada ? 'Finalizada' : 'Em andamento' ?>
                             </span>
                         </td>
                         <td class="text-muted">

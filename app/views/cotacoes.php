@@ -3,13 +3,13 @@ $titulo = 'Cotações - MT Par';
 require __DIR__ . '/partials/header.php';
 
 $statusLabel = [
-    Cotacao::STATUS_EM_ANDAMENTO => ['Em andamento', 'bg-primary'],
-    Cotacao::STATUS_FINALIZADA => ['Finalizada', 'bg-success'],
+    StatusCotacao::EmAndamento->value => ['Em andamento', 'bg-primary'],
+    StatusCotacao::Finalizada->value => ['Finalizada', 'bg-success'],
 ];
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <span class="fs-6 fw-semibold" style="color: #1F3864;">
+    <span class="fs-6 fw-semibold" style="color: var(--brand-blue-dark);">
         <i class="ti ti-clipboard-list" aria-hidden="true" style="font-size: 20px; vertical-align: -3px;"></i>
         Cotações
     </span>
@@ -37,7 +37,7 @@ $statusLabel = [
         <?php foreach ($cotacoes as $cotacao): ?>
             <?php
             $servidor = $cotacao->buscarServidor();
-            [$label, $classeBadge] = $statusLabel[$cotacao->status] ?? ['Indefinido', 'bg-secondary'];
+            [$label, $classeBadge] = $statusLabel[$cotacao->status->value] ?? ['Indefinido', 'bg-secondary'];
             ?>
             <div class="col-md-4">
                 <a href="index.php?action=cotacao&id=<?= $cotacao->id ?>" class="text-decoration-none">
@@ -45,7 +45,7 @@ $statusLabel = [
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h6 class="card-title mb-0">
-                                    <i class="ti ti-file-text" aria-hidden="true" style="font-size: 16px; color: #1F3864; vertical-align: -2px;"></i>
+                                    <i class="ti ti-file-text" aria-hidden="true" style="font-size: 16px; color: var(--brand-blue-dark); vertical-align: -2px;"></i>
                                     Processo <?= htmlspecialchars($cotacao->numeroProcesso) ?>
                                 </h6>
                                 <span class="badge <?= $classeBadge ?>"><?= $label ?></span>

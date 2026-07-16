@@ -21,7 +21,7 @@ $coresStatus = [
 
 <div class="row g-3 mb-4">
     <div class="col-6 col-md">
-        <div class="card shadow-sm h-100" style="border-left: 4px solid #1F3864;">
+        <div class="card shadow-sm h-100" style="border-left: 4px solid var(--brand-blue);">
             <div class="card-body py-3">
                 <p class="text-muted small mb-1">Processos em andamento</p>
                 <p class="fs-4 fw-bold m-0"><?= $processosEmAndamento ?></p>
@@ -29,7 +29,7 @@ $coresStatus = [
         </div>
     </div>
     <div class="col-6 col-md">
-        <div class="card shadow-sm h-100" style="border-left: 4px solid #1F3864;">
+        <div class="card shadow-sm h-100" style="border-left: 4px solid var(--brand-blue);">
             <div class="card-body py-3">
                 <p class="text-muted small mb-1">Cotações em andamento</p>
                 <p class="fs-4 fw-bold m-0"><?= $cotacoesEmAndamento ?></p>
@@ -37,7 +37,7 @@ $coresStatus = [
         </div>
     </div>
     <div class="col-6 col-md">
-        <div class="card shadow-sm h-100" style="border-left: 4px solid #1F3864;">
+        <div class="card shadow-sm h-100" style="border-left: 4px solid var(--brand-blue);">
             <div class="card-body py-3">
                 <p class="text-muted small mb-1">Licitações publicadas</p>
                 <p class="fs-4 fw-bold m-0"><?= $licitacoesPublicadas ?></p>
@@ -45,7 +45,7 @@ $coresStatus = [
         </div>
     </div>
     <div class="col-6 col-md">
-        <div class="card shadow-sm h-100" style="border-left: 4px solid #1F3864;">
+        <div class="card shadow-sm h-100" style="border-left: 4px solid var(--brand-blue);">
             <div class="card-body py-3">
                 <p class="text-muted small mb-1">Licitações homologadas</p>
                 <p class="fs-4 fw-bold m-0"><?= $licitacoesHomologadas ?></p>
@@ -53,7 +53,7 @@ $coresStatus = [
         </div>
     </div>
     <div class="col-6 col-md">
-        <div class="card shadow-sm h-100" style="background-color: #1F3864; border-left: 4px solid #FFC107;">
+        <div class="card shadow-sm h-100" style="background-color: var(--brand-deep); border-left: 4px solid var(--brand-green);">
             <div class="card-body py-3">
                 <p class="small mb-1" style="color: rgba(255,255,255,0.75);">Valor homologado</p>
                 <p class="fs-5 fw-bold m-0" style="color: #FFFFFF;"><?= formatarMoeda($valorHomologadas) ?></p>
@@ -62,7 +62,7 @@ $coresStatus = [
     </div>
 </div>
 
-<p class="fs-6 fw-semibold mb-3" style="color: #1F3864;">
+<p class="fs-6 fw-semibold mb-3" style="color: var(--brand-blue-dark);">
     <i class="ti ti-apps" aria-hidden="true" style="font-size: 18px; vertical-align: -3px;"></i>
     Módulos
 </p>
@@ -111,7 +111,7 @@ $coresStatus = [
 
 <div class="row g-3">
     <div class="col-md-7">
-        <div class="card shadow-sm h-100" style="border-top: 3px solid #1F3864;">
+        <div class="card shadow-sm h-100" style="border-top: 3px solid var(--brand-blue);">
             <div class="card-body">
                 <p class="text-muted small mb-1 text-uppercase" style="letter-spacing: 0.05em; font-size: 11px;">MT Par</p>
                 <h4 class="mb-1">Bem-vindo, <?= htmlspecialchars(explode(' ', $servidorLogado->nome)[0]) ?></h4>

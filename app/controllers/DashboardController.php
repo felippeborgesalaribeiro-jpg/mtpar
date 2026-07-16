@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../models/Cotacao.php';
+require_once __DIR__ . '/../models/StatusCotacao.php';
 require_once __DIR__ . '/../models/Servidor.php';
 require_once __DIR__ . '/../models/Demanda.php';
 require_once __DIR__ . '/../models/Licitacao.php';
@@ -19,7 +20,7 @@ class DashboardController
         $minhasPendenciasExibidas = array_slice($minhasPendencias, 0, 5);
 
         $cotacoes = Cotacao::buscarTodas();
-        $cotacoesEmAndamento = count(array_filter($cotacoes, fn($c) => $c->status === Cotacao::STATUS_EM_ANDAMENTO));
+        $cotacoesEmAndamento = count(array_filter($cotacoes, fn($c) => $c->status === StatusCotacao::EmAndamento));
         $processosEmAndamento = Demanda::contarEmAndamento();
         $licitacoesPublicadas = Licitacao::contarPublicadas();
         $licitacoesHomologadas = Licitacao::contarHomologadas();

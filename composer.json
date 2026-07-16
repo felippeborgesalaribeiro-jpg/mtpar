@@ -1,5 +1,6 @@
 {
     "require": {
+        "php": ">=8.2",
         "phpoffice/phpword": "^1.4"
     },
     "require-dev": {
@@ -12,5 +13,10 @@
     },
     "scripts": {
         "test": "phpunit"
+    },
+    "config": {
+        "platform": {
+            "php": "8.2.12"
+        }
     }
 }

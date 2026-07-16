@@ -15,6 +15,8 @@ require_once __DIR__ . '/app/controllers/PrecoController.php';
 require_once __DIR__ . '/app/controllers/MapaController.php';
 require_once __DIR__ . '/app/controllers/RelatorioController.php';
 require_once __DIR__ . '/app/controllers/RelatoriosLicitacaoController.php';
+require_once __DIR__ . '/app/controllers/EmpresaController.php';
+require_once __DIR__ . '/app/controllers/PropostaVencedoraController.php';
 require_once __DIR__ . '/app/controllers/VantajosidadeController.php';
 require_once __DIR__ . '/app/controllers/ParametroController.php';
 require_once __DIR__ . '/app/controllers/ServidorController.php';
@@ -171,6 +173,26 @@ switch ($action) {
 
     case 'relatorios_licitacao':
         (new RelatoriosLicitacaoController())->mostrar();
+        break;
+
+    case 'buscar_empresas':
+        (new EmpresaController())->buscar();
+        break;
+
+    case 'criar_empresa':
+        (new EmpresaController())->criar();
+        break;
+
+    case 'proposta_vencedora':
+        (new PropostaVencedoraController())->mostrar();
+        break;
+
+    case 'salvar_proposta_vencedora':
+        (new PropostaVencedoraController())->salvar();
+        break;
+
+    case 'gerar_documento_proposta_vencedora':
+        (new PropostaVencedoraController())->gerarDocumento();
         break;
 
     case 'vantajosidades':

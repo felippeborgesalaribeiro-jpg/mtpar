@@ -1,5 +1,5 @@
 <?php
-$titulo = 'Demanda — ' . $demanda->numeroProcesso;
+$titulo = 'Processo — ' . $demanda->numeroProcesso;
 require __DIR__ . '/partials/header.php';
 
 $coresStatus = [
@@ -26,7 +26,7 @@ $modoEdicao = ($modo === 'editar');
 <?php if ($modoEdicao): ?>
     <div class="alert alert-warning d-flex align-items-center gap-2 py-2 small mb-3">
         <i class="ti ti-pencil" aria-hidden="true" style="font-size:15px;"></i>
-        Você está editando esta demanda. Salve ou cancele para voltar à visualização.
+        Você está editando este processo. Salve ou cancele para voltar à visualização.
     </div>
 <?php endif; ?>
 
@@ -60,7 +60,7 @@ $modoEdicao = ($modo === 'editar');
             </a>
             <a href="index.php?action=excluir_demanda&id=<?= $demanda->id ?>"
                class="btn btn-sm btn-outline-danger"
-               onclick="return confirm('Excluir esta demanda? Esta ação não pode ser desfeita.')">
+               onclick="return confirm('Excluir este processo? Esta ação não pode ser desfeita.')">
                 <i class="ti ti-trash" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
                 Excluir
             </a>
@@ -78,7 +78,7 @@ $modoEdicao = ($modo === 'editar');
     <div class="card shadow-sm mb-3">
         <div class="card-header bg-white d-flex align-items-center gap-2 py-2">
             <i class="ti ti-folder" aria-hidden="true" style="font-size:16px; color: var(--brand-blue-dark);"></i>
-            <span class="fw-semibold small">Dados da demanda</span>
+            <span class="fw-semibold small">Dados do processo</span>
             <span class="badge bg-warning text-dark ms-auto" style="font-size:10px;">editando</span>
         </div>
         <div class="card-body">
@@ -144,7 +144,7 @@ $modoEdicao = ($modo === 'editar');
 <div class="card shadow-sm mb-3">
     <div class="card-header bg-white d-flex align-items-center gap-2 py-2">
         <i class="ti ti-folder" aria-hidden="true" style="font-size:16px; color: var(--brand-blue-dark);"></i>
-        <span class="fw-semibold small">Dados da demanda</span>
+        <span class="fw-semibold small">Dados do processo</span>
     </div>
     <div class="card-body">
         <div class="row g-3 mb-3">
@@ -230,12 +230,16 @@ $modoEdicao = ($modo === 'editar');
                 </span>
             </div>
         </div>
-        <div class="mt-2">
+        <div class="mt-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
             <small class="text-muted">
                 <i class="ti ti-info-circle" aria-hidden="true" style="font-size:12px; vertical-align:-1px;"></i>
                 Para editar os dados da licitação, acesse o módulo
                 <a href="index.php?action=licitacoes">Licitações</a>.
             </small>
+            <a href="index.php?action=proposta_vencedora&id=<?= $licitacao->id ?>" class="btn btn-sm btn-outline-primary">
+                <i class="ti ti-clipboard-check" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+                Conferir proposta vencedora
+            </a>
         </div>
     </div>
 </div>

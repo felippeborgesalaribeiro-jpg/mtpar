@@ -1,0 +1,75 @@
+<?php
+
+namespace Tests\Models;
+
+use Empresa;
+use Licitacao;
+use Demanda;
+use Tests\DatabaseTestCase;
+
+require_once __DIR__ . '/../../app/models/Empresa.php';
+require_once __DIR__ . '/../../app/models/Demanda.php';
+require_once __DIR__ . '/../../app/models/StatusLicitacao.php';
+require_once __DIR__ . '/../../app/models/Licitacao.php';
+
+final class EmpresaTest extends DatabaseTestCase
+{
+    public function testSalvarNormalizaCnpjRemovendoPontuacao(): void
+    {
+        $empresa = new Empresa('Climatiza Engenharia e Instalações Ltda.', '12.345.678/0001-90', 'Climatiza Engenharia');
+        $empresa->salvar();
+
+        $recarregada = Empresa::buscarPorId($empresa->id);
+        $this->assertSame('12345678000190', $recarregada->cnpj);
+    }
+
+    public function testBuscarPorCnpjAceitaCnpjFormatadoOuNao(): void
+    {
+        $empresa = new Empresa('Refrigeração Cuiabá Ltda.', '08765432000111');
+        $empresa->salvar();
+
+        $this->assertNotNull(Empresa::buscarPorCnpj('08765432000111'));
+        $this->assertNotNull(Empresa::buscarPorCnpj('08.765.432/0001-11'));
+        $this->assertNull(Empresa::buscarPorCnpj('00000000000000'));
+    }
+
+    public function testBuscarEncontraPorNomeNomeFantasiaOuDigitosDoCnpj(): void
+    {
+        $empresa = new Empresa('Climatiza Engenharia e Instalações Ltda.', '12345678000190', 'Climatiza Engenharia');
+        $empresa->salvar();
+
+        $this->assertCount(1, Empresa::buscar('climatiza'));
+        $this->assertCount(1, Empresa::buscar('Engenharia'));
+        $this->assertCount(1, Empresa::buscar('12345678000190'));
+        $this->assertCount(1, Empresa::buscar('12.345.678/0001-90'));
+        $this->assertCount(0, Empresa::buscar('inexistente'));
+    }
+
+    public function testBuscarComTextoCurtoNaoQuebraEIgnoraStringVazia(): void
+    {
+        $this->assertSame([], Empresa::buscar(''));
+        $this->assertSame([], Empresa::buscar('   '));
+    }
+
+    public function testContarLicitacoesHomologadasSoContaAsComValorAdjudicado(): void
+    {
+        $empresa = new Empresa('Instaladora Pantanal Ltda.', '33222111000177');
+        $empresa->salvar();
+
+        $demanda1 = new Demanda('MTPAR-PRO-2026/00001', '2026-01-01');
+        $demanda1->salvar();
+        $licitacao1 = Licitacao::criarApartirDeDemanda($demanda1);
+        $licitacao1->empresaVencedoraId = $empresa->id;
+        $licitacao1->valorAdjudicado = 1000.0;
+        $licitacao1->salvar();
+
+        $demanda2 = new Demanda('MTPAR-PRO-2026/00002', '2026-01-02');
+        $demanda2->salvar();
+        $licitacao2 = Licitacao::criarApartirDeDemanda($demanda2);
+        $licitacao2->empresaVencedoraId = $empresa->id;
+        // Sem valor_adjudicado - ainda nao homologada, nao deve contar.
+        $licitacao2->salvar();
+
+        $this->assertSame(1, $empresa->contarLicitacoesHomologadas());
+    }
+}

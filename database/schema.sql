@@ -31,6 +31,14 @@ CREATE TABLE IF NOT EXISTS demandas (
     FOREIGN KEY (servidor_responsavel_id) REFERENCES servidores(id)
 );
 
+CREATE TABLE IF NOT EXISTS empresas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    nome_fantasia TEXT NOT NULL DEFAULT '',
+    cnpj TEXT NOT NULL UNIQUE,
+    criado_em TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS licitacoes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     demanda_id INTEGER NOT NULL,
@@ -45,9 +53,23 @@ CREATE TABLE IF NOT EXISTS licitacoes (
     valor_estimado REAL,
     valor_adjudicado REAL,
     encaminhado_pactuacao_contrato TEXT,
+    empresa_vencedora_id INTEGER,
+    observacoes_proposta_vencedora TEXT NOT NULL DEFAULT '',
     criado_em TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (demanda_id) REFERENCES demandas(id) ON DELETE CASCADE,
-    FOREIGN KEY (servidor_responsavel_id) REFERENCES servidores(id)
+    FOREIGN KEY (servidor_responsavel_id) REFERENCES servidores(id),
+    FOREIGN KEY (empresa_vencedora_id) REFERENCES empresas(id)
+);
+
+CREATE TABLE IF NOT EXISTS itens_proposta_vencedora (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    licitacao_id INTEGER NOT NULL,
+    item_id INTEGER NOT NULL,
+    valor_proposto REAL NOT NULL,
+    criado_em TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (licitacao_id) REFERENCES licitacoes(id) ON DELETE CASCADE,
+    FOREIGN KEY (item_id) REFERENCES itens(id) ON DELETE CASCADE,
+    UNIQUE (licitacao_id, item_id)
 );
 
 CREATE TABLE IF NOT EXISTS cotacoes (

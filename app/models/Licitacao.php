@@ -4,6 +4,7 @@ require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Demanda.php';
 require_once __DIR__ . '/Servidor.php';
 require_once __DIR__ . '/StatusLicitacao.php';
+require_once __DIR__ . '/Empresa.php';
 
 class Licitacao
 {
@@ -21,6 +22,8 @@ class Licitacao
     public ?float $valorAdjudicado;
     public ?string $encaminhadoPactuacaoContrato;
     public string $criadoEm;
+    public ?int $empresaVencedoraId;
+    public string $observacoesPropostaVencedora;
 
     public function __construct(
         int $demandaId,
@@ -36,7 +39,9 @@ class Licitacao
         ?float $valorAdjudicado = null,
         ?string $encaminhadoPactuacaoContrato = null,
         ?int $id = null,
-        string $criadoEm = ''
+        string $criadoEm = '',
+        ?int $empresaVencedoraId = null,
+        string $observacoesPropostaVencedora = ''
     ) {
         $this->id = $id;
         $this->demandaId = $demandaId;
@@ -52,6 +57,8 @@ class Licitacao
         $this->valorAdjudicado = $valorAdjudicado;
         $this->encaminhadoPactuacaoContrato = $encaminhadoPactuacaoContrato;
         $this->criadoEm = $criadoEm;
+        $this->empresaVencedoraId = $empresaVencedoraId;
+        $this->observacoesPropostaVencedora = $observacoesPropostaVencedora;
     }
 
     public static function criarApartirDeDemanda(Demanda $demanda): Licitacao
@@ -86,10 +93,10 @@ class Licitacao
             $stmt = $pdo->prepare(
                 'INSERT INTO licitacoes (demanda_id, numero_processo, link_sigadoc, setor_demandante, data_recebimento,
                  objeto, servidor_responsavel_id, edital_licitacao, realizacao_sessao_publica, valor_estimado,
-                 valor_adjudicado, encaminhado_pactuacao_contrato)
+                 valor_adjudicado, encaminhado_pactuacao_contrato, empresa_vencedora_id, observacoes_proposta_vencedora)
                  VALUES (:demanda_id, :numero_processo, :link_sigadoc, :setor_demandante, :data_recebimento,
                  :objeto, :servidor_responsavel_id, :edital_licitacao, :realizacao_sessao_publica, :valor_estimado,
-                 :valor_adjudicado, :encaminhado_pactuacao_contrato)'
+                 :valor_adjudicado, :encaminhado_pactuacao_contrato, :empresa_vencedora_id, :observacoes_proposta_vencedora)'
             );
             $stmt->execute($this->paramsParaSalvar());
             $this->id = (int) $pdo->lastInsertId();
@@ -99,7 +106,8 @@ class Licitacao
                  setor_demandante = :setor_demandante, data_recebimento = :data_recebimento, objeto = :objeto,
                  servidor_responsavel_id = :servidor_responsavel_id, edital_licitacao = :edital_licitacao,
                  realizacao_sessao_publica = :realizacao_sessao_publica, valor_estimado = :valor_estimado,
-                 valor_adjudicado = :valor_adjudicado, encaminhado_pactuacao_contrato = :encaminhado_pactuacao_contrato
+                 valor_adjudicado = :valor_adjudicado, encaminhado_pactuacao_contrato = :encaminhado_pactuacao_contrato,
+                 empresa_vencedora_id = :empresa_vencedora_id, observacoes_proposta_vencedora = :observacoes_proposta_vencedora
                  WHERE id = :id'
             );
             $stmt->execute(array_merge($this->paramsParaSalvar(), ['id' => $this->id]));
@@ -123,6 +131,8 @@ class Licitacao
             'valor_estimado' => $this->valorEstimado,
             'valor_adjudicado' => $this->valorAdjudicado,
             'encaminhado_pactuacao_contrato' => $this->encaminhadoPactuacaoContrato,
+            'empresa_vencedora_id' => $this->empresaVencedoraId,
+            'observacoes_proposta_vencedora' => $this->observacoesPropostaVencedora,
         ];
     }
 
@@ -140,6 +150,15 @@ class Licitacao
         }
 
         return Servidor::buscarPorId($this->servidorResponsavelId);
+    }
+
+    public function buscarEmpresaVencedora(): ?Empresa
+    {
+        if ($this->empresaVencedoraId === null) {
+            return null;
+        }
+
+        return Empresa::buscarPorId($this->empresaVencedoraId);
     }
 
     public function calcularDiasNaLicitacao(): int
@@ -286,7 +305,9 @@ class Licitacao
             $linha['valor_adjudicado'] !== null ? (float) $linha['valor_adjudicado'] : null,
             $linha['encaminhado_pactuacao_contrato'],
             (int) $linha['id'],
-            $linha['criado_em'] ?? ''
+            $linha['criado_em'] ?? '',
+            $linha['empresa_vencedora_id'] !== null ? (int) $linha['empresa_vencedora_id'] : null,
+            $linha['observacoes_proposta_vencedora'] ?? ''
         );
     }
 }

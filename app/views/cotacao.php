@@ -9,6 +9,14 @@ $statusLabel = [
 [$labelStatus, $classeBadgeStatus] = $statusLabel[$cotacao->status->value] ?? ['Indefinido', 'bg-secondary'];
 ?>
 
+<div class="print-header">
+    <img src="public/img/logo.png" alt="MT Par">
+    <div class="print-header-info">
+        Processo <?= htmlspecialchars($cotacao->numeroProcesso) ?> — Etapas de análise de preços (70/30)<br>
+        Impresso em <?= date('d/m/Y H:i') ?>
+    </div>
+</div>
+
 <div class="d-flex justify-content-between align-items-start mb-3">
     <div>
         <h4 class="m-0">
@@ -41,6 +49,10 @@ $statusLabel = [
                 data-bs-toggle="modal" data-bs-target="#modalEditarCotacao">
             <i class="ti ti-edit" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
             Editar
+        </button>
+        <button onclick="window.print()" class="btn btn-sm btn-primary">
+            <i class="ti ti-printer" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+            Imprimir
         </button>
         <a href="index.php?action=mapa&id=<?= $cotacao->id ?>" class="btn btn-sm btn-info text-white">
             <i class="ti ti-table" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>

@@ -3,6 +3,14 @@ $titulo = 'Mapa Comparativo - ' . $cotacao->numeroProcesso;
 require __DIR__ . '/partials/header.php';
 ?>
 
+<div class="print-header">
+    <img src="public/img/logo.png" alt="MT Par">
+    <div class="print-header-info">
+        Mapa comparativo de preços — Processo <?= htmlspecialchars($cotacao->numeroProcesso) ?><br>
+        Impresso em <?= date('d/m/Y H:i') ?>
+    </div>
+</div>
+
 <div class="d-flex justify-content-between align-items-center mb-4 no-print">
     <span class="fs-6 fw-semibold" style="color: var(--brand-blue-dark);">
         <i class="ti ti-table" aria-hidden="true" style="font-size: 18px; vertical-align: -3px;"></i>

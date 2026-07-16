@@ -92,6 +92,78 @@ a:hover > .card {
     color: #fff;
 }
 
+/* Formularios e modais, no sistema inteiro (nao so no login) */
+.form-control,
+.form-select {
+    border-radius: 8px;
+    border-color: var(--line);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--brand-blue);
+    box-shadow: 0 0 0 3px var(--brand-blue-soft);
+}
+
+.form-label {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--ink-soft);
+}
+
+.modal-content {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(14, 46, 61, 0.18);
+}
+
+.modal-header {
+    border-bottom-color: var(--line);
+}
+
+.modal-footer {
+    border-top-color: var(--line);
+}
+
+/* Alinha os tons "subtle" do Bootstrap as cores da marca em vez do azul/verde padrao */
+.bg-primary-subtle {
+    background-color: var(--brand-blue-soft) !important;
+}
+
+.text-primary {
+    color: var(--brand-blue-dark) !important;
+}
+
+.bg-success-subtle {
+    background-color: var(--brand-green-soft) !important;
+}
+
+.text-success {
+    color: var(--brand-green-dark) !important;
+}
+
+.btn-success {
+    background-color: var(--brand-green-dark);
+    border-color: var(--brand-green-dark);
+}
+
+.btn-success:hover {
+    background-color: #007300;
+    border-color: #007300;
+}
+
+.btn-info {
+    background-color: var(--brand-blue);
+    border-color: var(--brand-blue);
+    color: #fff;
+}
+
+.btn-info:hover {
+    background-color: var(--brand-blue-dark);
+    border-color: var(--brand-blue-dark);
+    color: #fff;
+}
+
 .empty-state {
     text-align: center;
     padding: 48px 24px;
@@ -207,12 +279,44 @@ a:hover > .card {
     margin-top: 22px;
 }
 
+/* Cabecalho de impressao - some na tela, aparece so no papel/PDF */
+.print-header {
+    display: none;
+}
+
 @media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
     .navbar,
     .btn,
     form,
+    .modal,
     .no-print {
         display: none !important;
+    }
+
+    .print-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        border-bottom: 2px solid var(--brand-deep);
+        padding-bottom: 10px;
+        margin-bottom: 16px;
+    }
+
+    .print-header img {
+        height: 34px;
+    }
+
+    .print-header .print-header-info {
+        margin-left: auto;
+        text-align: right;
+        font-size: 11px;
+        color: var(--ink-soft);
     }
 
     .container {
@@ -226,6 +330,12 @@ a:hover > .card {
         border: 1px solid #ccc !important;
         box-shadow: none !important;
         page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .border.rounded {
+        page-break-inside: avoid;
+        break-inside: avoid;
     }
 
     .table-responsive {
@@ -234,6 +344,10 @@ a:hover > .card {
 
     table {
         width: 100% !important;
+    }
+
+    .badge {
+        border: 1px solid rgba(0, 0, 0, 0.15);
     }
 
     @page {

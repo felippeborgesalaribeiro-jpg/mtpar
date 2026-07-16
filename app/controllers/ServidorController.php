@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../models/Servidor.php';
+require_once __DIR__ . '/../models/NivelAcesso.php';
 require_once __DIR__ . '/../helpers/auth.php';
 
 class ServidorController
@@ -22,7 +23,7 @@ class ServidorController
         $matricula = trim($_POST['matricula'] ?? '');
         $cargo = trim($_POST['cargo'] ?? '');
         $usuario = trim($_POST['usuario'] ?? '');
-        $nivelAcesso = $_POST['nivel_acesso'] ?? Servidor::NIVEL_COMUM;
+        $nivelAcesso = NivelAcesso::tryFrom($_POST['nivel_acesso'] ?? '') ?? NivelAcesso::Comum;
 
         if ($nome === '' || $usuario === '') {
             echo 'Nome e usuário são obrigatórios.';
@@ -46,7 +47,7 @@ class ServidorController
         $matricula = trim($_POST['matricula'] ?? '');
         $cargo = trim($_POST['cargo'] ?? '');
         $usuario = trim($_POST['usuario'] ?? '');
-        $nivelAcesso = $_POST['nivel_acesso'] ?? Servidor::NIVEL_COMUM;
+        $nivelAcesso = NivelAcesso::tryFrom($_POST['nivel_acesso'] ?? '') ?? NivelAcesso::Comum;
 
         $servidor = Servidor::buscarPorId($id);
 

@@ -103,15 +103,24 @@ $statusLabel = [
                                     </span>
                                 </td>
                                 <td>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary"
-                                            data-bs-toggle="modal" data-bs-target="#modalEditarLicitacao<?= $licitacao->id ?>">
-                                        <i class="ti ti-edit" aria-hidden="true" style="font-size: 13px;"></i>
-                                    </button>
-                                    <a href="index.php?action=excluir_licitacao&id=<?= $licitacao->id ?>"
-                                       class="btn btn-sm btn-outline-danger"
-                                       onclick="return confirm('Excluir esta licitação?')">
-                                        <i class="ti ti-trash" aria-hidden="true" style="font-size: 13px;"></i>
-                                    </a>
+                                    <div class="d-flex gap-1">
+                                        <a href="index.php?action=ver_demanda&id=<?= $licitacao->demandaId ?>"
+                                           class="btn btn-sm btn-outline-primary"
+                                           title="Ver processo">
+                                            <i class="ti ti-eye" aria-hidden="true" style="font-size: 13px;"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                data-bs-toggle="modal" data-bs-target="#modalEditarLicitacao<?= $licitacao->id ?>"
+                                                title="Editar">
+                                            <i class="ti ti-edit" aria-hidden="true" style="font-size: 13px;"></i>
+                                        </button>
+                                        <a href="index.php?action=excluir_licitacao&id=<?= $licitacao->id ?>"
+                                           class="btn btn-sm btn-outline-danger"
+                                           onclick="return confirm('Excluir esta licitação?')"
+                                           title="Excluir">
+                                            <i class="ti ti-trash" aria-hidden="true" style="font-size: 13px;"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
 

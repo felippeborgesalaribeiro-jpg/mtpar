@@ -34,7 +34,7 @@ class PrecoController
             return;
         }
 
-        header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId);
+        header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId . '#item-' . $item->id);
         exit;
     }
 
@@ -67,7 +67,7 @@ class PrecoController
             return;
         }
 
-        header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId);
+        header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId . '#item-' . $item->id);
         exit;
     }
 
@@ -94,7 +94,7 @@ class PrecoController
 
         $preco->excluir();
 
-        header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId);
+        header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId . '#item-' . $item->id);
         exit;
     }
 }

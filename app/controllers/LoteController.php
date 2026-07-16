@@ -23,7 +23,7 @@ class LoteController
         $lote = new Lote($cotacao->id, Lote::proximoNumeroLote($cotacao->id));
         $lote->salvar();
 
-        header('Location: index.php?action=cotacao&id=' . $cotacao->id);
+        header('Location: index.php?action=cotacao&id=' . $cotacao->id . '#lote-' . $lote->id);
         exit;
     }
 
@@ -65,7 +65,7 @@ class LoteController
         $item = new Item($lote->id, $lote->proximoNumeroItem(), $descricao, $unidade, $quantidade);
         $item->salvar();
 
-        header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId);
+        header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId . '#item-' . $item->id);
         exit;
     }
 
@@ -97,7 +97,7 @@ class LoteController
             return;
         }
 
-        header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId);
+        header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId . '#item-' . $item->id);
         exit;
     }
 
@@ -123,7 +123,7 @@ class LoteController
 
         $item->excluir();
 
-        header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId);
+        header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId . '#lote-' . $lote->id);
         exit;
     }
 }

@@ -10,11 +10,7 @@
 <body class="login-page">
 
 <div class="login-card">
-    <div class="login-mark">
-        <div class="arc arc-outer"></div>
-        <div class="arc arc-inner"></div>
-    </div>
-    <p class="login-wordmark">MT Par</p>
+    <img src="public/img/logo.png" alt="MT Par" class="login-mark">
     <p class="login-tagline">Parcerias para fazer história</p>
 
     <?php if ($erro): ?>

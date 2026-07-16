@@ -2,18 +2,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root {
-    /* Cores da marca MT Par, extraidas do logo */
-    --brand-blue: #0FBAF3;
-    --brand-blue-dark: #0B93C2;
-    --brand-blue-soft: #E4F7FD;
-    --brand-green: #63E04D;
-    --brand-green-dark: #128235;
-    --brand-green-soft: #EAFBE6;
+    /* Cores da marca MT Par, extraidas por pixel do arquivo real do logo */
+    --brand-blue: #00C8FF;
+    --brand-blue-dark: #0090BD;
+    --brand-blue-soft: #E1F8FF;
+    --brand-green: #75F953;
+    --brand-green-dark: #009000;
+    --brand-green-soft: #EBFEE6;
     --brand-deep: #0E2E3D;
 
     /* Neutros com leve tom azulado, nao cinza puro */
-    --ink: #26282B;
-    --ink-soft: #58585B;
+    --ink: #2B2B2B;
+    --ink-soft: #646464;
     --ink-faint: #9498A0;
     --paper: #F5F7FA;
     --paper-raised: #FFFFFF;
@@ -118,44 +118,11 @@ a:hover > .card {
     box-shadow: 0 24px 60px rgba(14, 46, 61, 0.12), 0 2px 8px rgba(14, 46, 61, 0.06);
 }
 
-/* Marca temporaria (arcos), ate o arquivo real do logo ser adicionado em public/img/ */
 .login-mark {
-    position: relative;
-    width: 140px;
-    height: 70px;
-    margin: 0 auto 20px;
-}
-
-.login-mark .arc {
-    position: absolute;
-    border-radius: 999px 999px 0 0;
-    box-sizing: border-box;
-    border-bottom: none;
-}
-
-.login-mark .arc-outer {
-    width: 140px;
-    height: 70px;
-    left: 0;
-    top: 0;
-    border: 16px solid var(--brand-green);
-}
-
-.login-mark .arc-inner {
-    width: 78px;
-    height: 39px;
-    left: 45px;
-    top: 31px;
-    border: 14px solid var(--brand-blue);
-}
-
-.login-wordmark {
-    text-align: center;
-    font-size: 26px;
-    font-weight: 800;
-    color: var(--ink-soft);
-    margin: 0 0 2px;
-    letter-spacing: -0.02em;
+    display: block;
+    margin: 0 auto 22px;
+    width: 260px;
+    height: auto;
 }
 
 .login-tagline {

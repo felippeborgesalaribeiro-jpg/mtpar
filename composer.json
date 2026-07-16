@@ -1,5 +1,18 @@
 {
     "require": {
-        "phpoffice/phpword": "^1.4"
+        "phpoffice/phpword": "^1.4",
+        "netresearch/composer-agent-skill-plugin": "^1.1",
+        "netresearch/php-modernization-skill": "^1.20"
+    },
+    "config": {
+        "allow-plugins": {
+            "netresearch/composer-agent-skill-plugin": true
+        }
+    },
+    "repositories": {
+        "php-modernization-skill": {
+            "type": "vcs",
+            "url": "https://github.com/netresearch/php-modernization-skill"
+        }
     }
 }

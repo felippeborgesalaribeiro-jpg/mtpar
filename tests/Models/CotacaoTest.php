@@ -5,10 +5,12 @@ namespace Tests\Models;
 use Cotacao;
 use Lote;
 use Servidor;
+use StatusCotacao;
 use Tests\DatabaseTestCase;
 
 require_once __DIR__ . '/../../app/models/AnalisePrecos.php';
 require_once __DIR__ . '/../../app/models/Cotacao.php';
+require_once __DIR__ . '/../../app/models/StatusCotacao.php';
 require_once __DIR__ . '/../../app/models/Lote.php';
 require_once __DIR__ . '/../../app/models/Servidor.php';
 
@@ -40,7 +42,7 @@ final class CotacaoTest extends DatabaseTestCase
 
         $this->assertNotNull($encontrada);
         $this->assertSame('MTPAR-PRO-2026/00001', $encontrada->numeroProcesso);
-        $this->assertSame(Cotacao::STATUS_EM_ANDAMENTO, $encontrada->status);
+        $this->assertSame(StatusCotacao::EmAndamento, $encontrada->status);
     }
 
     public function testExcluirEhSoftDeleteNaoRemoveORegistro(): void
@@ -87,5 +89,33 @@ final class CotacaoTest extends DatabaseTestCase
 
         $this->assertNull(Cotacao::buscarExcluidaPorId($cotacao->id));
         $this->assertNull(Lote::buscarPorId($lote->id));
+    }
+
+    public function testFinalizarMudaOStatusEPersiste(): void
+    {
+        $servidor = $this->criarServidor();
+        $cotacao = new Cotacao('MTPAR-PRO-2026/00005', '', '', '', '', $servidor->id);
+        $cotacao->salvar();
+
+        $cotacao->status = StatusCotacao::Finalizada;
+        $cotacao->salvar();
+
+        $recarregada = Cotacao::buscarPorId($cotacao->id);
+        $this->assertSame(StatusCotacao::Finalizada, $recarregada->status);
+    }
+
+    public function testFromArrayIgnoraValorInvalidoDeStatus(): void
+    {
+        $servidor = $this->criarServidor();
+        $cotacao = new Cotacao('MTPAR-PRO-2026/00006', '', '', '', '', $servidor->id);
+        $cotacao->salvar();
+
+        \Database::getConnection()
+            ->prepare('UPDATE cotacoes SET status = :valor WHERE id = :id')
+            ->execute(['valor' => 'STATUS_ANTIGO_REMOVIDO', 'id' => $cotacao->id]);
+
+        $recarregada = Cotacao::buscarPorId($cotacao->id);
+
+        $this->assertSame(StatusCotacao::EmAndamento, $recarregada->status);
     }
 }

@@ -3,12 +3,10 @@
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Lote.php';
 require_once __DIR__ . '/Servidor.php';
+require_once __DIR__ . '/StatusCotacao.php';
 
 class Cotacao
 {
-    const STATUS_EM_ANDAMENTO = 'EM_ANDAMENTO';
-    const STATUS_FINALIZADA = 'FINALIZADA';
-
     public ?int $id;
     public string $numeroProcesso;
     public string $orgaoSetor;
@@ -17,7 +15,7 @@ class Cotacao
     public string $objeto;
     public int $servidorId;
     public string $criterioConsolidacao;
-    public string $status;
+    public StatusCotacao $status;
     public string $criadoEm;
     public ?int $demandaId;
     public ?string $deletedAt;
@@ -30,7 +28,7 @@ class Cotacao
         string $objeto,
         int $servidorId,
         string $criterioConsolidacao = AnalisePrecos::CRITERIO_MEDIANA,
-        string $status = self::STATUS_EM_ANDAMENTO,
+        StatusCotacao $status = StatusCotacao::EmAndamento,
         ?int $id = null,
         string $criadoEm = '',
         ?int $demandaId = null,
@@ -67,7 +65,7 @@ class Cotacao
                 'objeto'               => $this->objeto,
                 'servidor_id'          => $this->servidorId,
                 'criterio_consolidacao' => $this->criterioConsolidacao,
-                'status'               => $this->status,
+                'status'               => $this->status->value,
                 'demanda_id'           => $this->demandaId,
             ]);
             $this->id = (int) $pdo->lastInsertId();
@@ -87,7 +85,7 @@ class Cotacao
                 'objeto'               => $this->objeto,
                 'servidor_id'          => $this->servidorId,
                 'criterio_consolidacao' => $this->criterioConsolidacao,
-                'status'               => $this->status,
+                'status'               => $this->status->value,
                 'demanda_id'           => $this->demandaId,
                 'id'                   => $this->id,
             ]);
@@ -216,7 +214,7 @@ class Cotacao
         $stmt = $pdo->prepare(
             'SELECT * FROM cotacoes WHERE servidor_id = :servidor_id AND status = :status AND deleted_at IS NULL ORDER BY id DESC'
         );
-        $stmt->execute(['servidor_id' => $servidorId, 'status' => self::STATUS_EM_ANDAMENTO]);
+        $stmt->execute(['servidor_id' => $servidorId, 'status' => StatusCotacao::EmAndamento->value]);
 
         $cotacoes = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $linha) {
@@ -242,7 +240,7 @@ class Cotacao
             $linha['objeto'],
             (int) $linha['servidor_id'],
             $linha['criterio_consolidacao'],
-            $linha['status'],
+            StatusCotacao::tryFrom($linha['status']) ?? StatusCotacao::EmAndamento,
             (int) $linha['id'],
             $linha['criado_em'] ?? '',
             $linha['demanda_id'] !== null ? (int) $linha['demanda_id'] : null,

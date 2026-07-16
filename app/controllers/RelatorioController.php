@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../models/Cotacao.php';
+require_once __DIR__ . '/../models/StatusCotacao.php';
 require_once __DIR__ . '/../models/Servidor.php';
 require_once __DIR__ . '/../helpers/config.php';
 require_once __DIR__ . '/../helpers/auth.php';
@@ -19,7 +20,7 @@ class RelatorioController
             return;
         }
 
-        if ($cotacao->status !== Cotacao::STATUS_FINALIZADA) {
+        if ($cotacao->status !== StatusCotacao::Finalizada) {
             echo 'Esta cotação ainda não foi finalizada.';
             return;
         }
@@ -75,7 +76,7 @@ class RelatorioController
             return;
         }
 
-        if ($cotacao->status !== Cotacao::STATUS_FINALIZADA) {
+        if ($cotacao->status !== StatusCotacao::Finalizada) {
             echo 'Esta cotação ainda não foi finalizada.';
             return;
         }

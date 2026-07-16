@@ -259,8 +259,8 @@ $modoEdicao = ($modo === 'editar');
             </div>
             <div class="col-md-4">
                 <p class="text-muted mb-1" style="font-size:10px; text-transform:uppercase; letter-spacing:.05em;">Status</p>
-                <span class="badge <?= $cotacao->status === 'FINALIZADA' ? 'bg-success' : 'bg-primary' ?>">
-                    <?= $cotacao->status === 'FINALIZADA' ? 'Finalizada' : 'Em andamento' ?>
+                <span class="badge <?= $cotacao->status === StatusCotacao::Finalizada ? 'bg-success' : 'bg-primary' ?>">
+                    <?= $cotacao->status === StatusCotacao::Finalizada ? 'Finalizada' : 'Em andamento' ?>
                 </span>
             </div>
             <div class="col-md-4">

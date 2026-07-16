@@ -122,8 +122,8 @@ require __DIR__ . '/../partials/header.php';
                         <td class="fw-semibold"><?= htmlspecialchars($c->numeroProcesso) ?></td>
                         <td><?= htmlspecialchars($c->orgaoSetor ?: '—') ?></td>
                         <td>
-                            <span class="badge <?= $c->status === 'FINALIZADA' ? 'bg-success' : 'bg-primary' ?>" style="font-size:10px;">
-                                <?= $c->status === 'FINALIZADA' ? 'Finalizada' : 'Em andamento' ?>
+                            <span class="badge <?= $c->status === StatusCotacao::Finalizada ? 'bg-success' : 'bg-primary' ?>" style="font-size:10px;">
+                                <?= $c->status === StatusCotacao::Finalizada ? 'Finalizada' : 'Em andamento' ?>
                             </span>
                         </td>
                         <td class="text-muted">

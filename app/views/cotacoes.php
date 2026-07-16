@@ -3,8 +3,8 @@ $titulo = 'Cotações - MT Par';
 require __DIR__ . '/partials/header.php';
 
 $statusLabel = [
-    Cotacao::STATUS_EM_ANDAMENTO => ['Em andamento', 'bg-primary'],
-    Cotacao::STATUS_FINALIZADA => ['Finalizada', 'bg-success'],
+    StatusCotacao::EmAndamento->value => ['Em andamento', 'bg-primary'],
+    StatusCotacao::Finalizada->value => ['Finalizada', 'bg-success'],
 ];
 ?>
 
@@ -37,7 +37,7 @@ $statusLabel = [
         <?php foreach ($cotacoes as $cotacao): ?>
             <?php
             $servidor = $cotacao->buscarServidor();
-            [$label, $classeBadge] = $statusLabel[$cotacao->status] ?? ['Indefinido', 'bg-secondary'];
+            [$label, $classeBadge] = $statusLabel[$cotacao->status->value] ?? ['Indefinido', 'bg-secondary'];
             ?>
             <div class="col-md-4">
                 <a href="index.php?action=cotacao&id=<?= $cotacao->id ?>" class="text-decoration-none">

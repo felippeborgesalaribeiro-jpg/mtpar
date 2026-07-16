@@ -3,10 +3,10 @@ $titulo = 'Cotação ' . $cotacao->numeroProcesso . ' - MT Par';
 require __DIR__ . '/partials/header.php';
 
 $statusLabel = [
-    Cotacao::STATUS_EM_ANDAMENTO => ['Em andamento', 'bg-primary'],
-    Cotacao::STATUS_FINALIZADA   => ['Finalizada', 'bg-success'],
+    StatusCotacao::EmAndamento->value => ['Em andamento', 'bg-primary'],
+    StatusCotacao::Finalizada->value  => ['Finalizada', 'bg-success'],
 ];
-[$labelStatus, $classeBadgeStatus] = $statusLabel[$cotacao->status] ?? ['Indefinido', 'bg-secondary'];
+[$labelStatus, $classeBadgeStatus] = $statusLabel[$cotacao->status->value] ?? ['Indefinido', 'bg-secondary'];
 ?>
 
 <div class="d-flex justify-content-between align-items-start mb-3">
@@ -46,7 +46,7 @@ $statusLabel = [
             <i class="ti ti-table" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
             Ver mapa comparativo
         </a>
-        <?php if ($cotacao->status === Cotacao::STATUS_FINALIZADA): ?>
+        <?php if ($cotacao->status === StatusCotacao::Finalizada): ?>
             <a href="index.php?action=gerar_relatorio_pesquisa&id=<?= $cotacao->id ?>" class="btn btn-sm btn-info text-white">
                 <i class="ti ti-clipboard-data" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
                 Relatório de pesquisa de preços
@@ -56,7 +56,7 @@ $statusLabel = [
                 Gerar análise crítica
             </a>
         <?php endif; ?>
-        <?php if ($cotacao->status === Cotacao::STATUS_EM_ANDAMENTO): ?>
+        <?php if ($cotacao->status === StatusCotacao::EmAndamento): ?>
             <a href="index.php?action=finalizar_cotacao&id=<?= $cotacao->id ?>"
                class="btn btn-sm btn-success"
                onclick="return confirm('Finalizar esta cotação?')">

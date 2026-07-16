@@ -12,14 +12,14 @@ $statusLabel = [
 <div class="d-flex justify-content-between align-items-start mb-3">
     <div>
         <h4 class="m-0">
-            <i class="ti ti-scale" aria-hidden="true" style="font-size: 22px; vertical-align: -3px; color: #1F3864;"></i>
+            <i class="ti ti-scale" aria-hidden="true" style="font-size: 22px; vertical-align: -3px; color: var(--brand-blue-dark);"></i>
             Ata <?= htmlspecialchars($processo->numeroAta) ?>
             <span class="badge <?= $classeBadgeStatus ?>"><?= $labelStatus ?></span>
         </h4>
         <p class="text-muted mb-0"><?= htmlspecialchars($processo->orgaoGerenciador) ?></p>
         <?php if ($demandaVinculada !== null): ?>
             <p class="small mb-0">
-                <i class="ti ti-link" aria-hidden="true" style="font-size: 13px; vertical-align: -1px; color: #1F3864;"></i>
+                <i class="ti ti-link" aria-hidden="true" style="font-size: 13px; vertical-align: -1px; color: var(--brand-blue-dark);"></i>
                 Vinculado à Demanda nº <?= htmlspecialchars($demandaVinculada->numeroProcesso) ?>
                 <a href="index.php?action=demandas" class="text-decoration-none">
                     (ver demandas <i class="ti ti-arrow-right" aria-hidden="true" style="font-size: 11px;"></i>)
@@ -66,7 +66,7 @@ $statusLabel = [
 </div>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <span class="fs-6 fw-semibold" style="color: #1F3864;">
+    <span class="fs-6 fw-semibold" style="color: var(--brand-blue-dark);">
         <i class="ti ti-list" aria-hidden="true" style="font-size: 18px; vertical-align: -3px;"></i>
         Itens da Ata
     </span>
@@ -93,7 +93,7 @@ $statusLabel = [
     ?>
 
     <div class="card shadow-sm mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center text-white" style="background-color: #1F3864;">
+        <div class="card-header d-flex justify-content-between align-items-center text-white" style="background-color: var(--brand-deep);">
             <span class="fw-bold">
                 <i class="ti ti-box" aria-hidden="true" style="font-size: 15px; vertical-align: -2px;"></i>
                 Lote <?= htmlspecialchars($item->lote) ?> — Item <?= htmlspecialchars($item->item) ?>
@@ -228,7 +228,7 @@ $statusLabel = [
 
             <?php if ($resultado['resultado'] !== null): ?>
                 <p class="mb-0 mt-3 small">
-                    <i class="ti ti-target-arrow" aria-hidden="true" style="font-size: 14px; vertical-align: -1px; color: #1F3864;"></i>
+                    <i class="ti ti-target-arrow" aria-hidden="true" style="font-size: 14px; vertical-align: -1px; color: var(--brand-blue-dark);"></i>
                     <b>Média de mercado:</b> <?= formatarMoeda($resultado['media_mercado']) ?>
                     &nbsp;—&nbsp;
                     <b>Resultado:</b>

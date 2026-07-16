@@ -48,7 +48,7 @@ require __DIR__ . '/../partials/header.php';
     <?php if (count($demandasExcluidas) > 0): ?>
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-white d-flex align-items-center gap-2 py-2">
-            <i class="ti ti-folder" aria-hidden="true" style="font-size:16px; color:#1F3864;"></i>
+            <i class="ti ti-folder" aria-hidden="true" style="font-size:16px; color: var(--brand-blue-dark);"></i>
             <span class="fw-semibold small">Demandas</span>
             <span class="badge bg-secondary ms-1"><?= count($demandasExcluidas) ?></span>
         </div>

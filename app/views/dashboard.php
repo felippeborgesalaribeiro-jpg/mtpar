@@ -68,7 +68,7 @@ $coresStatus = [
 </p>
 
 <div class="row g-3 mb-4">
-    <div class="col-md-4">
+    <div class="col-md-3">
         <a href="index.php?action=demandas" class="text-decoration-none">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
@@ -81,7 +81,7 @@ $coresStatus = [
             </div>
         </a>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <a href="index.php?action=licitacoes" class="text-decoration-none">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
@@ -94,7 +94,7 @@ $coresStatus = [
             </div>
         </a>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <a href="index.php?action=orcamentos" class="text-decoration-none">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
@@ -103,6 +103,19 @@ $coresStatus = [
                     </div>
                     <p class="fw-semibold mb-1 mt-3 text-dark">Orçamentos</p>
                     <p class="text-muted small mb-0">Pesquisa de preço e vantajosidade de ata</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="index.php?action=relatorios_licitacao" class="text-decoration-none">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="rounded-3 bg-warning-subtle d-inline-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="ti ti-chart-bar text-warning" aria-hidden="true" style="font-size: 20px;"></i>
+                    </div>
+                    <p class="fw-semibold mb-1 mt-3 text-dark">Relatórios</p>
+                    <p class="text-muted small mb-0">Licitações por unidade, servidor e ano</p>
                 </div>
             </div>
         </a>

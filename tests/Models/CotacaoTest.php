@@ -3,7 +3,9 @@
 namespace Tests\Models;
 
 use Cotacao;
+use Item;
 use Lote;
+use Preco;
 use Servidor;
 use StatusCotacao;
 use Tests\DatabaseTestCase;
@@ -12,6 +14,9 @@ require_once __DIR__ . '/../../app/models/AnalisePrecos.php';
 require_once __DIR__ . '/../../app/models/Cotacao.php';
 require_once __DIR__ . '/../../app/models/StatusCotacao.php';
 require_once __DIR__ . '/../../app/models/Lote.php';
+require_once __DIR__ . '/../../app/models/Item.php';
+require_once __DIR__ . '/../../app/models/Preco.php';
+require_once __DIR__ . '/../../app/models/Parametro.php';
 require_once __DIR__ . '/../../app/models/Servidor.php';
 
 final class CotacaoTest extends DatabaseTestCase
@@ -117,5 +122,38 @@ final class CotacaoTest extends DatabaseTestCase
         $recarregada = Cotacao::buscarPorId($cotacao->id);
 
         $this->assertSame(StatusCotacao::EmAndamento, $recarregada->status);
+    }
+
+    public function testCalcularValorTotalSomaOValorDeReferenciaDeCadaItemPelaQuantidadeEmTodosOsLotes(): void
+    {
+        $servidor = $this->criarServidor();
+        $cotacao = new Cotacao('MTPAR-PRO-2026/00007', '', '', '', '', $servidor->id);
+        $cotacao->salvar();
+
+        // Lote 1, item 1: tres precos proximos (10, 11, 12) - nenhum e outlier,
+        // valor de referencia pela mediana = 11; quantidade 2 => 22.
+        $lote1 = new Lote($cotacao->id, '01');
+        $lote1->salvar();
+        $item1 = new Item($lote1->id, 1, 'Item de teste 1', 'UN', 2);
+        $item1->salvar();
+        foreach ([10, 12, 11] as $valor) {
+            (new Preco($item1->id, $valor))->salvar();
+        }
+
+        // Lote 1, item 2: um unico preco (50), sem comparacao possivel => aprovado
+        // direto; quantidade 1 => 50.
+        $item2 = new Item($lote1->id, 2, 'Item de teste 2', 'UN', 1);
+        $item2->salvar();
+        (new Preco($item2->id, 50))->salvar();
+
+        // Lote 2, item 1: um unico preco (100); quantidade 3 => 300.
+        $lote2 = new Lote($cotacao->id, '02');
+        $lote2->salvar();
+        $item3 = new Item($lote2->id, 1, 'Item de teste 3', 'UN', 3);
+        $item3->salvar();
+        (new Preco($item3->id, 100))->salvar();
+
+        // Total esperado: 22 + 50 + 300 = 372.
+        $this->assertEqualsWithDelta(372.0, $cotacao->calcularValorTotal(), 0.001);
     }
 }

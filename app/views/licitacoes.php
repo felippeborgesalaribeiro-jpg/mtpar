@@ -1,6 +1,13 @@
 <?php
 $titulo = 'Licitações - MT Par';
 require __DIR__ . '/partials/header.php';
+
+$statusLabel = [
+    StatusLicitacao::AguardandoPublicacao->value => ['Aguardando publicação', 'bg-secondary'],
+    StatusLicitacao::Publicada->value => ['Publicada', 'bg-primary'],
+    StatusLicitacao::Homologada->value => ['Homologada', 'bg-info text-dark'],
+    StatusLicitacao::EncaminhadaParaContratacao->value => ['Encaminhada p/ contratação', 'bg-success'],
+];
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -34,9 +41,11 @@ require __DIR__ . '/partials/header.php';
                 <table class="table table-bordered table-hover align-middle mb-0 small">
                     <thead class="table-dark">
                         <tr>
+                            <th>Status</th>
                             <th>Edital</th>
                             <th>Nº Processo</th>
                             <th>Setor Demandante</th>
+                            <th>Servidor Responsável</th>
                             <th>Data Receb.</th>
                             <th>Objeto</th>
                             <th>Sessão Pública</th>
@@ -54,8 +63,11 @@ require __DIR__ . '/partials/header.php';
                             $economicidadeReais = $licitacao->calcularEconomicidadeReais();
                             $economicidadePercentual = $licitacao->calcularEconomicidadePercentual();
                             $diasNaLicitacao = $licitacao->calcularDiasNaLicitacao();
+                            $servidorResponsavel = $licitacao->buscarServidorResponsavel();
+                            [$statusTexto, $statusClasse] = $statusLabel[$licitacao->status()->value];
                             ?>
                             <tr>
+                                <td><span class="badge <?= $statusClasse ?>"><?= $statusTexto ?></span></td>
                                 <td><?= $licitacao->editalLicitacao !== '' ? htmlspecialchars($licitacao->editalLicitacao) : '<span class="text-muted">—</span>' ?></td>
                                 <td>
                                     <?php if ($licitacao->linkSigadoc !== ''): ?>
@@ -68,6 +80,7 @@ require __DIR__ . '/partials/header.php';
                                     <?php endif; ?>
                                 </td>
                                 <td><?= htmlspecialchars($licitacao->setorDemandante) ?></td>
+                                <td><?= $servidorResponsavel !== null ? htmlspecialchars($servidorResponsavel->nome) : '<span class="text-muted">—</span>' ?></td>
                                 <td><?= date('d/m/Y', strtotime($licitacao->dataRecebimento)) ?></td>
                                 <td><?= htmlspecialchars(mb_strimwidth($licitacao->objeto, 0, 40, '...')) ?></td>
                                 <td><?= $licitacao->realizacaoSessaoPublica ? date('d/m/Y', strtotime($licitacao->realizacaoSessaoPublica)) : '—' ?></td>
@@ -112,6 +125,17 @@ require __DIR__ . '/partials/header.php';
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                             </div>
                                             <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Servidor responsável</label>
+                                                    <select name="servidor_responsavel_id" class="form-select">
+                                                        <option value="">— Selecione —</option>
+                                                        <?php foreach ($servidores as $servidor): ?>
+                                                            <option value="<?= $servidor->id ?>" <?= $licitacao->servidorResponsavelId === $servidor->id ? 'selected' : '' ?>>
+                                                                <?= htmlspecialchars($servidor->nome) ?>
+                                                            </option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
                                                 <div class="mb-3">
                                                     <label class="form-label">Edital de licitação</label>
                                                     <input type="text" name="edital_licitacao" class="form-control"

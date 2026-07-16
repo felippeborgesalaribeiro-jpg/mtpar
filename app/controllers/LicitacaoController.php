@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../models/Licitacao.php';
+require_once __DIR__ . '/../models/Servidor.php';
 require_once __DIR__ . '/../helpers/auth.php';
 
 class LicitacaoController
@@ -10,6 +11,7 @@ class LicitacaoController
         exigirLogin();
 
         $licitacoes = Licitacao::buscarTodas();
+        $servidores = Servidor::buscarTodos();
 
         require __DIR__ . '/../views/licitacoes.php';
     }
@@ -26,6 +28,8 @@ class LicitacaoController
             return;
         }
 
+        $servidorResponsavelId = trim($_POST['servidor_responsavel_id'] ?? '');
+        $licitacao->servidorResponsavelId = $servidorResponsavelId !== '' ? (int) $servidorResponsavelId : null;
         $licitacao->editalLicitacao = trim($_POST['edital_licitacao'] ?? '');
         $licitacao->realizacaoSessaoPublica = trim($_POST['realizacao_sessao_publica'] ?? '') ?: null;
         $licitacao->valorEstimado = ($_POST['valor_estimado'] ?? '') !== ''

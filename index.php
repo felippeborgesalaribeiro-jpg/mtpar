@@ -14,6 +14,7 @@ require_once __DIR__ . '/app/controllers/LoteController.php';
 require_once __DIR__ . '/app/controllers/PrecoController.php';
 require_once __DIR__ . '/app/controllers/MapaController.php';
 require_once __DIR__ . '/app/controllers/RelatorioController.php';
+require_once __DIR__ . '/app/controllers/RelatoriosLicitacaoController.php';
 require_once __DIR__ . '/app/controllers/VantajosidadeController.php';
 require_once __DIR__ . '/app/controllers/ParametroController.php';
 require_once __DIR__ . '/app/controllers/ServidorController.php';
@@ -166,6 +167,10 @@ switch ($action) {
     case 'gerar_pesquisa':
     case 'gerar_relatorio_pesquisa':
         (new RelatorioController())->gerarPesquisa();
+        break;
+
+    case 'relatorios_licitacao':
+        (new RelatoriosLicitacaoController())->mostrar();
         break;
 
     case 'vantajosidades':

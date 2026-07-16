@@ -3,6 +3,7 @@
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Demanda.php';
 require_once __DIR__ . '/Servidor.php';
+require_once __DIR__ . '/StatusLicitacao.php';
 
 class Licitacao
 {
@@ -19,6 +20,7 @@ class Licitacao
     public ?float $valorEstimado;
     public ?float $valorAdjudicado;
     public ?string $encaminhadoPactuacaoContrato;
+    public string $criadoEm;
 
     public function __construct(
         int $demandaId,
@@ -33,7 +35,8 @@ class Licitacao
         ?float $valorEstimado = null,
         ?float $valorAdjudicado = null,
         ?string $encaminhadoPactuacaoContrato = null,
-        ?int $id = null
+        ?int $id = null,
+        string $criadoEm = ''
     ) {
         $this->id = $id;
         $this->demandaId = $demandaId;
@@ -48,10 +51,16 @@ class Licitacao
         $this->valorEstimado = $valorEstimado;
         $this->valorAdjudicado = $valorAdjudicado;
         $this->encaminhadoPactuacaoContrato = $encaminhadoPactuacaoContrato;
+        $this->criadoEm = $criadoEm;
     }
 
     public static function criarApartirDeDemanda(Demanda $demanda): Licitacao
     {
+        require_once __DIR__ . '/Cotacao.php';
+
+        $cotacaoVinculada = Cotacao::buscarPorDemandaId($demanda->id);
+        $valorEstimado = $cotacaoVinculada !== null ? $cotacaoVinculada->calcularValorTotal() : null;
+
         $licitacao = new Licitacao(
             $demanda->id,
             $demanda->numeroProcesso,
@@ -59,7 +68,10 @@ class Licitacao
             $demanda->linkSigadoc,
             $demanda->setorDemandante,
             $demanda->objeto,
-            $demanda->servidorResponsavelId
+            $demanda->servidorResponsavelId,
+            '',
+            null,
+            $valorEstimado
         );
         $licitacao->salvar();
 
@@ -83,7 +95,7 @@ class Licitacao
             $this->id = (int) $pdo->lastInsertId();
         } else {
             $stmt = $pdo->prepare(
-                'UPDATE licitacoes SET numero_processo = :numero_processo, link_sigadoc = :link_sigadoc,
+                'UPDATE licitacoes SET demanda_id = :demanda_id, numero_processo = :numero_processo, link_sigadoc = :link_sigadoc,
                  setor_demandante = :setor_demandante, data_recebimento = :data_recebimento, objeto = :objeto,
                  servidor_responsavel_id = :servidor_responsavel_id, edital_licitacao = :edital_licitacao,
                  realizacao_sessao_publica = :realizacao_sessao_publica, valor_estimado = :valor_estimado,
@@ -150,6 +162,27 @@ class Licitacao
     public function foiHomologada(): bool
     {
         return $this->valorAdjudicado !== null;
+    }
+
+    /**
+     * Nao existe coluna de status: e inferido a partir dos campos que ja
+     * marcam o avanco da licitacao (edital, valor adjudicado, encaminhamento).
+     */
+    public function status(): StatusLicitacao
+    {
+        if ($this->encaminhadoPactuacaoContrato !== null) {
+            return StatusLicitacao::EncaminhadaParaContratacao;
+        }
+
+        if ($this->valorAdjudicado !== null) {
+            return StatusLicitacao::Homologada;
+        }
+
+        if ($this->editalLicitacao !== '') {
+            return StatusLicitacao::Publicada;
+        }
+
+        return StatusLicitacao::AguardandoPublicacao;
     }
 
     public function calcularEconomicidadeReais(): ?float
@@ -252,7 +285,8 @@ class Licitacao
             $linha['valor_estimado'] !== null ? (float) $linha['valor_estimado'] : null,
             $linha['valor_adjudicado'] !== null ? (float) $linha['valor_adjudicado'] : null,
             $linha['encaminhado_pactuacao_contrato'],
-            (int) $linha['id']
+            (int) $linha['id'],
+            $linha['criado_em'] ?? ''
         );
     }
 }

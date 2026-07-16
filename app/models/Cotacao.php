@@ -146,6 +146,26 @@ class Cotacao
         return $total;
     }
 
+    /**
+     * Mesmo calculo usado no mapa comparativo: soma, por lote, o valor de
+     * referencia de cada item (segundo o criterio de consolidacao da cotacao)
+     * multiplicado pela quantidade.
+     */
+    public function calcularValorTotal(): float
+    {
+        $valorTotal = 0.0;
+
+        foreach ($this->buscarLotes() as $lote) {
+            foreach ($lote->buscarItens() as $item) {
+                $resultado = $item->analisar($this->criterioConsolidacao);
+                $valorReferencia = $resultado['valor_referencia'] ?? 0;
+                $valorTotal += $valorReferencia * $item->quantidade;
+            }
+        }
+
+        return $valorTotal;
+    }
+
     public static function buscarPorId(int $id): ?Cotacao
     {
         $pdo = Database::getConnection();

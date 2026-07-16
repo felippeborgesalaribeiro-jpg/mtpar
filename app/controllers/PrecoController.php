@@ -29,6 +29,11 @@ class PrecoController
 
         $lote = Lote::buscarPorId($item->loteId);
 
+        if ($lote === null) {
+            echo 'Lote não encontrado.';
+            return;
+        }
+
         header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId);
         exit;
     }
@@ -55,7 +60,12 @@ class PrecoController
         $preco->salvar();
 
         $item = Item::buscarPorId($preco->itemId);
-        $lote = Lote::buscarPorId($item->loteId);
+        $lote = $item !== null ? Lote::buscarPorId($item->loteId) : null;
+
+        if ($lote === null) {
+            echo 'Lote não encontrado.';
+            return;
+        }
 
         header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId);
         exit;
@@ -75,7 +85,12 @@ class PrecoController
         }
 
         $item = Item::buscarPorId($preco->itemId);
-        $lote = Lote::buscarPorId($item->loteId);
+        $lote = $item !== null ? Lote::buscarPorId($item->loteId) : null;
+
+        if ($lote === null) {
+            echo 'Lote não encontrado.';
+            return;
+        }
 
         $preco->excluir();
 

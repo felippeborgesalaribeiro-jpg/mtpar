@@ -27,7 +27,7 @@ class AdminController
     /* ------------------------------------------------------------------ */
     public function index(): void
     {
-        $this->requireAdmin();
+        exigirAdmin();
 
         $backups      = $this->listarBackups();
         $dbSize       = file_exists($this->dbPath) ? $this->formatarTamanho(filesize($this->dbPath)) : '—';
@@ -50,7 +50,7 @@ class AdminController
     /* ------------------------------------------------------------------ */
     public function lixeira(): void
     {
-        $this->requireAdmin();
+        exigirAdmin();
 
         require_once __DIR__ . '/../models/Demanda.php';
         require_once __DIR__ . '/../models/Cotacao.php';
@@ -68,7 +68,7 @@ class AdminController
     /* ------------------------------------------------------------------ */
     public function restaurarDemanda(): void
     {
-        $this->requireAdmin();
+        exigirAdmin();
 
         $id = (int) ($_POST['id'] ?? 0);
 
@@ -88,7 +88,7 @@ class AdminController
 
     public function restaurarCotacao(): void
     {
-        $this->requireAdmin();
+        exigirAdmin();
 
         $id = (int) ($_POST['id'] ?? 0);
 
@@ -108,7 +108,7 @@ class AdminController
 
     public function restaurarVantajosidade(): void
     {
-        $this->requireAdmin();
+        exigirAdmin();
 
         $id = (int) ($_POST['id'] ?? 0);
 
@@ -131,7 +131,7 @@ class AdminController
     /* ------------------------------------------------------------------ */
     public function excluirDefinitivamenteDemanda(): void
     {
-        $this->requireAdmin();
+        exigirAdmin();
 
         $id = (int) ($_POST['id'] ?? 0);
 
@@ -151,7 +151,7 @@ class AdminController
 
     public function excluirDefinitivamenteCotacao(): void
     {
-        $this->requireAdmin();
+        exigirAdmin();
 
         $id = (int) ($_POST['id'] ?? 0);
 
@@ -171,7 +171,7 @@ class AdminController
 
     public function excluirDefinitivamenteVantajosidade(): void
     {
-        $this->requireAdmin();
+        exigirAdmin();
 
         $id = (int) ($_POST['id'] ?? 0);
 
@@ -194,7 +194,7 @@ class AdminController
     /* ------------------------------------------------------------------ */
     public function criarBackup(): void
     {
-        $this->requireAdmin();
+        exigirAdmin();
 
         if (!file_exists($this->dbPath)) {
             $_SESSION['erro'] = 'Arquivo do banco de dados não encontrado.';
@@ -218,7 +218,7 @@ class AdminController
 
     public function excluirBackup(): void
     {
-        $this->requireAdmin();
+        exigirAdmin();
 
         $arquivo = basename($_POST['arquivo'] ?? '');
 
@@ -292,13 +292,4 @@ class AdminController
         return date('d/m/Y \à\s H:i', $mtime);
     }
 
-    private function requireAdmin(): void
-    {
-        $servidor = usuarioLogado();
-
-        if ($servidor === null || !$servidor->ehAdmin()) {
-            header('Location: index.php?action=login');
-            exit;
-        }
-    }
 }

@@ -20,7 +20,7 @@ $coresStatus = [
 ?>
 
 <div class="row g-3 mb-4">
-    <div class="col">
+    <div class="col-6 col-md">
         <div class="card shadow-sm h-100" style="border-left: 4px solid #1F3864;">
             <div class="card-body py-3">
                 <p class="text-muted small mb-1">Processos em andamento</p>
@@ -28,7 +28,7 @@ $coresStatus = [
             </div>
         </div>
     </div>
-    <div class="col">
+    <div class="col-6 col-md">
         <div class="card shadow-sm h-100" style="border-left: 4px solid #1F3864;">
             <div class="card-body py-3">
                 <p class="text-muted small mb-1">Cotações em andamento</p>
@@ -36,7 +36,7 @@ $coresStatus = [
             </div>
         </div>
     </div>
-    <div class="col">
+    <div class="col-6 col-md">
         <div class="card shadow-sm h-100" style="border-left: 4px solid #1F3864;">
             <div class="card-body py-3">
                 <p class="text-muted small mb-1">Licitações publicadas</p>
@@ -44,7 +44,7 @@ $coresStatus = [
             </div>
         </div>
     </div>
-    <div class="col">
+    <div class="col-6 col-md">
         <div class="card shadow-sm h-100" style="border-left: 4px solid #1F3864;">
             <div class="card-body py-3">
                 <p class="text-muted small mb-1">Licitações homologadas</p>
@@ -52,7 +52,7 @@ $coresStatus = [
             </div>
         </div>
     </div>
-    <div class="col">
+    <div class="col-6 col-md">
         <div class="card shadow-sm h-100" style="background-color: #1F3864; border-left: 4px solid #FFC107;">
             <div class="card-body py-3">
                 <p class="small mb-1" style="color: rgba(255,255,255,0.75);">Valor homologado</p>

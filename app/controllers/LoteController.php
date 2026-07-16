@@ -92,6 +92,11 @@ class LoteController
 
         $lote = Lote::buscarPorId($item->loteId);
 
+        if ($lote === null) {
+            echo 'Lote não encontrado.';
+            return;
+        }
+
         header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId);
         exit;
     }
@@ -110,6 +115,12 @@ class LoteController
         }
 
         $lote = Lote::buscarPorId($item->loteId);
+
+        if ($lote === null) {
+            echo 'Lote não encontrado.';
+            return;
+        }
+
         $item->excluir();
 
         header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId);

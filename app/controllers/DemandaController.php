@@ -14,7 +14,6 @@ class DemandaController
         exigirLogin();
 
         $demandas = Demanda::buscarTodas();
-        $servidores = Servidor::buscarTodos();
 
         require __DIR__ . '/../views/demandas.php';
     }
@@ -61,44 +60,7 @@ class DemandaController
         $demanda = new Demanda($numeroProcesso, $dataRecebimento, $linkSigadoc, $setorDemandante, $objeto, $servidorResponsavelId, $status);
         $demanda->salvar();
 
-        header('Location: index.php?action=demandas');
-        exit;
-    }
-
-    public function editar(): void
-    {
-        exigirLogin();
-
-        $id = (int) ($_POST['demanda_id'] ?? 0);
-        $demanda = Demanda::buscarPorId($id);
-
-        if ($demanda === null) {
-            echo 'Demanda não encontrada.';
-            return;
-        }
-
-        $statusAnterior = $demanda->status;
-
-        $demanda->numeroProcesso = trim($_POST['numero_processo'] ?? '');
-        $demanda->linkSigadoc = trim($_POST['link_sigadoc'] ?? '');
-        $demanda->setorDemandante = trim($_POST['setor_demandante'] ?? '');
-        $demanda->dataRecebimento = trim($_POST['data_recebimento'] ?? '');
-        $demanda->objeto = trim($_POST['objeto'] ?? '');
-        $demanda->servidorResponsavelId = (int) ($_POST['servidor_responsavel_id'] ?? 0) ?: null;
-        $demanda->status = $_POST['status'] ?? Demanda::STATUS_EM_ANDAMENTO;
-
-        $demanda->salvar();
-
-        $mudouParaConcluido = $statusAnterior !== Demanda::STATUS_CONCLUIDO && $demanda->status === Demanda::STATUS_CONCLUIDO;
-
-        if ($mudouParaConcluido) {
-            $licitacaoExistente = Licitacao::buscarPorDemandaId($demanda->id);
-            if ($licitacaoExistente === null) {
-                Licitacao::criarApartirDeDemanda($demanda);
-            }
-        }
-
-        header('Location: index.php?action=demandas');
+        header('Location: index.php?action=ver_demanda&id=' . $demanda->id);
         exit;
     }
 

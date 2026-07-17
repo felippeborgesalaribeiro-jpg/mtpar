@@ -19,6 +19,17 @@ $coresStatus = [
 ];
 ?>
 
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="section-title">
+        <i class="ti ti-layout-dashboard" aria-hidden="true" style="font-size: 20px; vertical-align: -3px;"></i>
+        Dashboard
+    </span>
+    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalCadastrarProcesso">
+        <i class="ti ti-plus" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+        Cadastrar Processo
+    </button>
+</div>
+
 <div class="row g-3 mb-4">
     <div class="col-6 col-md">
         <div class="card shadow-sm h-100" style="border-left: 4px solid var(--brand-blue);">
@@ -196,6 +207,77 @@ $coresStatus = [
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal cadastrar processo -->
+<div class="modal fade" id="modalCadastrarProcesso" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="index.php?action=criar_demanda">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="ti ti-folder-plus" aria-hidden="true" style="font-size: 18px; vertical-align: -2px;"></i>
+                        Cadastrar Processo
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">
+                        Cadastro inicial de um processo entrando no setor. Depois de salvo, você é levado direto
+                        para a tela do processo, onde vai acompanhar tudo daqui pra frente.
+                    </p>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nº processo</label>
+                            <input type="text" name="numero_processo" class="form-control"
+                                   placeholder="MTPAR-PRO-2026/00001" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Data de recebimento</label>
+                            <input type="date" name="data_recebimento" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Setor demandante</label>
+                            <input type="text" name="setor_demandante" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                <?php foreach (Demanda::STATUS_OPCOES as $opcao): ?>
+                                    <option value="<?= $opcao ?>"><?= htmlspecialchars($opcao) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Responsável</label>
+                            <select name="servidor_responsavel_id" class="form-select">
+                                <option value="">— Sem responsável —</option>
+                                <?php foreach ($servidores as $servidor): ?>
+                                    <option value="<?= $servidor->id ?>"><?= htmlspecialchars($servidor->nome) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Link SIGADOC</label>
+                            <input type="text" name="link_sigadoc" class="form-control"
+                                   placeholder="https://sigadoc.mt.gov.br/...">
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label">Objeto</label>
+                        <textarea name="objeto" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

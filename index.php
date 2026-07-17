@@ -67,10 +67,6 @@ switch ($action) {
         (new DemandaController())->criar();
         break;
 
-    case 'editar_demanda':
-        (new DemandaController())->editar();
-        break;
-
     case 'editar_demanda_inline':
         (new DemandaController())->editarInline();
         break;

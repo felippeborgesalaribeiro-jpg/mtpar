@@ -9,6 +9,15 @@ roda PHP 8.4 — não assuma que a versão local é a versão de produção. `co
 isso via `"require": {"php": ">=8.2"}` e `"config.platform.php": "8.2.12"`; não remova essa
 trava, ela existe porque já causou um incidente em produção (ver "Composer" abaixo).
 
+**A extensão `zip` do PHP precisa estar ativada em cada instalação do XAMPP** (já faltou
+tanto em teste quanto em produção, mesmo erro nas duas: `Class "ZipArchive" not found`).
+Sem ela, o PhpWord não consegue montar nenhum `.docx` (análise crítica, relatório de
+pesquisa, termo de adjudicação, comparação de proposta) — quebra com "Fatal error" na hora
+de gerar qualquer um desses documentos. Isso não é bug do código, é configuração do PHP:
+em `C:\xampp\php\php.ini`, tirar o `;` da linha `;extension=zip` (virar `extension=zip`)
+e reiniciar o Apache pelo XAMPP Control Panel. Cada computador/instalação tem seu próprio
+`php.ini`, então isso pode precisar ser refeito em qualquer XAMPP novo.
+
 ## Fluxo de branches — leia antes de commitar ou dar push
 
 Este projeto está **em uso real** por pessoas do setor (não é só um repositório de testes).

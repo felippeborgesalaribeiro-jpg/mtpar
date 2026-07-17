@@ -91,6 +91,10 @@ switch ($action) {
         (new LicitacaoController())->excluir();
         break;
 
+    case 'finalizar_licitacao':
+        (new LicitacaoController())->finalizar();
+        break;
+
     case 'orcamentos':
         (new OrcamentoController())->listar();
         break;
@@ -193,6 +197,10 @@ switch ($action) {
 
     case 'gerar_documento_proposta_vencedora':
         (new PropostaVencedoraController())->gerarDocumento();
+        break;
+
+    case 'gerar_termo_adjudicacao':
+        (new PropostaVencedoraController())->gerarTermoAdjudicacao();
         break;
 
     case 'vantajosidades':

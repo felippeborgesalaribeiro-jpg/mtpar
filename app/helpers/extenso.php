@@ -1,5 +1,25 @@
 <?php
 
+/**
+ * Formata uma data (Y-m-d) por extenso, no padrão usado em documentos
+ * oficiais: "14 de julho de 2026".
+ */
+function dataPorExtenso(string $dataYmd): string
+{
+    $meses = [
+        1 => 'janeiro', 2 => 'fevereiro', 3 => 'março', 4 => 'abril',
+        5 => 'maio', 6 => 'junho', 7 => 'julho', 8 => 'agosto',
+        9 => 'setembro', 10 => 'outubro', 11 => 'novembro', 12 => 'dezembro',
+    ];
+
+    $timestamp = strtotime($dataYmd);
+    $dia = (int) date('j', $timestamp);
+    $mes = (int) date('n', $timestamp);
+    $ano = date('Y', $timestamp);
+
+    return $dia . ' de ' . $meses[$mes] . ' de ' . $ano;
+}
+
 function numeroParaExtenso(float $valor): string
 {
     $valor = round($valor, 2);

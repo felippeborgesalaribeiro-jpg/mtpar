@@ -17,7 +17,8 @@ class GeradorComparacaoProposta
 {
     private Licitacao $licitacao;
     private Cotacao $cotacao;
-    private Empresa $empresaVencedora;
+    /** @var array<int, Empresa> empresa vencedora de cada lote, indexado por lote_id */
+    private array $empresasPorLote;
     private ?Servidor $conferidoPor;
     private PhpWord $documento;
     private float $totalEstimadoGeral = 0.0;
@@ -27,15 +28,20 @@ class GeradorComparacaoProposta
     const FONTE_PADRAO = 'Calibri';
     const TAMANHO_PADRAO = 11;
 
+    /**
+     * @param array<int, Empresa> $empresasPorLote empresa vencedora de cada
+     * lote (indexado por lote_id) - lotes ainda sem empresa definida podem
+     * ficar de fora do array.
+     */
     public function __construct(
         Licitacao $licitacao,
         Cotacao $cotacao,
-        Empresa $empresaVencedora,
+        array $empresasPorLote,
         ?Servidor $conferidoPor = null
     ) {
         $this->licitacao = $licitacao;
         $this->cotacao = $cotacao;
-        $this->empresaVencedora = $empresaVencedora;
+        $this->empresasPorLote = $empresasPorLote;
         $this->conferidoPor = $conferidoPor;
 
         $this->documento = new PhpWord();
@@ -79,21 +85,14 @@ class GeradorComparacaoProposta
 
         $linhaProcesso = $secao->addTextRun(['alignment' => Jc::CENTER]);
         $linhaProcesso->addText('Processo: ', ['bold' => true]);
-        $linhaProcesso->addText(htmlspecialchars($this->licitacao->numeroProcesso));
-
-        $linhaEmpresa = $secao->addTextRun(['alignment' => Jc::CENTER, 'spaceBefore' => 100]);
-        $linhaEmpresa->addText('Empresa vencedora: ', ['bold' => true]);
-        $linhaEmpresa->addText(htmlspecialchars($this->empresaVencedora->nome));
-
-        $linhaCnpj = $secao->addTextRun(['alignment' => Jc::CENTER, 'spaceBefore' => 100]);
-        $linhaCnpj->addText('CNPJ: ', ['bold' => true]);
-        $linhaCnpj->addText($this->formatarCnpj($this->empresaVencedora->cnpj));
+        $linhaProcesso->addText($this->licitacao->numeroProcesso);
 
         $secao->addTextBreak(2);
         $secao->addText(
-            'Conferência item a item e lote a lote da proposta apresentada pela empresa vencedora do certame, em '
-            . 'comparação com o preço de referência apurado no mapa comparativo da pesquisa de preços vinculada a '
-            . 'este processo (Processo ' . htmlspecialchars($this->cotacao->numeroProcesso) . ').',
+            'Conferência item a item e lote a lote da proposta apresentada pela(s) empresa(s) vencedora(s) do '
+            . 'certame, em comparação com o preço de referência apurado no mapa comparativo da pesquisa de '
+            . 'preços vinculada a este processo (Processo ' . $this->cotacao->numeroProcesso . '). '
+            . 'A empresa vencedora de cada lote é indicada na respectiva tabela.',
             [],
             ['alignment' => Jc::BOTH, 'spaceBefore' => 200]
         );
@@ -118,7 +117,19 @@ class GeradorComparacaoProposta
         $fonteCabecalho = ['bold' => true, 'size' => 8];
         $fonteCelula = ['size' => 8];
 
-        $secao->addText('LOTE ' . htmlspecialchars($lote->numero), ['bold' => true, 'size' => 10], ['spaceBefore' => 200, 'spaceAfter' => 150]);
+        $secao->addText('LOTE ' . $lote->numero, ['bold' => true, 'size' => 10], ['spaceBefore' => 200, 'spaceAfter' => 100]);
+
+        $empresaDoLote = $this->empresasPorLote[$lote->id] ?? null;
+        $linhaEmpresa = $secao->addTextRun(['spaceAfter' => 150]);
+        $linhaEmpresa->addText('Empresa vencedora: ', ['bold' => true, 'size' => 9]);
+        if ($empresaDoLote !== null) {
+            $linhaEmpresa->addText(
+                $empresaDoLote->nome . ' - CNPJ ' . $this->formatarCnpj($empresaDoLote->cnpj),
+                ['size' => 9]
+            );
+        } else {
+            $linhaEmpresa->addText('— ainda não definida —', ['italic' => true, 'size' => 9]);
+        }
 
         $tabela = $secao->addTable($estiloTabela);
         $tabela->addRow();
@@ -153,8 +164,8 @@ class GeradorComparacaoProposta
 
             $tabela->addRow();
             $tabela->addCell(600)->addText((string) $item->numero, $fonteCelula, ['alignment' => Jc::CENTER]);
-            $tabela->addCell(3200)->addText(htmlspecialchars($item->descricao), $fonteCelula);
-            $tabela->addCell(900)->addText(formatarNumero($item->quantidade) . ' ' . htmlspecialchars($item->unidade), $fonteCelula, ['alignment' => Jc::CENTER]);
+            $tabela->addCell(3200)->addText($item->descricao, $fonteCelula);
+            $tabela->addCell(900)->addText(formatarNumero($item->quantidade) . ' ' . $item->unidade, $fonteCelula, ['alignment' => Jc::CENTER]);
             $tabela->addCell(1600)->addText(formatarMoeda($valorReferencia), $fonteCelula, ['alignment' => Jc::CENTER]);
             $tabela->addCell(1600)->addText($textoProposto, $fonteCelula, ['alignment' => Jc::CENTER]);
             $tabela->addCell(1700)->addText($situacao, $fonteCelula, ['alignment' => Jc::CENTER]);
@@ -223,7 +234,7 @@ class GeradorComparacaoProposta
         $secao = $this->documento->addSection();
         $secao->addText('OBSERVAÇÕES', ['bold' => true, 'size' => 12], ['spaceAfter' => 300]);
         $secao->addText(
-            htmlspecialchars($this->licitacao->observacoesPropostaVencedora),
+            $this->licitacao->observacoesPropostaVencedora,
             [],
             ['alignment' => Jc::BOTH]
         );

@@ -4,7 +4,6 @@ require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Demanda.php';
 require_once __DIR__ . '/Servidor.php';
 require_once __DIR__ . '/StatusLicitacao.php';
-require_once __DIR__ . '/Empresa.php';
 
 class Licitacao
 {
@@ -22,8 +21,8 @@ class Licitacao
     public ?float $valorAdjudicado;
     public ?string $encaminhadoPactuacaoContrato;
     public string $criadoEm;
-    public ?int $empresaVencedoraId;
     public string $observacoesPropostaVencedora;
+    public ?string $dataAdjudicacaoHomologacao;
 
     public function __construct(
         int $demandaId,
@@ -40,8 +39,8 @@ class Licitacao
         ?string $encaminhadoPactuacaoContrato = null,
         ?int $id = null,
         string $criadoEm = '',
-        ?int $empresaVencedoraId = null,
-        string $observacoesPropostaVencedora = ''
+        string $observacoesPropostaVencedora = '',
+        ?string $dataAdjudicacaoHomologacao = null
     ) {
         $this->id = $id;
         $this->demandaId = $demandaId;
@@ -57,8 +56,8 @@ class Licitacao
         $this->valorAdjudicado = $valorAdjudicado;
         $this->encaminhadoPactuacaoContrato = $encaminhadoPactuacaoContrato;
         $this->criadoEm = $criadoEm;
-        $this->empresaVencedoraId = $empresaVencedoraId;
         $this->observacoesPropostaVencedora = $observacoesPropostaVencedora;
+        $this->dataAdjudicacaoHomologacao = $dataAdjudicacaoHomologacao;
     }
 
     public static function criarApartirDeDemanda(Demanda $demanda): Licitacao
@@ -93,10 +92,10 @@ class Licitacao
             $stmt = $pdo->prepare(
                 'INSERT INTO licitacoes (demanda_id, numero_processo, link_sigadoc, setor_demandante, data_recebimento,
                  objeto, servidor_responsavel_id, edital_licitacao, realizacao_sessao_publica, valor_estimado,
-                 valor_adjudicado, encaminhado_pactuacao_contrato, empresa_vencedora_id, observacoes_proposta_vencedora)
+                 valor_adjudicado, encaminhado_pactuacao_contrato, observacoes_proposta_vencedora, data_adjudicacao_homologacao)
                  VALUES (:demanda_id, :numero_processo, :link_sigadoc, :setor_demandante, :data_recebimento,
                  :objeto, :servidor_responsavel_id, :edital_licitacao, :realizacao_sessao_publica, :valor_estimado,
-                 :valor_adjudicado, :encaminhado_pactuacao_contrato, :empresa_vencedora_id, :observacoes_proposta_vencedora)'
+                 :valor_adjudicado, :encaminhado_pactuacao_contrato, :observacoes_proposta_vencedora, :data_adjudicacao_homologacao)'
             );
             $stmt->execute($this->paramsParaSalvar());
             $this->id = (int) $pdo->lastInsertId();
@@ -107,7 +106,8 @@ class Licitacao
                  servidor_responsavel_id = :servidor_responsavel_id, edital_licitacao = :edital_licitacao,
                  realizacao_sessao_publica = :realizacao_sessao_publica, valor_estimado = :valor_estimado,
                  valor_adjudicado = :valor_adjudicado, encaminhado_pactuacao_contrato = :encaminhado_pactuacao_contrato,
-                 empresa_vencedora_id = :empresa_vencedora_id, observacoes_proposta_vencedora = :observacoes_proposta_vencedora
+                 observacoes_proposta_vencedora = :observacoes_proposta_vencedora,
+                 data_adjudicacao_homologacao = :data_adjudicacao_homologacao
                  WHERE id = :id'
             );
             $stmt->execute(array_merge($this->paramsParaSalvar(), ['id' => $this->id]));
@@ -131,8 +131,8 @@ class Licitacao
             'valor_estimado' => $this->valorEstimado,
             'valor_adjudicado' => $this->valorAdjudicado,
             'encaminhado_pactuacao_contrato' => $this->encaminhadoPactuacaoContrato,
-            'empresa_vencedora_id' => $this->empresaVencedoraId,
             'observacoes_proposta_vencedora' => $this->observacoesPropostaVencedora,
+            'data_adjudicacao_homologacao' => $this->dataAdjudicacaoHomologacao,
         ];
     }
 
@@ -152,13 +152,9 @@ class Licitacao
         return Servidor::buscarPorId($this->servidorResponsavelId);
     }
 
-    public function buscarEmpresaVencedora(): ?Empresa
+    public function estaFinalizada(): bool
     {
-        if ($this->empresaVencedoraId === null) {
-            return null;
-        }
-
-        return Empresa::buscarPorId($this->empresaVencedoraId);
+        return $this->dataAdjudicacaoHomologacao !== null;
     }
 
     public function calcularDiasNaLicitacao(): int
@@ -185,7 +181,10 @@ class Licitacao
 
     /**
      * Nao existe coluna de status: e inferido a partir dos campos que ja
-     * marcam o avanco da licitacao (edital, valor adjudicado, encaminhamento).
+     * marcam o avanco da licitacao (edital, data de adjudicacao/homologacao,
+     * encaminhamento). "Homologada" exige o ato formal de finalizar o
+     * processo (estaFinalizada()) - so ter um valor_adjudicado digitado
+     * nao basta, porque pode ser so um rascunho.
      */
     public function status(): StatusLicitacao
     {
@@ -193,7 +192,7 @@ class Licitacao
             return StatusLicitacao::EncaminhadaParaContratacao;
         }
 
-        if ($this->valorAdjudicado !== null) {
+        if ($this->estaFinalizada()) {
             return StatusLicitacao::Homologada;
         }
 
@@ -306,8 +305,8 @@ class Licitacao
             $linha['encaminhado_pactuacao_contrato'],
             (int) $linha['id'],
             $linha['criado_em'] ?? '',
-            $linha['empresa_vencedora_id'] !== null ? (int) $linha['empresa_vencedora_id'] : null,
-            $linha['observacoes_proposta_vencedora'] ?? ''
+            $linha['observacoes_proposta_vencedora'] ?? '',
+            $linha['data_adjudicacao_homologacao'] ?? null
         );
     }
 }

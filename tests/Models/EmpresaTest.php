@@ -2,15 +2,25 @@
 
 namespace Tests\Models;
 
+use Cotacao;
 use Empresa;
 use Licitacao;
+use LotePropostaVencedora;
+use Lote;
 use Demanda;
+use Servidor;
 use Tests\DatabaseTestCase;
 
 require_once __DIR__ . '/../../app/models/Empresa.php';
 require_once __DIR__ . '/../../app/models/Demanda.php';
 require_once __DIR__ . '/../../app/models/StatusLicitacao.php';
 require_once __DIR__ . '/../../app/models/Licitacao.php';
+require_once __DIR__ . '/../../app/models/AnalisePrecos.php';
+require_once __DIR__ . '/../../app/models/Cotacao.php';
+require_once __DIR__ . '/../../app/models/StatusCotacao.php';
+require_once __DIR__ . '/../../app/models/Lote.php';
+require_once __DIR__ . '/../../app/models/Servidor.php';
+require_once __DIR__ . '/../../app/models/LotePropostaVencedora.php';
 
 final class EmpresaTest extends DatabaseTestCase
 {
@@ -51,24 +61,42 @@ final class EmpresaTest extends DatabaseTestCase
         $this->assertSame([], Empresa::buscar('   '));
     }
 
-    public function testContarLicitacoesHomologadasSoContaAsComValorAdjudicado(): void
+    /**
+     * Cria uma Licitacao com um lote (via Cotacao vinculada) pra poder
+     * registrar uma empresa vencedora naquele lote.
+     */
+    private function criarLicitacaoComLote(string $numeroProcesso): array
+    {
+        $servidor = new Servidor('Servidor de Teste');
+        $servidor->salvar();
+
+        $demanda = new Demanda($numeroProcesso, '2026-01-01');
+        $demanda->salvar();
+
+        $cotacao = new Cotacao($numeroProcesso, '', '', '', '', $servidor->id, demandaId: $demanda->id);
+        $cotacao->salvar();
+
+        $lote = new Lote($cotacao->id, '01');
+        $lote->salvar();
+
+        $licitacao = Licitacao::criarApartirDeDemanda($demanda);
+
+        return [$licitacao, $lote];
+    }
+
+    public function testContarLicitacoesHomologadasSoContaLicitacoesFinalizadas(): void
     {
         $empresa = new Empresa('Instaladora Pantanal Ltda.', '33222111000177');
         $empresa->salvar();
 
-        $demanda1 = new Demanda('MTPAR-PRO-2026/00001', '2026-01-01');
-        $demanda1->salvar();
-        $licitacao1 = Licitacao::criarApartirDeDemanda($demanda1);
-        $licitacao1->empresaVencedoraId = $empresa->id;
-        $licitacao1->valorAdjudicado = 1000.0;
+        [$licitacao1, $lote1] = $this->criarLicitacaoComLote('MTPAR-PRO-2026/00001');
+        (new LotePropostaVencedora($licitacao1->id, $lote1->id, $empresa->id))->salvar();
+        $licitacao1->dataAdjudicacaoHomologacao = '2026-01-20';
         $licitacao1->salvar();
 
-        $demanda2 = new Demanda('MTPAR-PRO-2026/00002', '2026-01-02');
-        $demanda2->salvar();
-        $licitacao2 = Licitacao::criarApartirDeDemanda($demanda2);
-        $licitacao2->empresaVencedoraId = $empresa->id;
-        // Sem valor_adjudicado - ainda nao homologada, nao deve contar.
-        $licitacao2->salvar();
+        [$licitacao2, $lote2] = $this->criarLicitacaoComLote('MTPAR-PRO-2026/00002');
+        (new LotePropostaVencedora($licitacao2->id, $lote2->id, $empresa->id))->salvar();
+        // Ainda nao finalizada (sem data_adjudicacao_homologacao) - nao deve contar.
 
         $this->assertSame(1, $empresa->contarLicitacoesHomologadas());
     }

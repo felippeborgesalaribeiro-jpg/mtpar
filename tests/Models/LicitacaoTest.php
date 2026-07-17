@@ -4,7 +4,6 @@ namespace Tests\Models;
 
 use Cotacao;
 use Demanda;
-use Empresa;
 use Item;
 use Licitacao;
 use Lote;
@@ -19,7 +18,6 @@ require_once __DIR__ . '/../../app/models/StatusCotacao.php';
 require_once __DIR__ . '/../../app/models/Demanda.php';
 require_once __DIR__ . '/../../app/models/Licitacao.php';
 require_once __DIR__ . '/../../app/models/StatusLicitacao.php';
-require_once __DIR__ . '/../../app/models/Empresa.php';
 require_once __DIR__ . '/../../app/models/Lote.php';
 require_once __DIR__ . '/../../app/models/Item.php';
 require_once __DIR__ . '/../../app/models/Preco.php';
@@ -94,7 +92,12 @@ final class LicitacaoTest extends DatabaseTestCase
         $licitacao->editalLicitacao = 'Edital 001/2026';
         $this->assertSame(StatusLicitacao::Publicada, $licitacao->status());
 
+        // Ter so o valor_adjudicado digitado nao basta - "Homologada" exige
+        // o ato formal de finalizar o processo (data_adjudicacao_homologacao).
         $licitacao->valorAdjudicado = 1000.0;
+        $this->assertSame(StatusLicitacao::Publicada, $licitacao->status());
+
+        $licitacao->dataAdjudicacaoHomologacao = '2026-01-20';
         $this->assertSame(StatusLicitacao::Homologada, $licitacao->status());
 
         $licitacao->encaminhadoPactuacaoContrato = '2026-02-01';
@@ -129,32 +132,30 @@ final class LicitacaoTest extends DatabaseTestCase
         $this->assertNotSame('', $recarregada->criadoEm);
     }
 
-    public function testEmpresaVencedoraEObservacoesPersistemERecarregam(): void
+    public function testObservacoesPropostaVencedoraPersisteERecarrega(): void
     {
         $demanda = $this->criarDemanda();
         $licitacao = Licitacao::criarApartirDeDemanda($demanda);
 
-        $empresa = new Empresa('Climatiza Engenharia e Instalações Ltda.', '12345678000190');
-        $empresa->salvar();
-
-        $licitacao->empresaVencedoraId = $empresa->id;
         $licitacao->observacoesPropostaVencedora = 'Item 2 negociado com desconto adicional.';
         $licitacao->salvar();
 
         $recarregada = Licitacao::buscarPorId($licitacao->id);
-        $this->assertSame($empresa->id, $recarregada->empresaVencedoraId);
         $this->assertSame('Item 2 negociado com desconto adicional.', $recarregada->observacoesPropostaVencedora);
-
-        $empresaVencedora = $recarregada->buscarEmpresaVencedora();
-        $this->assertNotNull($empresaVencedora);
-        $this->assertSame('Climatiza Engenharia e Instalações Ltda.', $empresaVencedora->nome);
     }
 
-    public function testBuscarEmpresaVencedoraRetornaNullQuandoNaoDefinida(): void
+    public function testEstaFinalizadaSoEhVerdadeiroComDataAdjudicacaoHomologacaoDefinida(): void
     {
         $demanda = $this->criarDemanda();
         $licitacao = Licitacao::criarApartirDeDemanda($demanda);
 
-        $this->assertNull($licitacao->buscarEmpresaVencedora());
+        $this->assertFalse($licitacao->estaFinalizada());
+
+        $licitacao->dataAdjudicacaoHomologacao = '2026-01-20';
+        $licitacao->salvar();
+
+        $recarregada = Licitacao::buscarPorId($licitacao->id);
+        $this->assertTrue($recarregada->estaFinalizada());
+        $this->assertSame('2026-01-20', $recarregada->dataAdjudicacaoHomologacao);
     }
 }

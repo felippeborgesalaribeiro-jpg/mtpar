@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS licitacoes (
     encaminhado_pactuacao_contrato TEXT,
     empresa_vencedora_id INTEGER,
     observacoes_proposta_vencedora TEXT NOT NULL DEFAULT '',
+    data_adjudicacao_homologacao TEXT,
     criado_em TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (demanda_id) REFERENCES demandas(id) ON DELETE CASCADE,
     FOREIGN KEY (servidor_responsavel_id) REFERENCES servidores(id),
@@ -94,6 +95,18 @@ CREATE TABLE IF NOT EXISTS lotes (
     numero TEXT NOT NULL,
     criado_em TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (cotacao_id) REFERENCES cotacoes(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS lotes_proposta_vencedora (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    licitacao_id INTEGER NOT NULL,
+    lote_id INTEGER NOT NULL,
+    empresa_vencedora_id INTEGER NOT NULL,
+    criado_em TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (licitacao_id) REFERENCES licitacoes(id) ON DELETE CASCADE,
+    FOREIGN KEY (lote_id) REFERENCES lotes(id) ON DELETE CASCADE,
+    FOREIGN KEY (empresa_vencedora_id) REFERENCES empresas(id),
+    UNIQUE (licitacao_id, lote_id)
 );
 
 CREATE TABLE IF NOT EXISTS itens (

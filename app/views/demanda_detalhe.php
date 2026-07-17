@@ -236,13 +236,54 @@ $modoEdicao = ($modo === 'editar');
                 Para editar os dados da licitação, acesse o módulo
                 <a href="index.php?action=licitacoes">Licitações</a>.
             </small>
-            <a href="index.php?action=proposta_vencedora&id=<?= $licitacao->id ?>" class="btn btn-sm btn-outline-primary">
-                <i class="ti ti-clipboard-check" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
-                Conferir proposta vencedora
-            </a>
+            <div class="d-flex gap-2">
+                <a href="index.php?action=proposta_vencedora&id=<?= $licitacao->id ?>" class="btn btn-sm btn-outline-primary">
+                    <i class="ti ti-clipboard-check" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+                    Conferir proposta vencedora
+                </a>
+                <?php if ($licitacao->estaFinalizada()): ?>
+                    <span class="badge bg-success-subtle text-success d-flex align-items-center px-2">
+                        <i class="ti ti-circle-check" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+                        &nbsp;Processo finalizado em <?= date('d/m/Y', strtotime($licitacao->dataAdjudicacaoHomologacao)) ?>
+                    </span>
+                <?php else: ?>
+                    <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#modalFinalizarProcesso">
+                        <i class="ti ti-stamp" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+                        Finalizar processo
+                    </button>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>
+
+<?php if (!$licitacao->estaFinalizada()): ?>
+<div class="modal fade" id="modalFinalizarProcesso" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="index.php?action=finalizar_licitacao" onsubmit="return confirm('Confirma que este processo foi de fato adjudicado e homologado? Depois de finalizado, isso marca oficialmente o encerramento no setor de licitação.');">
+                <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
+                <div class="modal-header">
+                    <h5 class="modal-title">Finalizar processo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">
+                        Isso marca que o processo foi adjudicado e homologado, encerrando-o no setor de licitação.
+                        Essa ação não pode ser desfeita pela tela — se precisar corrigir a data depois, avise o administrador.
+                    </p>
+                    <label class="form-label small fw-semibold">Data da adjudicação e homologação</label>
+                    <input type="date" name="data" class="form-control form-control-sm" style="max-width: 220px;" value="<?= date('Y-m-d') ?>" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-dark btn-sm">Confirmar finalização</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <?php endif; ?>
 
 <!-- ================================================================ -->

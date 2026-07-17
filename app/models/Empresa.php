@@ -54,14 +54,18 @@ class Empresa
     }
 
     /**
-     * Quantas licitacoes essa empresa venceu E que ja foram homologadas
-     * (valor_adjudicado preenchido) - usado no cadastro/relatorios.
+     * Quantas licitacoes distintas essa empresa venceu (em pelo menos um
+     * lote) E que ja foram formalmente finalizadas (data_adjudicacao_
+     * homologacao preenchida) - usado no cadastro/relatorios.
      */
     public function contarLicitacoesHomologadas(): int
     {
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare(
-            'SELECT COUNT(*) FROM licitacoes WHERE empresa_vencedora_id = :id AND valor_adjudicado IS NOT NULL'
+            'SELECT COUNT(DISTINCT lpv.licitacao_id)
+             FROM lotes_proposta_vencedora lpv
+             INNER JOIN licitacoes l ON l.id = lpv.licitacao_id
+             WHERE lpv.empresa_vencedora_id = :id AND l.data_adjudicacao_homologacao IS NOT NULL'
         );
         $stmt->execute(['id' => $this->id]);
 

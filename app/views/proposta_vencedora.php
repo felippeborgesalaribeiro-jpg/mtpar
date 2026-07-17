@@ -30,63 +30,18 @@ require __DIR__ . '/partials/header.php';
     </div>
 <?php else: ?>
 
+<?php if (count($lotes) > 1): ?>
+<div class="d-flex justify-content-end mb-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalSelecionarLotes">
+        <i class="ti ti-filter" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+        Selecionar lotes para conferir agora
+    </button>
+</div>
+<?php endif; ?>
+
 <form method="post" action="index.php?action=salvar_proposta_vencedora" id="formProposta">
     <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
-    <input type="hidden" name="empresa_vencedora_id" id="campoEmpresaVencedoraId" value="<?= $licitacao->empresaVencedoraId ?? '' ?>">
     <input type="hidden" name="operacao" id="campoOperacao" value="salvar">
-
-    <!-- Empresa vencedora -->
-    <div class="card shadow-sm mb-3" style="border-left: 3px solid var(--brand-blue);">
-        <div class="card-header bg-white d-flex align-items-center gap-2 py-2">
-            <i class="ti ti-building" aria-hidden="true" style="font-size:16px; color: var(--brand-blue-dark);"></i>
-            <span class="fw-semibold small">Empresa vencedora</span>
-        </div>
-        <div class="card-body">
-            <div id="empresaSearchWrap" class="<?= $empresaVencedora !== null ? 'd-none' : '' ?>">
-                <div class="position-relative">
-                    <i class="ti ti-search text-muted position-absolute" aria-hidden="true" style="font-size: 14px; left: 12px; top: 10px;"></i>
-                    <input type="text" id="empresaInput" class="form-control form-control-sm" style="padding-left: 32px;"
-                           placeholder="Buscar por nome, nome fantasia ou CNPJ..." autocomplete="off">
-                </div>
-                <div id="empresaResults" class="list-group mt-2" style="display:none;"></div>
-                <div id="empresaNotFound" class="border border-dashed rounded p-2 mt-2 d-none align-items-center justify-content-between gap-2 small">
-                    <span>Nenhuma empresa encontrada para "<b id="empresaQueryEcho"></b>".</span>
-                    <button type="button" class="btn btn-sm btn-outline-primary" id="btnAbrirCadastro">+ Cadastrar nova empresa</button>
-                </div>
-                <div id="empresaCadastro" class="border rounded p-3 mt-2" style="display:none; background: var(--paper, #F5F7FA);">
-                    <div class="row g-2">
-                        <div class="col-md-5">
-                            <label class="form-label small">Nome (razão social)</label>
-                            <input type="text" id="campoNome" class="form-control form-control-sm">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small">Nome fantasia</label>
-                            <input type="text" id="campoFantasia" class="form-control form-control-sm">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small">CNPJ</label>
-                            <input type="text" id="campoCnpj" class="form-control form-control-sm" inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00">
-                        </div>
-                    </div>
-                    <div class="mt-2 d-flex gap-3 align-items-center">
-                        <button type="button" class="btn btn-sm btn-primary" id="btnSalvarEmpresa">Cadastrar e usar nesta licitação</button>
-                        <button type="button" class="btn btn-sm btn-link text-muted" id="btnCancelarCadastro">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-            <div id="empresaSelected" class="align-items-center gap-3 <?= $empresaVencedora !== null ? 'd-flex' : 'd-none' ?>">
-                <div class="rounded-3 bg-primary-subtle d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 38px; height: 38px;">
-                    <i class="ti ti-building text-primary" aria-hidden="true" style="font-size: 18px;"></i>
-                </div>
-                <div class="flex-grow-1">
-                    <p class="mb-0 fw-semibold small" id="selNome"><?= $empresaVencedora !== null ? htmlspecialchars($empresaVencedora->nome) : '' ?></p>
-                    <p class="mb-0 text-muted small" id="selFantasia"><?= $empresaVencedora !== null ? htmlspecialchars($empresaVencedora->nomeFantasia) : '' ?></p>
-                    <p class="mb-0 text-muted small" id="selCnpj"><?= $empresaVencedora !== null ? 'CNPJ ' . htmlspecialchars($empresaVencedora->cnpj) : '' ?></p>
-                </div>
-                <button type="button" class="btn btn-sm btn-outline-secondary" id="btnTrocarEmpresa">Trocar empresa</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Resumo -->
     <div class="position-sticky mb-3" style="top: 10px; z-index: 5;">
@@ -119,14 +74,22 @@ require __DIR__ . '/partials/header.php';
                     <i class="ti ti-file-download" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
                     Gerar documento
                 </button>
+                <button type="button" class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#modalAdjudicacao">
+                    <i class="ti ti-stamp" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+                    Gerar Adjudicação/Homologação
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Lotes -->
     <?php foreach ($lotes as $lote): ?>
-        <?php $itens = $lote->buscarItens(); ?>
-        <div class="card shadow-sm mb-3" data-lote>
+        <?php
+        $itens = $lote->buscarItens();
+        $loteProposta = $lotesComEmpresa[$lote->id] ?? null;
+        $empresaDoLote = $loteProposta !== null ? $loteProposta->buscarEmpresa() : null;
+        ?>
+        <div class="card shadow-sm mb-3" data-lote data-lote-numero="<?= htmlspecialchars($lote->numero) ?>">
             <div class="card-header bg-white d-flex align-items-center justify-content-between py-2">
                 <span class="fw-semibold small">
                     <i class="ti ti-package" aria-hidden="true" style="font-size:15px; color: var(--brand-blue-dark); vertical-align: -2px;"></i>
@@ -134,6 +97,57 @@ require __DIR__ . '/partials/header.php';
                 </span>
                 <span class="text-muted small"><?= count($itens) ?> ite<?= count($itens) === 1 ? 'm' : 'ns' ?></span>
             </div>
+
+            <!-- Empresa vencedora deste lote -->
+            <div class="card-body border-bottom empresa-lote-widget" data-lote-id="<?= $lote->id ?>">
+                <input type="hidden" name="lote_empresa_vencedora_id[<?= $lote->id ?>]" class="campo-empresa-id" value="<?= $empresaDoLote !== null ? $empresaDoLote->id : '' ?>">
+
+                <div class="empresa-search-wrap <?= $empresaDoLote !== null ? 'd-none' : '' ?>">
+                    <label class="form-label small fw-semibold mb-1">Empresa vencedora deste lote</label>
+                    <div class="position-relative">
+                        <i class="ti ti-search text-muted position-absolute" aria-hidden="true" style="font-size: 14px; left: 12px; top: 10px;"></i>
+                        <input type="text" class="form-control form-control-sm empresa-input" style="padding-left: 32px;"
+                               placeholder="Buscar por nome, nome fantasia ou CNPJ..." autocomplete="off">
+                    </div>
+                    <div class="empresa-results list-group mt-2" style="display:none;"></div>
+                    <div class="empresa-not-found border border-dashed rounded p-2 mt-2 d-none align-items-center justify-content-between gap-2 small">
+                        <span>Nenhuma empresa encontrada para "<b class="empresa-query-echo"></b>".</span>
+                        <button type="button" class="btn btn-sm btn-outline-primary btn-abrir-cadastro">+ Cadastrar nova empresa</button>
+                    </div>
+                    <div class="empresa-cadastro border rounded p-3 mt-2" style="display:none; background: var(--paper, #F5F7FA);">
+                        <div class="row g-2">
+                            <div class="col-md-5">
+                                <label class="form-label small">Nome (razão social)</label>
+                                <input type="text" class="form-control form-control-sm campo-nome">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small">Nome fantasia</label>
+                                <input type="text" class="form-control form-control-sm campo-fantasia">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small">CNPJ</label>
+                                <input type="text" class="form-control form-control-sm campo-cnpj" inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00">
+                            </div>
+                        </div>
+                        <div class="mt-2 d-flex gap-3 align-items-center">
+                            <button type="button" class="btn btn-sm btn-primary btn-salvar-empresa">Cadastrar e usar neste lote</button>
+                            <button type="button" class="btn btn-sm btn-link text-muted btn-cancelar-cadastro">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="empresa-selected align-items-center gap-3 <?= $empresaDoLote !== null ? 'd-flex' : 'd-none' ?>">
+                    <div class="rounded-3 bg-primary-subtle d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 34px; height: 34px;">
+                        <i class="ti ti-building text-primary" aria-hidden="true" style="font-size: 16px;"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <p class="mb-0 fw-semibold small sel-nome"><?= $empresaDoLote !== null ? htmlspecialchars($empresaDoLote->nome) : '' ?></p>
+                        <p class="mb-0 text-muted small sel-fantasia"><?= $empresaDoLote !== null ? htmlspecialchars($empresaDoLote->nomeFantasia) : '' ?></p>
+                        <p class="mb-0 text-muted small sel-cnpj"><?= $empresaDoLote !== null ? 'CNPJ ' . htmlspecialchars($empresaDoLote->cnpj) : '' ?></p>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary btn-trocar-empresa">Trocar empresa</button>
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table class="table table-bordered table-hover align-middle mb-0 small">
                     <thead class="table-light">
@@ -196,6 +210,84 @@ require __DIR__ . '/partials/header.php';
     </div>
 </form>
 
+<!-- Modal: selecionar lotes -->
+<div class="modal fade" id="modalSelecionarLotes" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quais lotes você quer conferir agora?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small">Não precisa ser sequencial — marque só os lotes que você quer trabalhar agora. Os demais continuam guardados, só ficam ocultos por enquanto.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <?php foreach ($lotes as $lote): ?>
+                        <div class="form-check form-check-inline border rounded px-2 py-1">
+                            <input class="form-check-input checkbox-lote" type="checkbox" value="<?= $lote->id ?>" id="chkLote<?= $lote->id ?>" checked>
+                            <label class="form-check-label small" for="chkLote<?= $lote->id ?>">Lote <?= htmlspecialchars($lote->numero) ?></label>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-link text-muted" id="btnMarcarTodosLotes">Marcar todos</button>
+                <button type="button" class="btn btn-sm btn-primary" id="btnAplicarSelecaoLotes" data-bs-dismiss="modal">Aplicar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Adjudicação/Homologação -->
+<div class="modal fade" id="modalAdjudicacao" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="get" action="index.php" id="formTermoAdjudicacao">
+                <input type="hidden" name="action" value="gerar_termo_adjudicacao">
+                <input type="hidden" name="id" value="<?= $licitacao->id ?>">
+                <div class="modal-header">
+                    <h5 class="modal-title">Gerar Termo de Adjudicação e Homologação</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Data da adjudicação e homologação</label>
+                        <input type="date" name="data" class="form-control form-control-sm" style="max-width: 220px;"
+                               value="<?= $licitacao->dataAdjudicacaoHomologacao ?? date('Y-m-d') ?>">
+                    </div>
+                    <?php $temLoteComEmpresa = false; ?>
+                    <?php foreach ($lotes as $lote): ?>
+                        <?php $loteProposta = $lotesComEmpresa[$lote->id] ?? null; ?>
+                        <?php if ($loteProposta !== null): ?>
+                            <?php $temLoteComEmpresa = true; ?>
+                            <div class="row g-2 align-items-center mb-2">
+                                <div class="col-auto">
+                                    <span class="badge bg-secondary">Lote <?= htmlspecialchars($lote->numero) ?></span>
+                                </div>
+                                <div class="col">
+                                    <input type="text" name="categoria_lote[<?= $lote->id ?>]" class="form-control form-control-sm"
+                                           placeholder="Categoria (opcional) — ex.: AMPLA CONCORRÊNCIA, EXCLUSIVO ME/EPP/MEI">
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                    <?php if (!$temLoteComEmpresa): ?>
+                        <p class="text-muted small mb-0">
+                            <i class="ti ti-alert-circle" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+                            Nenhum lote tem empresa vencedora definida ainda. Salve pelo menos um lote antes de gerar o termo.
+                        </p>
+                    <?php endif; ?>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary btn-sm" <?= !$temLoteComEmpresa ? 'disabled' : '' ?>>
+                        <i class="ti ti-file-download" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+                        Gerar documento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <?php endif; ?>
 
 <style>
@@ -227,6 +319,8 @@ tr.lote-subtotal.ok td { background-color: #d1e7dd; }
         var algumAlerta = false;
 
         document.querySelectorAll('[data-lote]').forEach(function (lote) {
+            if (lote.style.display === 'none') return;
+
             var subEstimado = 0, subProposto = 0, subTemPendente = false, subAlerta = false;
 
             lote.querySelectorAll('tr[data-item]').forEach(function (row) {
@@ -315,7 +409,28 @@ tr.lote-subtotal.ok td { background-color: #d1e7dd; }
         recalcular();
     }
 
-    /* ---------- empresa vencedora: busca + cadastro ---------- */
+    /* ---------- selecionar lotes pra conferir agora (so filtro visual) ---------- */
+    var btnAplicar = document.getElementById('btnAplicarSelecaoLotes');
+    if (btnAplicar) {
+        btnAplicar.addEventListener('click', function () {
+            var marcados = Array.from(document.querySelectorAll('.checkbox-lote'))
+                .filter(function (c) { return c.checked; })
+                .map(function (c) { return c.value; });
+
+            document.querySelectorAll('[data-lote]').forEach(function (lote) {
+                var loteId = lote.querySelector('.campo-empresa-id') ? lote.querySelector('.campo-empresa-id').name.match(/\[(\d+)\]/)[1] : null;
+                lote.style.display = marcados.indexOf(loteId) === -1 ? 'none' : '';
+            });
+        });
+    }
+    var btnMarcarTodos = document.getElementById('btnMarcarTodosLotes');
+    if (btnMarcarTodos) {
+        btnMarcarTodos.addEventListener('click', function () {
+            document.querySelectorAll('.checkbox-lote').forEach(function (c) { c.checked = true; });
+        });
+    }
+
+    /* ---------- empresa vencedora por lote: busca + cadastro ---------- */
     function maskCnpj(digits) {
         digits = digits.slice(0, 14);
         var out = digits;
@@ -326,126 +441,128 @@ tr.lote-subtotal.ok td { background-color: #d1e7dd; }
         return out;
     }
 
-    var empresaInput = document.getElementById('empresaInput');
-    if (!empresaInput) return;
+    function inicializarWidgetEmpresa(root) {
+        var hiddenInput = root.querySelector('.campo-empresa-id');
+        var searchWrap = root.querySelector('.empresa-search-wrap');
+        var selected = root.querySelector('.empresa-selected');
+        var input = root.querySelector('.empresa-input');
+        var results = root.querySelector('.empresa-results');
+        var notFound = root.querySelector('.empresa-not-found');
+        var cadastro = root.querySelector('.empresa-cadastro');
+        var campoCnpj = root.querySelector('.campo-cnpj');
+        var debounceTimer = null;
 
-    var empresaResults = document.getElementById('empresaResults');
-    var empresaNotFound = document.getElementById('empresaNotFound');
-    var empresaCadastro = document.getElementById('empresaCadastro');
-    var empresaSearchWrap = document.getElementById('empresaSearchWrap');
-    var empresaSelected = document.getElementById('empresaSelected');
-    var campoCnpj = document.getElementById('campoCnpj');
-    var campoEmpresaVencedoraId = document.getElementById('campoEmpresaVencedoraId');
-    var debounceTimer = null;
+        function selecionar(empresa) {
+            root.querySelector('.sel-nome').textContent = empresa.nome;
+            root.querySelector('.sel-fantasia').textContent = empresa.nomeFantasia || '';
+            root.querySelector('.sel-cnpj').textContent = 'CNPJ ' + maskCnpj(empresa.cnpj);
+            hiddenInput.value = empresa.id;
 
-    function selecionarEmpresa(empresa) {
-        document.getElementById('selNome').textContent = empresa.nome;
-        document.getElementById('selFantasia').textContent = empresa.nomeFantasia || '';
-        document.getElementById('selCnpj').textContent = 'CNPJ ' + maskCnpj(empresa.cnpj);
-        campoEmpresaVencedoraId.value = empresa.id;
+            searchWrap.classList.add('d-none');
+            selected.classList.remove('d-none');
+            selected.classList.add('d-flex');
+            input.value = '';
+            results.style.display = 'none';
+            notFound.classList.add('d-none');
+            notFound.classList.remove('d-flex');
+            cadastro.style.display = 'none';
+        }
 
-        empresaSearchWrap.classList.add('d-none');
-        empresaSelected.classList.remove('d-none');
-        empresaSelected.classList.add('d-flex');
-        empresaInput.value = '';
-        empresaResults.style.display = 'none';
-        empresaNotFound.classList.add('d-none');
-        empresaNotFound.classList.remove('d-flex');
-        empresaCadastro.style.display = 'none';
-    }
+        function renderizarResultados(lista) {
+            results.innerHTML = lista.map(function (e, i) {
+                return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2" data-idx="' + i + '">' +
+                    '<span><span class="fw-semibold small d-block">' + e.nome + '</span>' +
+                    (e.nomeFantasia ? '<span class="text-muted small d-block">' + e.nomeFantasia + '</span>' : '') + '</span>' +
+                    '<span class="text-end"><span class="text-muted small d-block tabular-nums">' + maskCnpj(e.cnpj) + '</span>' +
+                    '<span class="badge bg-primary-subtle text-primary" style="font-size:10px;">' + e.licitacoesHomologadas + ' licitações</span></span>' +
+                    '</button>';
+            }).join('');
 
-    function renderizarResultados(lista) {
-        empresaResults.innerHTML = lista.map(function (e, i) {
-            return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2" data-idx="' + i + '">' +
-                '<span><span class="fw-semibold small d-block">' + e.nome + '</span>' +
-                (e.nomeFantasia ? '<span class="text-muted small d-block">' + e.nomeFantasia + '</span>' : '') + '</span>' +
-                '<span class="text-end"><span class="text-muted small d-block tabular-nums">' + maskCnpj(e.cnpj) + '</span>' +
-                '<span class="badge bg-primary-subtle text-primary" style="font-size:10px;">' + e.licitacoesHomologadas + ' licitações</span></span>' +
-                '</button>';
-        }).join('');
-
-        empresaResults.querySelectorAll('[data-idx]').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                selecionarEmpresa(lista[parseInt(btn.dataset.idx, 10)]);
+            results.querySelectorAll('[data-idx]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    selecionar(lista[parseInt(btn.dataset.idx, 10)]);
+                });
             });
+        }
+
+        input.addEventListener('input', function () {
+            var query = input.value.trim();
+            cadastro.style.display = 'none';
+            clearTimeout(debounceTimer);
+
+            if (query.length < 2) {
+                results.style.display = 'none';
+                notFound.classList.add('d-none');
+                notFound.classList.remove('d-flex');
+                return;
+            }
+
+            debounceTimer = setTimeout(function () {
+                fetch('index.php?action=buscar_empresas&q=' + encodeURIComponent(query))
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        var achadas = data.empresas || [];
+                        if (achadas.length > 0) {
+                            renderizarResultados(achadas);
+                            results.style.display = 'block';
+                            notFound.classList.add('d-none');
+                            notFound.classList.remove('d-flex');
+                        } else {
+                            results.style.display = 'none';
+                            root.querySelector('.empresa-query-echo').textContent = query;
+                            notFound.classList.remove('d-none');
+                            notFound.classList.add('d-flex');
+                        }
+                    });
+            }, 250);
+        });
+
+        root.querySelector('.btn-abrir-cadastro').addEventListener('click', function () {
+            cadastro.style.display = 'block';
+            notFound.classList.add('d-none');
+            notFound.classList.remove('d-flex');
+            root.querySelector('.campo-nome').value = input.value.trim();
+            root.querySelector('.campo-nome').focus();
+        });
+
+        root.querySelector('.btn-cancelar-cadastro').addEventListener('click', function () {
+            cadastro.style.display = 'none';
+        });
+
+        campoCnpj.addEventListener('input', function () {
+            campoCnpj.value = maskCnpj(campoCnpj.value.replace(/\D/g, ''));
+        });
+
+        root.querySelector('.btn-salvar-empresa').addEventListener('click', function () {
+            var nome = root.querySelector('.campo-nome').value.trim();
+            var nomeFantasia = root.querySelector('.campo-fantasia').value.trim();
+            var cnpj = campoCnpj.value;
+
+            var form = new FormData();
+            form.append('nome', nome);
+            form.append('nome_fantasia', nomeFantasia);
+            form.append('cnpj', cnpj);
+
+            fetch('index.php?action=criar_empresa', { method: 'POST', body: form })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.erro) {
+                        alert(data.erro);
+                        return;
+                    }
+                    selecionar(data.empresa);
+                });
+        });
+
+        root.querySelector('.btn-trocar-empresa').addEventListener('click', function () {
+            selected.classList.remove('d-flex');
+            selected.classList.add('d-none');
+            searchWrap.classList.remove('d-none');
+            input.focus();
         });
     }
 
-    empresaInput.addEventListener('input', function () {
-        var query = empresaInput.value.trim();
-        empresaCadastro.style.display = 'none';
-        clearTimeout(debounceTimer);
-
-        if (query.length < 2) {
-            empresaResults.style.display = 'none';
-            empresaNotFound.classList.add('d-none');
-            empresaNotFound.classList.remove('d-flex');
-            return;
-        }
-
-        debounceTimer = setTimeout(function () {
-            fetch('index.php?action=buscar_empresas&q=' + encodeURIComponent(query))
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
-                    var achadas = data.empresas || [];
-                    if (achadas.length > 0) {
-                        renderizarResultados(achadas);
-                        empresaResults.style.display = 'block';
-                        empresaNotFound.classList.add('d-none');
-                        empresaNotFound.classList.remove('d-flex');
-                    } else {
-                        empresaResults.style.display = 'none';
-                        document.getElementById('empresaQueryEcho').textContent = query;
-                        empresaNotFound.classList.remove('d-none');
-                        empresaNotFound.classList.add('d-flex');
-                    }
-                });
-        }, 250);
-    });
-
-    document.getElementById('btnAbrirCadastro').addEventListener('click', function () {
-        empresaCadastro.style.display = 'block';
-        empresaNotFound.classList.add('d-none');
-        empresaNotFound.classList.remove('d-flex');
-        document.getElementById('campoNome').value = empresaInput.value.trim();
-        document.getElementById('campoNome').focus();
-    });
-
-    document.getElementById('btnCancelarCadastro').addEventListener('click', function () {
-        empresaCadastro.style.display = 'none';
-    });
-
-    campoCnpj.addEventListener('input', function () {
-        campoCnpj.value = maskCnpj(campoCnpj.value.replace(/\D/g, ''));
-    });
-
-    document.getElementById('btnSalvarEmpresa').addEventListener('click', function () {
-        var nome = document.getElementById('campoNome').value.trim();
-        var nomeFantasia = document.getElementById('campoFantasia').value.trim();
-        var cnpj = campoCnpj.value;
-
-        var form = new FormData();
-        form.append('nome', nome);
-        form.append('nome_fantasia', nomeFantasia);
-        form.append('cnpj', cnpj);
-
-        fetch('index.php?action=criar_empresa', { method: 'POST', body: form })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                if (data.erro) {
-                    alert(data.erro);
-                    return;
-                }
-                selecionarEmpresa(data.empresa);
-            });
-    });
-
-    document.getElementById('btnTrocarEmpresa').addEventListener('click', function () {
-        empresaSelected.classList.remove('d-flex');
-        empresaSelected.classList.add('d-none');
-        empresaSearchWrap.classList.remove('d-none');
-        empresaInput.focus();
-    });
+    document.querySelectorAll('.empresa-lote-widget').forEach(inicializarWidgetEmpresa);
 
     /* ---------- botões salvar / gerar documento ---------- */
     var btnGerar = document.getElementById('btnGerar');

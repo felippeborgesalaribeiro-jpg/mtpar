@@ -42,18 +42,12 @@ $statusLabel = [
                     <thead class="table-dark">
                         <tr>
                             <th>Status</th>
-                            <th>Edital</th>
-                            <th>Nº Processo</th>
-                            <th>Setor Demandante</th>
-                            <th>Servidor Responsável</th>
-                            <th>Data Receb.</th>
+                            <th>Processo</th>
+                            <th>Setor / Responsável</th>
                             <th>Objeto</th>
-                            <th>Sessão Pública</th>
-                            <th>Valor Estimado</th>
-                            <th>Valor Adjudicado</th>
-                            <th>Economicidade</th>
-                            <th>Encaminhado Contrato</th>
-                            <th>Dias na Licitação</th>
+                            <th>Datas</th>
+                            <th>Valores</th>
+                            <th>Dias</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -68,7 +62,6 @@ $statusLabel = [
                             ?>
                             <tr>
                                 <td><span class="badge <?= $statusClasse ?>"><?= $statusTexto ?></span></td>
-                                <td><?= $licitacao->editalLicitacao !== '' ? htmlspecialchars($licitacao->editalLicitacao) : '<span class="text-muted">—</span>' ?></td>
                                 <td>
                                     <?php if ($licitacao->linkSigadoc !== ''): ?>
                                         <a href="<?= htmlspecialchars($licitacao->linkSigadoc) ?>" target="_blank">
@@ -78,28 +71,36 @@ $statusLabel = [
                                     <?php else: ?>
                                         <?= htmlspecialchars($licitacao->numeroProcesso) ?>
                                     <?php endif; ?>
-                                </td>
-                                <td><?= htmlspecialchars($licitacao->setorDemandante) ?></td>
-                                <td><?= $servidorResponsavel !== null ? htmlspecialchars($servidorResponsavel->nome) : '<span class="text-muted">—</span>' ?></td>
-                                <td><?= date('d/m/Y', strtotime($licitacao->dataRecebimento)) ?></td>
-                                <td><?= htmlspecialchars(mb_strimwidth($licitacao->objeto, 0, 40, '...')) ?></td>
-                                <td><?= $licitacao->realizacaoSessaoPublica ? date('d/m/Y', strtotime($licitacao->realizacaoSessaoPublica)) : '—' ?></td>
-                                <td><?= $licitacao->valorEstimado !== null ? formatarMoeda($licitacao->valorEstimado) : '—' ?></td>
-                                <td><?= $licitacao->valorAdjudicado !== null ? formatarMoeda($licitacao->valorAdjudicado) : '—' ?></td>
-                                <td>
-                                    <?php if ($economicidadeReais !== null): ?>
-                                        <span class="<?= $economicidadeReais >= 0 ? 'text-success' : 'text-danger' ?>">
-                                            <?= formatarMoeda($economicidadeReais) ?>
-                                            (<?= formatarNumero($economicidadePercentual, 1) ?>%)
-                                        </span>
-                                    <?php else: ?>
-                                        —
+                                    <?php if ($licitacao->editalLicitacao !== ''): ?>
+                                        <span class="text-muted d-block" style="font-size: 11px;">Edital: <?= htmlspecialchars($licitacao->editalLicitacao) ?></span>
                                     <?php endif; ?>
                                 </td>
-                                <td><?= $licitacao->encaminhadoPactuacaoContrato ? date('d/m/Y', strtotime($licitacao->encaminhadoPactuacaoContrato)) : '—' ?></td>
+                                <td>
+                                    <?= htmlspecialchars($licitacao->setorDemandante) ?>
+                                    <span class="text-muted d-block" style="font-size: 11px;">
+                                        <?= $servidorResponsavel !== null ? htmlspecialchars($servidorResponsavel->nome) : '—' ?>
+                                    </span>
+                                </td>
+                                <td><?= htmlspecialchars(mb_strimwidth($licitacao->objeto, 0, 40, '...')) ?></td>
+                                <td style="font-size: 11px;">
+                                    <span class="d-block">Receb: <?= date('d/m/Y', strtotime($licitacao->dataRecebimento)) ?></span>
+                                    <span class="d-block text-muted">Sessão: <?= $licitacao->realizacaoSessaoPublica ? date('d/m/Y', strtotime($licitacao->realizacaoSessaoPublica)) : '—' ?></span>
+                                    <span class="d-block text-muted">Contrato: <?= $licitacao->encaminhadoPactuacaoContrato ? date('d/m/Y', strtotime($licitacao->encaminhadoPactuacaoContrato)) : '—' ?></span>
+                                </td>
+                                <td style="font-size: 11px;">
+                                    <span class="d-block">Estimado: <?= $licitacao->valorEstimado !== null ? formatarMoeda($licitacao->valorEstimado) : '—' ?></span>
+                                    <span class="d-block text-muted">Adjudicado: <?= $licitacao->valorAdjudicado !== null ? formatarMoeda($licitacao->valorAdjudicado) : '—' ?></span>
+                                    <?php if ($economicidadeReais !== null): ?>
+                                        <span class="d-block <?= $economicidadeReais >= 0 ? 'text-success' : 'text-danger' ?>">
+                                            Econ.: <?= formatarMoeda($economicidadeReais) ?> (<?= formatarNumero($economicidadePercentual, 1) ?>%)
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="d-block text-muted">Econ.: —</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td>
                                     <span class="badge <?= $licitacao->estaEmAndamento() ? 'bg-warning text-dark' : 'bg-secondary' ?>">
-                                        <?= $diasNaLicitacao ?> dia(s)
+                                        <?= $diasNaLicitacao ?>d
                                     </span>
                                 </td>
                                 <td>

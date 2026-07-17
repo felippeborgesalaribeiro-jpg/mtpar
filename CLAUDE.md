@@ -28,6 +28,29 @@ ou óbvia.
 Isso vale tanto para esta sessão remota quanto para qualquer sessão local do Claude Code
 (VS Code) rodando no repositório.
 
+## Dois computadores (casa e trabalho) — como funciona na prática
+
+O usuário revezar entre dois computadores físicos: um em casa (pessoal) e um no trabalho
+(o XAMPP com as duas pastas `mtpar`/`mtpar-teste` da tabela acima). **Esta sessão (e
+qualquer sessão de Claude Code rodando "na nuvem"/remota) nunca tem acesso direto a
+nenhum desses dois computadores** — ela só enxerga uma cópia do repositório rodando num
+sandbox isolado. A única ponte entre o que a sessão faz aqui e o computador físico do
+usuário é o GitHub: a sessão só consegue `git push`; o `git pull` no computador físico
+(seja casa, seja trabalho) **sempre precisa ser digitado pelo próprio usuário** — nunca
+é algo que a sessão "faz por ele" automaticamente, mesmo que ele peça assim.
+
+Combinado com o usuário: quando ele disser algo como "vamos atualizar meu processo em
+casa" ou "vamos atualizar o processo do trabalho", isso significa:
+1. Terminar/commitar/dar push do que estiver em andamento pra branch certa (`dev`, ou
+   `main` só se ele pedir explicitamente).
+2. Devolver pra ele o(s) comando(s) exatos de `git pull` pra rodar no computador daquele
+   local especificamente — em casa normalmente só a pasta de teste (`mtpar-teste`,
+   branch `dev`); no trabalho, a pasta relevante (`mtpar-teste` para testar, `mtpar`
+   só quando for promoção pra produção).
+
+Sempre que pedir isso, dê os comandos completos e explícitos (o usuário já avisou que é
+leigo em terminal) — nunca assuma que ele lembra o caminho da pasta ou o comando exato.
+
 ## Banco de dados
 
 `database/mtpar.sqlite` é **versionado no Git** e contém dados reais (servidores,

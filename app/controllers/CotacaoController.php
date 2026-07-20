@@ -125,6 +125,15 @@ class CotacaoController
         $parametros      = Parametro::buscarTodos();
         $demandaVinculada = $cotacao->buscarDemandaVinculada();
 
+        // Demandas sem nenhum vinculo ainda, mais a que ja esta vinculada a
+        // esta cotacao (que senao nao apareceria na lista, ja que passa a
+        // contar como "com vinculo") - assim da pra vincular, trocar ou
+        // desvincular pelo mesmo campo.
+        $demandasParaVincular = Demanda::buscarEmAndamentoSemVinculo();
+        if ($demandaVinculada !== null) {
+            $demandasParaVincular[] = $demandaVinculada;
+        }
+
         require __DIR__ . '/../views/cotacao.php';
     }
 
@@ -147,6 +156,7 @@ class CotacaoController
         $cotacao->objeto             = trim($_POST['objeto'] ?? '');
         $cotacao->servidorId         = (int) ($_POST['servidor_id'] ?? $cotacao->servidorId);
         $cotacao->criterioConsolidacao = trim($_POST['criterio_consolidacao'] ?? $cotacao->criterioConsolidacao);
+        $cotacao->demandaId          = (int) ($_POST['demanda_id'] ?? 0) ?: null;
 
         $cotacao->salvar();
 

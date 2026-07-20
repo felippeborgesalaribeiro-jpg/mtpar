@@ -29,8 +29,8 @@ $statusLabel = [
             <p class="small mb-0">
                 <i class="ti ti-link" aria-hidden="true" style="font-size: 13px; vertical-align: -1px; color: var(--brand-blue-dark);"></i>
                 Vinculada à Demanda nº <?= htmlspecialchars($demandaVinculada->numeroProcesso) ?>
-                <a href="index.php?action=demandas" class="text-decoration-none">
-                    (ver demandas <i class="ti ti-arrow-right" aria-hidden="true" style="font-size: 11px;"></i>)
+                <a href="index.php?action=ver_demanda&id=<?= $demandaVinculada->id ?>" class="text-decoration-none">
+                    (ver processo <i class="ti ti-arrow-right" aria-hidden="true" style="font-size: 11px;"></i>)
                 </a>
             </p>
         <?php else: ?>
@@ -447,9 +447,22 @@ $statusLabel = [
                             </select>
                         </div>
                     </div>
-                    <div class="mb-0">
+                    <div class="mb-3">
                         <label class="form-label">Objeto</label>
                         <textarea name="objeto" class="form-control" rows="3"><?= htmlspecialchars($cotacao->objeto) ?></textarea>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label">Processo vinculado (Demanda)</label>
+                        <select name="demanda_id" class="form-select">
+                            <option value="">— Nenhum —</option>
+                            <?php foreach ($demandasParaVincular as $demandaOpcao): ?>
+                                <option value="<?= $demandaOpcao->id ?>"
+                                    <?= $cotacao->demandaId === $demandaOpcao->id ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($demandaOpcao->numeroProcesso) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="form-text">Só aparecem aqui demandas em andamento que ainda não têm nenhum vínculo (ou a que já está vinculada a esta cotação).</div>
                     </div>
                 </div>
                 <div class="modal-footer">

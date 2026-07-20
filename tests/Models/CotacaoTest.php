@@ -3,6 +3,7 @@
 namespace Tests\Models;
 
 use Cotacao;
+use Demanda;
 use Item;
 use Lote;
 use Preco;
@@ -13,6 +14,7 @@ use Tests\DatabaseTestCase;
 require_once __DIR__ . '/../../app/models/AnalisePrecos.php';
 require_once __DIR__ . '/../../app/models/Cotacao.php';
 require_once __DIR__ . '/../../app/models/StatusCotacao.php';
+require_once __DIR__ . '/../../app/models/Demanda.php';
 require_once __DIR__ . '/../../app/models/Lote.php';
 require_once __DIR__ . '/../../app/models/Item.php';
 require_once __DIR__ . '/../../app/models/Preco.php';
@@ -155,5 +157,27 @@ final class CotacaoTest extends DatabaseTestCase
 
         // Total esperado: 22 + 50 + 300 = 372.
         $this->assertEqualsWithDelta(372.0, $cotacao->calcularValorTotal(), 0.001);
+    }
+
+    public function testCotacaoCriadaSemDemandaPodeSerVinculadaDepois(): void
+    {
+        $servidor = $this->criarServidor();
+        $cotacao = new Cotacao('MTPAR-PRO-2026/00008', '', '', '', '', $servidor->id);
+        $cotacao->salvar();
+
+        $this->assertNull($cotacao->demandaId);
+        $this->assertNull(Cotacao::buscarPorId($cotacao->id)->demandaId);
+
+        $demanda = new Demanda('MTPAR-PRO-2026/00008', '2026-01-10');
+        $demanda->salvar();
+
+        // Regressao: uma cotacao criada sem vinculo precisa poder ser
+        // vinculada a uma demanda depois, editando o campo normalmente.
+        $cotacao->demandaId = $demanda->id;
+        $cotacao->salvar();
+
+        $recarregada = Cotacao::buscarPorId($cotacao->id);
+        $this->assertSame($demanda->id, $recarregada->demandaId);
+        $this->assertSame($demanda->id, $recarregada->buscarDemandaVinculada()->id);
     }
 }

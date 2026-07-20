@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../models/Licitacao.php';
 require_once __DIR__ . '/../models/Servidor.php';
 require_once __DIR__ . '/../helpers/auth.php';
+require_once __DIR__ . '/../helpers/formatacao.php';
 
 class LicitacaoController
 {
@@ -32,11 +33,8 @@ class LicitacaoController
         $licitacao->servidorResponsavelId = $servidorResponsavelId !== '' ? (int) $servidorResponsavelId : null;
         $licitacao->editalLicitacao = trim($_POST['edital_licitacao'] ?? '');
         $licitacao->realizacaoSessaoPublica = trim($_POST['realizacao_sessao_publica'] ?? '') ?: null;
-        $licitacao->valorEstimado = ($_POST['valor_estimado'] ?? '') !== ''
-            ? (float) str_replace(',', '.', $_POST['valor_estimado'])
-            : null;
         $licitacao->valorAdjudicado = ($_POST['valor_adjudicado'] ?? '') !== ''
-            ? (float) str_replace(',', '.', $_POST['valor_adjudicado'])
+            ? converterMoedaBrParaFloat($_POST['valor_adjudicado'])
             : null;
         $licitacao->encaminhadoPactuacaoContrato = trim($_POST['encaminhado_pactuacao_contrato'] ?? '') ?: null;
 

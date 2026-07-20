@@ -144,6 +144,49 @@ final class LicitacaoTest extends DatabaseTestCase
         $this->assertSame('Item 2 negociado com desconto adicional.', $recarregada->observacoesPropostaVencedora);
     }
 
+    public function testValorEstimadoEhRecalculadoAoCarregarMesmoSeEstiverErradoNoBanco(): void
+    {
+        // Regressao: o valor estimado nao pode mais ser editado a mao (o
+        // campo do formulario foi removido). Se por algum motivo o valor
+        // salvo no banco ficar desatualizado/errado em relacao ao mapa de
+        // pesquisa da Cotacao vinculada, carregar a licitacao precisa
+        // corrigir sozinho, sem exigir uma correcao manual.
+        $servidor = $this->criarServidor();
+        $demanda = $this->criarDemanda();
+
+        $cotacao = new Cotacao(
+            $demanda->numeroProcesso,
+            $demanda->setorDemandante,
+            'Dispensa',
+            'Menor preço',
+            $demanda->objeto,
+            $servidor->id,
+            demandaId: $demanda->id
+        );
+        $cotacao->salvar();
+
+        $lote = new Lote($cotacao->id, '01');
+        $lote->salvar();
+        $item = new Item($lote->id, 1, 'Item de teste', 'UN', 1);
+        $item->salvar();
+        (new Preco($item->id, 223753.69))->salvar();
+
+        $licitacao = Licitacao::criarApartirDeDemanda($demanda);
+
+        \Database::getConnection()
+            ->prepare('UPDATE licitacoes SET valor_estimado = :valor WHERE id = :id')
+            ->execute(['valor' => 223.753, 'id' => $licitacao->id]);
+
+        $recarregada = Licitacao::buscarPorId($licitacao->id);
+        $this->assertEqualsWithDelta(223753.69, $recarregada->valorEstimado, 0.001);
+
+        // A correcao tambem precisa ter sido persistida, nao so em memoria.
+        $novaLeitura = \Database::getConnection()
+            ->query('SELECT valor_estimado FROM licitacoes WHERE id = ' . $licitacao->id)
+            ->fetchColumn();
+        $this->assertEqualsWithDelta(223753.69, (float) $novaLeitura, 0.001);
+    }
+
     public function testEstaFinalizadaSoEhVerdadeiroComDataAdjudicacaoHomologacaoDefinida(): void
     {
         $demanda = $this->criarDemanda();

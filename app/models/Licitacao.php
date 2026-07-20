@@ -152,6 +152,30 @@ class Licitacao
         return Servidor::buscarPorId($this->servidorResponsavelId);
     }
 
+    /**
+     * O valor estimado nunca e digitado a mao: e sempre o total do mapa de
+     * pesquisa de precos da Cotacao vinculada a demanda desta licitacao.
+     * Recalcula e persiste sempre que a licitacao e carregada, para nunca
+     * ficar dessincronizado (ou com um valor antigo/errado) do mapa.
+     */
+    private function sincronizarValorEstimado(): void
+    {
+        require_once __DIR__ . '/Cotacao.php';
+
+        $cotacaoVinculada = Cotacao::buscarPorDemandaId($this->demandaId);
+
+        if ($cotacaoVinculada === null) {
+            return;
+        }
+
+        $valorAtual = $cotacaoVinculada->calcularValorTotal();
+
+        if ($this->valorEstimado === null || abs($valorAtual - $this->valorEstimado) > 0.001) {
+            $this->valorEstimado = $valorAtual;
+            $this->salvar();
+        }
+    }
+
     public function estaFinalizada(): bool
     {
         return $this->dataAdjudicacaoHomologacao !== null;
@@ -290,7 +314,7 @@ class Licitacao
 
     private static function fromArray(array $linha): Licitacao
     {
-        return new Licitacao(
+        $licitacao = new Licitacao(
             (int) $linha['demanda_id'],
             $linha['numero_processo'],
             $linha['data_recebimento'],
@@ -308,5 +332,9 @@ class Licitacao
             $linha['observacoes_proposta_vencedora'] ?? '',
             $linha['data_adjudicacao_homologacao'] ?? null
         );
+
+        $licitacao->sincronizarValorEstimado();
+
+        return $licitacao;
     }
 }

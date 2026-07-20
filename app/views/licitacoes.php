@@ -156,17 +156,15 @@ $statusLabel = [
                                                     <input type="date" name="realizacao_sessao_publica" class="form-control"
                                                            value="<?= htmlspecialchars($licitacao->realizacaoSessaoPublica ?? '') ?>">
                                                 </div>
-                                                <div class="row">
-                                                    <div class="col-md-6 mb-3">
-                                                        <label class="form-label">Valor estimado</label>
-                                                        <input type="text" name="valor_estimado" class="form-control"
-                                                               value="<?= $licitacao->valorEstimado !== null ? formatarNumero($licitacao->valorEstimado) : '' ?>">
-                                                    </div>
-                                                    <div class="col-md-6 mb-3">
-                                                        <label class="form-label">Valor adjudicado</label>
-                                                        <input type="text" name="valor_adjudicado" class="form-control"
-                                                               value="<?= $licitacao->valorAdjudicado !== null ? formatarNumero($licitacao->valorAdjudicado) : '' ?>">
-                                                    </div>
+                                                <p class="text-muted small mb-2">
+                                                    Valor estimado: <strong><?= $licitacao->valorEstimado !== null ? formatarMoeda($licitacao->valorEstimado) : '—' ?></strong>
+                                                    <br>
+                                                    <span class="fst-italic">Puxado automaticamente do mapa de pesquisa de preços da Cotação vinculada.</span>
+                                                </p>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Valor adjudicado</label>
+                                                    <input type="text" name="valor_adjudicado" class="form-control"
+                                                           value="<?= $licitacao->valorAdjudicado !== null ? formatarNumero($licitacao->valorAdjudicado) : '' ?>">
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label">Encaminhado para pactuação do contrato</label>

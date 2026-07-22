@@ -75,7 +75,10 @@ class PropostaVencedoraController
             exit;
         }
 
-        header('Location: index.php?action=proposta_vencedora&id=' . $licitacao->id);
+        $ultimoItemId = (int) ($_POST['ultimo_item_id'] ?? 0);
+        $ancora = $ultimoItemId > 0 ? '#item-' . $ultimoItemId : '';
+
+        header('Location: index.php?action=proposta_vencedora&id=' . $licitacao->id . $ancora);
         exit;
     }
 

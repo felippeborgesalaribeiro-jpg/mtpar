@@ -42,6 +42,7 @@ require __DIR__ . '/partials/header.php';
 <form method="post" action="index.php?action=salvar_proposta_vencedora" id="formProposta">
     <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
     <input type="hidden" name="operacao" id="campoOperacao" value="salvar">
+    <input type="hidden" name="ultimo_item_id" id="campoUltimoItem" value="">
 
     <!-- Resumo -->
     <div class="position-sticky mb-3" style="top: 10px; z-index: 5;">
@@ -167,7 +168,7 @@ require __DIR__ . '/partials/header.php';
                             $valorReferencia = $resultado['valor_referencia'] ?? 0;
                             $propostaExistente = $valoresPropostos[$item->id] ?? null;
                             ?>
-                            <tr data-item data-qtd="<?= $item->quantidade ?>" data-ref="<?= $valorReferencia ?>">
+                            <tr data-item data-qtd="<?= $item->quantidade ?>" data-ref="<?= $valorReferencia ?>" id="item-<?= $item->id ?>">
                                 <td>
                                     <span class="text-muted fw-semibold"><?= $item->numero ?>.</span>
                                     <?= htmlspecialchars($item->descricao) ?>
@@ -177,7 +178,7 @@ require __DIR__ . '/partials/header.php';
                                 <td class="text-end tabular-nums"><?= formatarMoeda($valorReferencia) ?></td>
                                 <td class="text-end">
                                     <input type="text" inputmode="decimal" class="form-control form-control-sm text-end input-proposto"
-                                           name="valor_proposto[<?= $item->id ?>]"
+                                           name="valor_proposto[<?= $item->id ?>]" data-item-id="<?= $item->id ?>"
                                            value="<?= $propostaExistente !== null ? formatarNumero($propostaExistente->valorProposto) : '' ?>"
                                            placeholder="0,00">
                                 </td>
@@ -402,8 +403,12 @@ tr.lote-subtotal.ok td { background-color: #d1e7dd; }
         verdictText.textContent = algumAlerta ? 'Existem itens acima do valor de referência' : 'Proposta dentro do estimado';
     }
 
+    var campoUltimoItem = document.getElementById('campoUltimoItem');
     document.querySelectorAll('.input-proposto').forEach(function (input) {
         input.addEventListener('input', recalcular);
+        input.addEventListener('focus', function () {
+            campoUltimoItem.value = input.dataset.itemId;
+        });
     });
     if (document.querySelectorAll('[data-lote]').length > 0) {
         recalcular();

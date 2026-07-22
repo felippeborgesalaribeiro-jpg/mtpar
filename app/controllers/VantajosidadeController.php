@@ -8,6 +8,7 @@ require_once __DIR__ . '/../models/Parametro.php';
 require_once __DIR__ . '/../models/Demanda.php';
 require_once __DIR__ . '/../models/AnaliseVantajosidade.php';
 require_once __DIR__ . '/../helpers/auth.php';
+require_once __DIR__ . '/../helpers/formatacao.php';
 
 class VantajosidadeController
 {
@@ -156,8 +157,8 @@ class VantajosidadeController
         $item = trim($_POST['item'] ?? '');
         $descricao = trim($_POST['descricao'] ?? '');
         $unidade = trim($_POST['unidade'] ?? 'UN');
-        $quantidade = (float) str_replace(',', '.', $_POST['quantidade'] ?? '1');
-        $precoAta = (float) str_replace(',', '.', $_POST['preco_ata'] ?? '0');
+        $quantidade = converterMoedaBrParaFloat($_POST['quantidade'] ?? '1');
+        $precoAta = converterMoedaBrParaFloat($_POST['preco_ata'] ?? '0');
 
         if ($lote === '' || $item === '') {
             echo 'Lote e Item são obrigatórios.';
@@ -187,8 +188,8 @@ class VantajosidadeController
         $item->item = trim($_POST['item'] ?? '');
         $item->descricao = trim($_POST['descricao'] ?? '');
         $item->unidade = trim($_POST['unidade'] ?? 'UN');
-        $item->quantidade = (float) str_replace(',', '.', $_POST['quantidade'] ?? '1');
-        $item->precoAta = (float) str_replace(',', '.', $_POST['preco_ata'] ?? '0');
+        $item->quantidade = converterMoedaBrParaFloat($_POST['quantidade'] ?? '1');
+        $item->precoAta = converterMoedaBrParaFloat($_POST['preco_ata'] ?? '0');
         $item->salvar();
 
         header('Location: index.php?action=vantajosidade&id=' . $item->processoId);
@@ -219,7 +220,7 @@ class VantajosidadeController
         exigirLogin();
 
         $itemId = (int) ($_POST['item_id'] ?? 0);
-        $valor = (float) str_replace(',', '.', $_POST['valor'] ?? '0');
+        $valor = converterMoedaBrParaFloat($_POST['valor'] ?? '0');
         $parametro = trim($_POST['parametro'] ?? '');
         $fonte = trim($_POST['fonte'] ?? '');
 
@@ -249,7 +250,7 @@ class VantajosidadeController
             return;
         }
 
-        $preco->valor = (float) str_replace(',', '.', $_POST['valor'] ?? '0');
+        $preco->valor = converterMoedaBrParaFloat($_POST['valor'] ?? '0');
         $preco->parametro = trim($_POST['parametro'] ?? '');
         $preco->fonte = trim($_POST['fonte'] ?? '');
         $preco->salvar();

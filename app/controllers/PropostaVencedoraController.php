@@ -7,6 +7,7 @@ require_once __DIR__ . '/../models/Empresa.php';
 require_once __DIR__ . '/../models/ItemPropostaVencedora.php';
 require_once __DIR__ . '/../models/LotePropostaVencedora.php';
 require_once __DIR__ . '/../helpers/auth.php';
+require_once __DIR__ . '/../helpers/formatacao.php';
 
 class PropostaVencedoraController
 {
@@ -64,7 +65,7 @@ class PropostaVencedoraController
                 continue;
             }
 
-            $valor = (float) str_replace(',', '.', $valorTexto);
+            $valor = converterMoedaBrParaFloat($valorTexto);
             $itemProposta = new ItemPropostaVencedora($licitacao->id, (int) $itemId, $valor);
             $itemProposta->salvar();
         }

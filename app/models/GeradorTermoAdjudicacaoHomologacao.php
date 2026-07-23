@@ -29,6 +29,9 @@ class GeradorTermoAdjudicacaoHomologacao
 
     const FONTE_PADRAO = 'Calibri';
     const TAMANHO_PADRAO = 11;
+    // Soma das larguras das 8 colunas da tabela do lote (500+2200+1500+1300+1000+700+1500+1400),
+    // usada pras celulas de total que ocupam a largura inteira (gridSpan ou tabela sozinha).
+    const LARGURA_TABELA_LOTE = 10100;
 
     /**
      * @param array<int, Empresa> $empresasPorLote
@@ -231,9 +234,16 @@ class GeradorTermoAdjudicacaoHomologacao
         $extenso = numeroParaExtenso($valorGlobalLote);
         $extensoComMaiuscula = mb_strtoupper(mb_substr($extenso, 0, 1)) . mb_substr($extenso, 1);
 
-        $linhaGlobal = $secao->addTextRun(['spaceBefore' => 150, 'spaceAfter' => 300]);
-        $linhaGlobal->addText('VALOR GLOBAL DO LOTE: ', ['bold' => true]);
-        $linhaGlobal->addText(formatarMoeda($valorGlobalLote) . ' (' . $extensoComMaiuscula . ').', ['bold' => true]);
+        // Fica dentro da propria tabela do lote (ultima linha, celula unica
+        // ocupando as 8 colunas), em vez de um paragrafo solto depois da tabela.
+        $tabela->addRow();
+        $tabela->addCell(self::LARGURA_TABELA_LOTE, ['gridSpan' => 8, 'bgColor' => 'D9D9D9'])->addText(
+            'VALOR GLOBAL DO LOTE: ' . formatarMoeda($valorGlobalLote) . ' (' . $extensoComMaiuscula . ').',
+            ['bold' => true, 'size' => 9],
+            ['alignment' => Jc::CENTER]
+        );
+
+        $secao->addTextBreak(1, ['size' => 4]);
 
         $this->valorAdjudicadoGeral += $valorGlobalLote;
     }
@@ -243,9 +253,17 @@ class GeradorTermoAdjudicacaoHomologacao
         $extenso = numeroParaExtenso($this->valorAdjudicadoGeral);
         $extensoComMaiuscula = mb_strtoupper(mb_substr($extenso, 0, 1)) . mb_substr($extenso, 1);
 
-        $linha = $secao->addTextRun(['spaceAfter' => 400]);
-        $linha->addText('VALOR ADJUDICADO E HOMOLOGADO: ', ['bold' => true]);
-        $linha->addText(formatarMoeda($this->valorAdjudicadoGeral) . ' (' . $extensoComMaiuscula . ').', ['bold' => true]);
+        // Uma unica tabela, com uma unica celula, so pra esse total geral -
+        // nao e mais um paragrafo solto nem faz parte da tabela de nenhum lote.
+        $tabela = $secao->addTable(['borderSize' => 6, 'borderColor' => '000000', 'cellMargin' => 80]);
+        $tabela->addRow();
+        $tabela->addCell(self::LARGURA_TABELA_LOTE, ['bgColor' => 'D9D9D9'])->addText(
+            'VALOR ADJUDICADO E HOMOLOGADO: ' . formatarMoeda($this->valorAdjudicadoGeral) . ' (' . $extensoComMaiuscula . ').',
+            ['bold' => true, 'size' => 10],
+            ['alignment' => Jc::CENTER]
+        );
+
+        $secao->addTextBreak(1, ['size' => 4]);
     }
 
     private function montarAssinatura($secao): void

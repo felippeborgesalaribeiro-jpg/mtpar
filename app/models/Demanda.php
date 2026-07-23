@@ -142,6 +142,14 @@ class Demanda
         return ProcessoVantajosidade::buscarPorDemandaId($this->id);
     }
 
+    public function calcularDiasEmAberto(): int
+    {
+        $dataInicio = new DateTime($this->dataRecebimento);
+        $dataFim = new DateTime('today');
+
+        return (int) $dataInicio->diff($dataFim)->days;
+    }
+
     public static function buscarPorId(int $id): ?Demanda
     {
         $pdo = Database::getConnection();

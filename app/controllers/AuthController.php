@@ -31,6 +31,11 @@ class AuthController
 
         efetuarLogin($servidor);
 
+        if ($servidor->senhaProvisoria) {
+            header('Location: index.php?action=perfil&trocar_senha=1');
+            exit;
+        }
+
         header('Location: index.php?action=dashboard');
         exit;
     }

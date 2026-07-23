@@ -60,7 +60,7 @@ $modoEdicao = ($modo === 'editar');
             </a>
             <a href="index.php?action=excluir_demanda&id=<?= $demanda->id ?>"
                class="btn btn-sm btn-outline-danger"
-               onclick="return confirm('Excluir este processo? Esta ação não pode ser desfeita.')">
+               onclick="return confirm('Excluir este processo? Ele vai para a lixeira do Administrador, que pode restaurá-lo depois se precisar.')">
                 <i class="ti ti-trash" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
                 Excluir
             </a>

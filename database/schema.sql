@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS servidores (
     usuario TEXT NOT NULL DEFAULT '',
     senha_hash TEXT NOT NULL DEFAULT '',
     nivel_acesso TEXT NOT NULL DEFAULT 'COMUM',
+    senha_provisoria INTEGER NOT NULL DEFAULT 0,
     criado_em TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

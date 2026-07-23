@@ -23,6 +23,22 @@ $senhaResetada = isset($_GET['senha_resetada']);
     </div>
 <?php endif; ?>
 
+<?php if (!empty($_SESSION['sucesso'])): ?>
+    <div class="alert alert-success small">
+        <i class="ti ti-check" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+        <?= $_SESSION['sucesso'] ?>
+    </div>
+    <?php unset($_SESSION['sucesso']); ?>
+<?php endif; ?>
+
+<?php if (!empty($_SESSION['erro'])): ?>
+    <div class="alert alert-danger small">
+        <i class="ti ti-alert-triangle" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+        <?= $_SESSION['erro'] ?>
+    </div>
+    <?php unset($_SESSION['erro']); ?>
+<?php endif; ?>
+
 <div class="card shadow-sm mb-3">
     <div class="card-body">
         <h6 class="card-subtitle mb-3 text-muted">Cadastrar novo servidor</h6>

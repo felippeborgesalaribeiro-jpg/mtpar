@@ -74,7 +74,12 @@ class Item
         return Preco::buscarPorItem($this->id);
     }
 
-    public function analisar(string $criterio = AnalisePrecos::CRITERIO_MEDIANA): array
+    /**
+     * @param array<int, string>|null $parametrosPrecoPublico ja calculado por quem chama
+     * (ex.: Cotacao::calcularValorTotal() percorrendo varios itens) - evita
+     * repetir a mesma consulta a cada item. Se null, busca aqui mesmo.
+     */
+    public function analisar(string $criterio = AnalisePrecos::CRITERIO_MEDIANA, ?array $parametrosPrecoPublico = null): array
     {
         $precos = $this->buscarPrecos();
 
@@ -86,7 +91,7 @@ class Item
             ];
         }
 
-        $parametrosPrecoPublico = Parametro::buscarNomesPrecoPublico();
+        $parametrosPrecoPublico ??= Parametro::buscarNomesPrecoPublico();
 
         $analise = new AnalisePrecos($precosParaCalculo, $criterio, $parametrosPrecoPublico);
 

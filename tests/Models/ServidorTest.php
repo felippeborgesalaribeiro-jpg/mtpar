@@ -2,12 +2,14 @@
 
 namespace Tests\Models;
 
+use Demanda;
 use NivelAcesso;
 use Servidor;
 use Tests\DatabaseTestCase;
 
 require_once __DIR__ . '/../../app/models/Servidor.php';
 require_once __DIR__ . '/../../app/models/NivelAcesso.php';
+require_once __DIR__ . '/../../app/models/Demanda.php';
 
 final class ServidorTest extends DatabaseTestCase
 {
@@ -49,6 +51,25 @@ final class ServidorTest extends DatabaseTestCase
 
         $recarregado = Servidor::buscarPorId($servidor->id);
         $this->assertTrue($recarregado->verificarSenha('123'));
+        // Reset de senha marca como provisoria, pra avisar o dono no proximo login.
+        $this->assertTrue($recarregado->senhaProvisoria);
+    }
+
+    public function testSenhaProvisoriaPersisteERecarrega(): void
+    {
+        $servidor = new Servidor('Bruno Alves', usuario: 'bruno');
+        $this->assertFalse($servidor->senhaProvisoria);
+
+        $servidor->senhaProvisoria = true;
+        $servidor->salvar();
+
+        $recarregado = Servidor::buscarPorId($servidor->id);
+        $this->assertTrue($recarregado->senhaProvisoria);
+
+        $recarregado->senhaProvisoria = false;
+        $recarregado->salvar();
+
+        $this->assertFalse(Servidor::buscarPorId($servidor->id)->senhaProvisoria);
     }
 
     public function testEhAdminDistingueNivelDeAcesso(): void
@@ -75,6 +96,19 @@ final class ServidorTest extends DatabaseTestCase
 
         $this->assertSame(NivelAcesso::Comum, $recarregado->nivelAcesso);
         $this->assertFalse($recarregado->ehAdmin());
+    }
+
+    public function testContarVinculosContaDemandasQueApontamParaOServidor(): void
+    {
+        $servidor = new Servidor('Carla Nunes', usuario: 'carla');
+        $servidor->salvar();
+
+        $this->assertSame(0, $servidor->contarVinculos());
+
+        $demanda = new Demanda('MTPAR-PRO-2026/00700', '2026-01-10', '', '', '', $servidor->id);
+        $demanda->salvar();
+
+        $this->assertSame(1, $servidor->contarVinculos());
     }
 
     public function testBuscarPorUsuarioEncontraPeloCampoUsuario(): void

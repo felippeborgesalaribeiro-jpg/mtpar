@@ -12,6 +12,7 @@ class Servidor
     public string $usuario;
     public string $senhaHash;
     public NivelAcesso $nivelAcesso;
+    public bool $senhaProvisoria;
 
     public function __construct(
         string $nome,
@@ -20,7 +21,8 @@ class Servidor
         string $usuario = '',
         string $senhaHash = '',
         NivelAcesso $nivelAcesso = NivelAcesso::Comum,
-        ?int $id = null
+        ?int $id = null,
+        bool $senhaProvisoria = false
     ) {
         $this->id = $id;
         $this->nome = $nome;
@@ -29,6 +31,7 @@ class Servidor
         $this->usuario = $usuario;
         $this->senhaHash = $senhaHash;
         $this->nivelAcesso = $nivelAcesso;
+        $this->senhaProvisoria = $senhaProvisoria;
     }
 
     public function salvar(): int
@@ -37,8 +40,8 @@ class Servidor
 
         if ($this->id === null) {
             $stmt = $pdo->prepare(
-                'INSERT INTO servidores (nome, matricula, cargo, usuario, senha_hash, nivel_acesso)
-                 VALUES (:nome, :matricula, :cargo, :usuario, :senha_hash, :nivel_acesso)'
+                'INSERT INTO servidores (nome, matricula, cargo, usuario, senha_hash, nivel_acesso, senha_provisoria)
+                 VALUES (:nome, :matricula, :cargo, :usuario, :senha_hash, :nivel_acesso, :senha_provisoria)'
             );
             $stmt->execute([
                 'nome' => $this->nome,
@@ -47,12 +50,14 @@ class Servidor
                 'usuario' => $this->usuario,
                 'senha_hash' => $this->senhaHash,
                 'nivel_acesso' => $this->nivelAcesso->value,
+                'senha_provisoria' => $this->senhaProvisoria ? 1 : 0,
             ]);
             $this->id = (int) $pdo->lastInsertId();
         } else {
             $stmt = $pdo->prepare(
                 'UPDATE servidores SET nome = :nome, matricula = :matricula, cargo = :cargo,
-                 usuario = :usuario, senha_hash = :senha_hash, nivel_acesso = :nivel_acesso
+                 usuario = :usuario, senha_hash = :senha_hash, nivel_acesso = :nivel_acesso,
+                 senha_provisoria = :senha_provisoria
                  WHERE id = :id'
             );
             $stmt->execute([
@@ -62,6 +67,7 @@ class Servidor
                 'usuario' => $this->usuario,
                 'senha_hash' => $this->senhaHash,
                 'nivel_acesso' => $this->nivelAcesso->value,
+                'senha_provisoria' => $this->senhaProvisoria ? 1 : 0,
                 'id' => $this->id,
             ]);
         }
@@ -82,6 +88,7 @@ class Servidor
     public function resetarSenhaPadrao(): void
     {
         $this->definirSenha('123');
+        $this->senhaProvisoria = true;
         $this->salvar();
     }
 
@@ -95,6 +102,25 @@ class Servidor
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare('DELETE FROM servidores WHERE id = :id');
         $stmt->execute(['id' => $this->id]);
+    }
+
+    /**
+     * Quantos registros (demandas, licitacoes, cotacoes, processos de
+     * vantajosidade) ainda apontam para este servidor como responsavel -
+     * excluir com vinculos pendentes quebra a chave estrangeira (FK ligada).
+     */
+    public function contarVinculos(): int
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare(
+            'SELECT (SELECT COUNT(*) FROM demandas WHERE servidor_responsavel_id = :id1)
+             + (SELECT COUNT(*) FROM licitacoes WHERE servidor_responsavel_id = :id2)
+             + (SELECT COUNT(*) FROM cotacoes WHERE servidor_id = :id3)
+             + (SELECT COUNT(*) FROM processos_vantajosidade WHERE servidor_id = :id4)'
+        );
+        $stmt->execute(['id1' => $this->id, 'id2' => $this->id, 'id3' => $this->id, 'id4' => $this->id]);
+
+        return (int) $stmt->fetchColumn();
     }
 
     public static function buscarPorId(int $id): ?Servidor
@@ -147,7 +173,8 @@ class Servidor
             $linha['usuario'] ?? '',
             $linha['senha_hash'] ?? '',
             NivelAcesso::tryFrom($linha['nivel_acesso'] ?? '') ?? NivelAcesso::Comum,
-            (int) $linha['id']
+            (int) $linha['id'],
+            (bool) ($linha['senha_provisoria'] ?? false)
         );
     }
 }

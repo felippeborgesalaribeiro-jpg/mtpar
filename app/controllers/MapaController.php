@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../models/Cotacao.php';
 require_once __DIR__ . '/../models/AnalisePrecos.php';
+require_once __DIR__ . '/../models/Parametro.php';
 require_once __DIR__ . '/../helpers/auth.php';
 
 class MapaController
@@ -22,6 +23,7 @@ class MapaController
 
         $mapaLotes = [];
         $valorGlobalCotacao = 0.0;
+        $parametrosPrecoPublico = Parametro::buscarNomesPrecoPublico();
 
         foreach ($lotes as $lote) {
             $itens = $lote->buscarItens();
@@ -29,7 +31,7 @@ class MapaController
             $valorTotalLote = 0.0;
 
             foreach ($itens as $item) {
-                $resultado = $item->analisar($cotacao->criterioConsolidacao);
+                $resultado = $item->analisar($cotacao->criterioConsolidacao, $parametrosPrecoPublico);
                 $precos = $item->buscarPrecos();
 
                 $fornecedoresAprovados = [];

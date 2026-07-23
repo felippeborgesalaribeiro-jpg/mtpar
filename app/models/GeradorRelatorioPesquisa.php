@@ -3,6 +3,7 @@
 require_once __DIR__ . '/Cotacao.php';
 require_once __DIR__ . '/Servidor.php';
 require_once __DIR__ . '/AnalisePrecos.php';
+require_once __DIR__ . '/Parametro.php';
 require_once __DIR__ . '/../helpers/extenso.php';
 
 use PhpOffice\PhpWord\PhpWord;
@@ -73,7 +74,7 @@ class GeradorRelatorioPesquisa
         $textoObjeto = $secao->addTextRun(['alignment' => Jc::CENTER]);
         $textoObjeto->addText('OBJETO: ', ['bold' => true]);
         $textoObjeto->addText('"Pesquisa de Preços - Processo ', ['italic' => true]);
-        $textoObjeto->addText(htmlspecialchars($this->cotacao->numeroProcesso), ['italic' => true]);
+        $textoObjeto->addText($this->cotacao->numeroProcesso, ['italic' => true]);
         $textoObjeto->addText('"', ['italic' => true]);
 
         $secao->addPageBreak();
@@ -191,21 +192,22 @@ class GeradorRelatorioPesquisa
 
         $lotes = $this->cotacao->buscarLotes();
         $valorGlobalEstimado = 0.0;
+        $parametrosPrecoPublico = Parametro::buscarNomesPrecoPublico();
 
         foreach ($lotes as $lote) {
             $itens = $lote->buscarItens();
             $valorTotalLote = 0.0;
 
             foreach ($itens as $item) {
-                $this->montarBlocoItem($secao, $lote, $item);
-                $resultado = $item->analisar($this->cotacao->criterioConsolidacao);
+                $this->montarBlocoItem($secao, $lote, $item, $parametrosPrecoPublico);
+                $resultado = $item->analisar($this->cotacao->criterioConsolidacao, $parametrosPrecoPublico);
                 $valorReferencia = $resultado['valor_referencia'] ?? 0;
                 $valorTotalLote += $valorReferencia * $item->quantidade;
             }
 
             if (count($lotes) > 1) {
                 $secao->addText(
-                    'Preço de referência consolidado do Lote ' . htmlspecialchars($lote->numero) . ': ' . formatarMoeda($valorTotalLote),
+                    'Preço de referência consolidado do Lote ' . $lote->numero . ': ' . formatarMoeda($valorTotalLote),
                     ['bold' => true],
                     ['spaceAfter' => 300, 'spaceBefore' => 150]
                 );
@@ -217,7 +219,7 @@ class GeradorRelatorioPesquisa
         $this->valorGlobalEstimado = $valorGlobalEstimado;
     }
 
-    private function montarBlocoItem($secao, $lote, $item): void
+    private function montarBlocoItem($secao, $lote, $item, ?array $parametrosPrecoPublico = null): void
     {
         $estiloTabela = ['borderSize' => 6, 'borderColor' => '000000', 'cellMargin' => 80];
         $estiloCelulaCabecalho = ['bgColor' => 'D9D9D9'];
@@ -225,13 +227,13 @@ class GeradorRelatorioPesquisa
         $fonteCelula = ['size' => 8];
 
         $secao->addText(
-            'LOTE ' . htmlspecialchars($lote->numero) . ' — ITEM ' . $item->numero . ' — ' . htmlspecialchars($item->descricao),
+            'LOTE ' . $lote->numero . ' — ITEM ' . $item->numero . ' — ' . $item->descricao,
             ['bold' => true, 'size' => 10],
             ['spaceBefore' => 300, 'spaceAfter' => 150]
         );
 
         $precos = $item->buscarPrecos();
-        $resultado = $item->analisar($this->cotacao->criterioConsolidacao);
+        $resultado = $item->analisar($this->cotacao->criterioConsolidacao, $parametrosPrecoPublico);
 
         $tabela = $secao->addTable($estiloTabela);
         $tabela->addRow();
@@ -265,8 +267,8 @@ class GeradorRelatorioPesquisa
 
             $tabela->addRow();
             $tabela->addCell(500)->addText((string) ($indice + 1), $fonteCelula, ['alignment' => Jc::CENTER]);
-            $tabela->addCell(2200)->addText(htmlspecialchars($preco->fonte ?: '—'), $fonteCelula);
-            $tabela->addCell(1400)->addText(htmlspecialchars($preco->parametro ?: '—'), $fonteCelula);
+            $tabela->addCell(2200)->addText($preco->fonte ?: '—', $fonteCelula);
+            $tabela->addCell(1400)->addText($preco->parametro ?: '—', $fonteCelula);
             $tabela->addCell(1300)->addText(formatarMoeda($preco->valor), $fonteCelula, ['alignment' => Jc::CENTER]);
             $tabela->addCell(1500)->addText($textoMedia, $fonteCelula, ['alignment' => Jc::CENTER]);
             $tabela->addCell(1100)->addText($percentual, $fonteCelula, ['alignment' => Jc::CENTER]);
@@ -289,7 +291,7 @@ class GeradorRelatorioPesquisa
         $linhaUnitario->addText(formatarMoeda($valorReferencia), ['bold' => true]);
 
         $linhaTotal = $secao->addTextRun(['spaceAfter' => 300]);
-        $linhaTotal->addText('Preço de referência total do item (x ' . formatarNumero($item->quantidade) . ' ' . htmlspecialchars($item->unidade) . '): ');
+        $linhaTotal->addText('Preço de referência total do item (x ' . formatarNumero($item->quantidade) . ' ' . $item->unidade . '): ');
         $linhaTotal->addText(formatarMoeda($valorTotal), ['bold' => true]);
     }
 

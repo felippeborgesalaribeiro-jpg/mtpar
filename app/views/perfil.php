@@ -3,6 +3,7 @@ $titulo = 'Meu Perfil - MT Par';
 require __DIR__ . '/partials/header.php';
 
 $sucesso = isset($_GET['sucesso']);
+$avisarTrocarSenha = isset($_GET['trocar_senha']) && $servidorLogado->senhaProvisoria;
 $iniciais = mb_strtoupper(mb_substr($servidorLogado->nome, 0, 1));
 ?>
 
@@ -17,11 +18,27 @@ $iniciais = mb_strtoupper(mb_substr($servidorLogado->nome, 0, 1));
     </a>
 </div>
 
+<?php if ($avisarTrocarSenha): ?>
+    <div class="alert alert-warning small">
+        <i class="ti ti-key" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+        Você ainda está usando a senha padrão. Por segurança, defina uma senha só sua no campo
+        "Nova senha" abaixo.
+    </div>
+<?php endif; ?>
+
 <?php if ($sucesso): ?>
     <div class="alert alert-success small">
         <i class="ti ti-check" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
         Perfil atualizado com sucesso.
     </div>
+<?php endif; ?>
+
+<?php if (!empty($_SESSION['erro'])): ?>
+    <div class="alert alert-danger small">
+        <i class="ti ti-alert-triangle" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+        <?= $_SESSION['erro'] ?>
+    </div>
+    <?php unset($_SESSION['erro']); ?>
 <?php endif; ?>
 
 <div class="card shadow-sm">

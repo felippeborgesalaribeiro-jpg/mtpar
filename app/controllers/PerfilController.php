@@ -27,6 +27,13 @@ class PerfilController
             return;
         }
 
+        $existente = Servidor::buscarPorUsuario($usuario);
+        if ($existente !== null && $existente->id !== $servidorLogado->id) {
+            $_SESSION['erro'] = "Já existe outro servidor cadastrado com o usuário <strong>{$usuario}</strong>.";
+            header('Location: index.php?action=perfil');
+            exit;
+        }
+
         $servidorLogado->nome = $nome;
         $servidorLogado->matricula = $matricula;
         $servidorLogado->cargo = $cargo;
@@ -34,6 +41,7 @@ class PerfilController
 
         if ($novaSenha !== '') {
             $servidorLogado->definirSenha($novaSenha);
+            $servidorLogado->senhaProvisoria = false;
         }
 
         $servidorLogado->salvar();

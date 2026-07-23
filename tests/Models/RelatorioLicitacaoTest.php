@@ -41,6 +41,9 @@ final class RelatorioLicitacaoTest extends DatabaseTestCase
         $licitacao1->servidorResponsavelId = $servidor->id;
         $licitacao1->valorEstimado = 1000.0;
         $licitacao1->valorAdjudicado = 900.0;
+        // "Homologada" exige o ato formal de finalizar - so ter um
+        // valor_adjudicado digitado nao basta (regressao coberta aqui).
+        $licitacao1->dataAdjudicacaoHomologacao = '2026-02-01';
         $licitacao1->salvar();
 
         $demanda2 = $this->criarDemanda('Setor A');
@@ -61,6 +64,22 @@ final class RelatorioLicitacaoTest extends DatabaseTestCase
 
         $this->assertSame(1, $linhas['Setor B']['quantidade']);
         $this->assertNull($linhas['Setor B']['economicidade']);
+    }
+
+    public function testValorAdjudicadoSemFinalizarNaoContaComoHomologada(): void
+    {
+        $demanda = $this->criarDemanda('Setor C');
+        $licitacao = Licitacao::criarApartirDeDemanda($demanda);
+        // Valor adjudicado digitado, mas processo ainda nao finalizado -
+        // nao pode contar como homologada nem entrar na economicidade.
+        $licitacao->valorAdjudicado = 500.0;
+        $licitacao->salvar();
+
+        $linhas = RelatorioLicitacao::porSetorDemandante(Licitacao::buscarTodas());
+
+        $this->assertSame(0, $linhas['Setor C']['homologadas']);
+        $this->assertEqualsWithDelta(0.0, $linhas['Setor C']['valor_adjudicado'], 0.001);
+        $this->assertNull($linhas['Setor C']['economicidade']);
     }
 
     public function testPorServidorResponsavelUsaNaoInformadoQuandoAusente(): void

@@ -6,6 +6,16 @@ $statusLabel = [
     ProcessoVantajosidade::STATUS_EM_ANDAMENTO => ['Em andamento', 'bg-primary'],
     ProcessoVantajosidade::STATUS_FINALIZADO => ['Finalizado', 'bg-success'],
 ];
+
+$totalAndamento = 0;
+$totalFinalizados = 0;
+foreach ($processos as $processo) {
+    if ($processo->status === ProcessoVantajosidade::STATUS_FINALIZADO) {
+        $totalFinalizados++;
+    } else {
+        $totalAndamento++;
+    }
+}
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -33,13 +43,49 @@ $statusLabel = [
         </div>
     </div>
 <?php else: ?>
+
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <div class="card shadow-sm resumo-chip is-active" data-status-filtro="<?= ProcessoVantajosidade::STATUS_EM_ANDAMENTO ?>">
+            <div class="card-body d-flex align-items-center gap-2 py-2 px-3">
+                <span class="resumo-dot" style="background: var(--brand-deep);"></span>
+                <div>
+                    <p class="mb-0 fw-bold resumo-num"><?= $totalAndamento ?></p>
+                    <p class="mb-0 text-muted resumo-lbl">Em andamento</p>
+                </div>
+            </div>
+        </div>
+        <div class="card shadow-sm resumo-chip" data-status-filtro="<?= ProcessoVantajosidade::STATUS_FINALIZADO ?>">
+            <div class="card-body d-flex align-items-center gap-2 py-2 px-3">
+                <span class="resumo-dot" style="background: var(--brand-green-dark);"></span>
+                <div>
+                    <p class="mb-0 fw-bold resumo-num"><?= $totalFinalizados ?></p>
+                    <p class="mb-0 text-muted resumo-lbl">Finalizados</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-2">
+        <div class="input-group input-group-sm" style="max-width: 420px;">
+            <span class="input-group-text bg-white">
+                <i class="ti ti-search text-muted" aria-hidden="true" style="font-size: 13px;"></i>
+            </span>
+            <input type="text" id="buscaVantajosidade" class="form-control"
+                   placeholder="Buscar por nº da ata, órgão ou objeto...">
+        </div>
+    </div>
+    <p class="text-muted small mb-2" id="contagemResultadoVant"></p>
+
     <div class="row g-3">
         <?php foreach ($processos as $processo): ?>
             <?php
             $servidor = $processo->buscarServidor();
             [$label, $classeBadge] = $statusLabel[$processo->status] ?? ['Indefinido', 'bg-secondary'];
+            $buscaTexto = mb_strtolower($processo->numeroAta . ' ' . $processo->orgaoGerenciador . ' ' . $processo->objeto);
             ?>
-            <div class="col-md-4">
+            <div class="col-md-4 <?= $processo->status === ProcessoVantajosidade::STATUS_FINALIZADO ? 'd-none' : '' ?>"
+                 data-status="<?= htmlspecialchars($processo->status) ?>"
+                 data-busca="<?= htmlspecialchars($buscaTexto) ?>">
                 <a href="index.php?action=vantajosidade&id=<?= $processo->id ?>" class="text-decoration-none">
                     <div class="card shadow-sm h-100">
                         <div class="card-body">
@@ -70,7 +116,63 @@ $statusLabel = [
                 </a>
             </div>
         <?php endforeach; ?>
+        <p class="text-muted small d-none w-100 text-center py-4" id="semResultadoVant">
+            Nenhum processo encontrado para esse filtro.
+        </p>
     </div>
+
+    <style>
+        .resumo-chip { cursor: pointer; min-width: 155px; transition: border-color .15s ease; }
+        .resumo-chip:hover { border-color: var(--brand-blue); }
+        .resumo-chip.is-active { border-color: var(--brand-blue-dark); background: var(--brand-blue-soft); }
+        .resumo-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+        .resumo-num { font-size: 18px; line-height: 1; }
+        .resumo-lbl { font-size: 10px; }
+    </style>
+
+    <script>
+    (function () {
+        var filtroAtivo = '<?= ProcessoVantajosidade::STATUS_EM_ANDAMENTO ?>';
+        var chips = document.querySelectorAll('.resumo-chip');
+        var cartoes = document.querySelectorAll('[data-status]');
+        var semResultado = document.getElementById('semResultadoVant');
+        var campoBusca = document.getElementById('buscaVantajosidade');
+        var contagem = document.getElementById('contagemResultadoVant');
+
+        function aplicarFiltros() {
+            var query = campoBusca.value.trim().toLowerCase();
+            var visiveis = 0;
+
+            cartoes.forEach(function (cartao) {
+                var visivel = cartao.dataset.status === filtroAtivo;
+
+                if (visivel && query) {
+                    visivel = cartao.dataset.busca.indexOf(query) !== -1;
+                }
+
+                cartao.classList.toggle('d-none', !visivel);
+                if (visivel) visiveis++;
+            });
+
+            semResultado.classList.toggle('d-none', visiveis > 0);
+            contagem.textContent = visiveis + ' processo' + (visiveis === 1 ? '' : 's');
+        }
+
+        chips.forEach(function (chip) {
+            chip.addEventListener('click', function () {
+                filtroAtivo = chip.dataset.statusFiltro;
+                chips.forEach(function (c) { c.classList.remove('is-active'); });
+                chip.classList.add('is-active');
+                aplicarFiltros();
+            });
+        });
+
+        campoBusca.addEventListener('input', aplicarFiltros);
+
+        aplicarFiltros();
+    })();
+    </script>
+
 <?php endif; ?>
 
 <!-- MODAL 1: Pergunta inicial sobre vinculo -->

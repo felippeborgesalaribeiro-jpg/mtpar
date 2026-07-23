@@ -4,6 +4,7 @@ require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Lote.php';
 require_once __DIR__ . '/Servidor.php';
 require_once __DIR__ . '/StatusCotacao.php';
+require_once __DIR__ . '/Parametro.php';
 
 class Cotacao
 {
@@ -154,10 +155,11 @@ class Cotacao
     public function calcularValorTotal(): float
     {
         $valorTotal = 0.0;
+        $parametrosPrecoPublico = Parametro::buscarNomesPrecoPublico();
 
         foreach ($this->buscarLotes() as $lote) {
             foreach ($lote->buscarItens() as $item) {
-                $resultado = $item->analisar($this->criterioConsolidacao);
+                $resultado = $item->analisar($this->criterioConsolidacao, $parametrosPrecoPublico);
                 $valorReferencia = $resultado['valor_referencia'] ?? 0;
                 $valorTotal += $valorReferencia * $item->quantidade;
             }

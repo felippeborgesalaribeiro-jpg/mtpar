@@ -68,8 +68,10 @@ class RelatorioLicitacao
             $grupos[$chave]['quantidade']++;
             $grupos[$chave]['valor_estimado'] += $licitacao->valorEstimado ?? 0;
 
-            if ($licitacao->valorAdjudicado !== null) {
-                $grupos[$chave]['valor_adjudicado'] += $licitacao->valorAdjudicado;
+            // "Homologada" exige o ato formal de finalizar o processo -
+            // so ter um valor_adjudicado digitado nao basta (pode ser rascunho).
+            if ($licitacao->estaFinalizada()) {
+                $grupos[$chave]['valor_adjudicado'] += $licitacao->valorAdjudicado ?? 0;
                 $grupos[$chave]['valor_estimado_homologadas'] += $licitacao->valorEstimado ?? 0;
                 $grupos[$chave]['homologadas']++;
             }

@@ -198,11 +198,6 @@ class Licitacao
         return $this->encaminhadoPactuacaoContrato === null;
     }
 
-    public function foiHomologada(): bool
-    {
-        return $this->valorAdjudicado !== null;
-    }
-
     /**
      * Nao existe coluna de status: e inferido a partir dos campos que ja
      * marcam o avanco da licitacao (edital, data de adjudicacao/homologacao,
@@ -299,7 +294,7 @@ class Licitacao
     public static function contarHomologadas(): int
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->query('SELECT COUNT(*) FROM licitacoes WHERE valor_adjudicado IS NOT NULL');
+        $stmt = $pdo->query('SELECT COUNT(*) FROM licitacoes WHERE data_adjudicacao_homologacao IS NOT NULL');
 
         return (int) $stmt->fetchColumn();
     }
@@ -307,7 +302,10 @@ class Licitacao
     public static function somarValorAdjudicadoHomologadas(): float
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->query('SELECT SUM(valor_adjudicado) FROM licitacoes WHERE valor_adjudicado IS NOT NULL');
+        $stmt = $pdo->query(
+            'SELECT SUM(valor_adjudicado) FROM licitacoes
+             WHERE data_adjudicacao_homologacao IS NOT NULL AND valor_adjudicado IS NOT NULL'
+        );
 
         return (float) ($stmt->fetchColumn() ?? 0);
     }

@@ -187,6 +187,23 @@ final class LicitacaoTest extends DatabaseTestCase
         $this->assertEqualsWithDelta(223753.69, (float) $novaLeitura, 0.001);
     }
 
+    public function testContarEsomarHomologadasIgnoramValorAdjudicadoSemFinalizar(): void
+    {
+        $demandaRascunho = $this->criarDemanda();
+        $licitacaoRascunho = Licitacao::criarApartirDeDemanda($demandaRascunho);
+        $licitacaoRascunho->valorAdjudicado = 700.0;
+        $licitacaoRascunho->salvar();
+
+        $this->assertSame(0, Licitacao::contarHomologadas());
+        $this->assertEqualsWithDelta(0.0, Licitacao::somarValorAdjudicadoHomologadas(), 0.001);
+
+        $licitacaoRascunho->dataAdjudicacaoHomologacao = '2026-03-10';
+        $licitacaoRascunho->salvar();
+
+        $this->assertSame(1, Licitacao::contarHomologadas());
+        $this->assertEqualsWithDelta(700.0, Licitacao::somarValorAdjudicadoHomologadas(), 0.001);
+    }
+
     public function testEstaFinalizadaSoEhVerdadeiroComDataAdjudicacaoHomologacaoDefinida(): void
     {
         $demanda = $this->criarDemanda();

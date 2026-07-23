@@ -30,8 +30,15 @@ class ServidorController
             return;
         }
 
+        if (Servidor::buscarPorUsuario($usuario) !== null) {
+            $_SESSION['erro'] = "Já existe um servidor cadastrado com o usuário <strong>{$usuario}</strong>.";
+            header('Location: index.php?action=servidores');
+            exit;
+        }
+
         $servidor = new Servidor($nome, $matricula, $cargo, $usuario, '', $nivelAcesso);
         $servidor->definirSenha('123');
+        $servidor->senhaProvisoria = true;
         $servidor->salvar();
 
         header('Location: index.php?action=servidores');
@@ -54,6 +61,13 @@ class ServidorController
         if ($servidor === null) {
             echo 'Servidor não encontrado.';
             return;
+        }
+
+        $existente = Servidor::buscarPorUsuario($usuario);
+        if ($existente !== null && $existente->id !== $servidor->id) {
+            $_SESSION['erro'] = "Já existe outro servidor cadastrado com o usuário <strong>{$usuario}</strong>.";
+            header('Location: index.php?action=servidores');
+            exit;
         }
 
         $servidor->nome = $nome;
@@ -91,6 +105,16 @@ class ServidorController
         $servidor = Servidor::buscarPorId($id);
 
         if ($servidor !== null) {
+            $vinculos = $servidor->contarVinculos();
+
+            if ($vinculos > 0) {
+                $_SESSION['erro'] = "Não é possível excluir <strong>{$servidor->nome}</strong>: "
+                    . "há {$vinculos} registro(s) (demandas, licitações, cotações ou vantajosidade) "
+                    . "vinculados a esse servidor como responsável.";
+                header('Location: index.php?action=servidores');
+                exit;
+            }
+
             $servidor->excluir();
         }
 

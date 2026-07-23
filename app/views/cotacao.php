@@ -78,7 +78,7 @@ $statusLabel = [
         <?php endif; ?>
         <a href="index.php?action=excluir_cotacao&id=<?= $cotacao->id ?>"
            class="btn btn-sm btn-outline-danger"
-           onclick="return confirm('Excluir toda a cotação, incluindo lotes, itens e preços?')">
+           onclick="return confirm('Excluir toda a cotação, incluindo lotes, itens e preços? Ela vai para a lixeira do Administrador, que pode restaurá-la depois se precisar.')">
             <i class="ti ti-trash" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
             Excluir
         </a>

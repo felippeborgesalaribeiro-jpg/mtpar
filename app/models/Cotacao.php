@@ -20,6 +20,7 @@ class Cotacao
     public string $criadoEm;
     public ?int $demandaId;
     public ?string $deletedAt;
+    public bool $ehRepublicacaoLote;
 
     public function __construct(
         string $numeroProcesso,
@@ -33,7 +34,8 @@ class Cotacao
         ?int $id = null,
         string $criadoEm = '',
         ?int $demandaId = null,
-        ?string $deletedAt = null
+        ?string $deletedAt = null,
+        bool $ehRepublicacaoLote = false
     ) {
         $this->id = $id;
         $this->numeroProcesso = $numeroProcesso;
@@ -47,6 +49,7 @@ class Cotacao
         $this->criadoEm = $criadoEm;
         $this->demandaId = $demandaId;
         $this->deletedAt = $deletedAt;
+        $this->ehRepublicacaoLote = $ehRepublicacaoLote;
     }
 
     public function salvar(): int
@@ -55,8 +58,8 @@ class Cotacao
 
         if ($this->id === null) {
             $stmt = $pdo->prepare(
-                'INSERT INTO cotacoes (numero_processo, orgao_setor, procedimento, tipo_julgamento, objeto, servidor_id, criterio_consolidacao, status, demanda_id)
-                 VALUES (:numero_processo, :orgao_setor, :procedimento, :tipo_julgamento, :objeto, :servidor_id, :criterio_consolidacao, :status, :demanda_id)'
+                'INSERT INTO cotacoes (numero_processo, orgao_setor, procedimento, tipo_julgamento, objeto, servidor_id, criterio_consolidacao, status, demanda_id, eh_republicacao_lote)
+                 VALUES (:numero_processo, :orgao_setor, :procedimento, :tipo_julgamento, :objeto, :servidor_id, :criterio_consolidacao, :status, :demanda_id, :eh_republicacao_lote)'
             );
             $stmt->execute([
                 'numero_processo'      => $this->numeroProcesso,
@@ -68,6 +71,7 @@ class Cotacao
                 'criterio_consolidacao' => $this->criterioConsolidacao,
                 'status'               => $this->status->value,
                 'demanda_id'           => $this->demandaId,
+                'eh_republicacao_lote' => $this->ehRepublicacaoLote ? 1 : 0,
             ]);
             $this->id = (int) $pdo->lastInsertId();
         } else {
@@ -75,7 +79,7 @@ class Cotacao
                 'UPDATE cotacoes SET numero_processo = :numero_processo, orgao_setor = :orgao_setor,
                  procedimento = :procedimento, tipo_julgamento = :tipo_julgamento, objeto = :objeto,
                  servidor_id = :servidor_id, criterio_consolidacao = :criterio_consolidacao, status = :status,
-                 demanda_id = :demanda_id
+                 demanda_id = :demanda_id, eh_republicacao_lote = :eh_republicacao_lote
                  WHERE id = :id'
             );
             $stmt->execute([
@@ -88,6 +92,7 @@ class Cotacao
                 'criterio_consolidacao' => $this->criterioConsolidacao,
                 'status'               => $this->status->value,
                 'demanda_id'           => $this->demandaId,
+                'eh_republicacao_lote' => $this->ehRepublicacaoLote ? 1 : 0,
                 'id'                   => $this->id,
             ]);
         }
@@ -207,7 +212,10 @@ class Cotacao
     public static function buscarTodas(): array
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->query('SELECT * FROM cotacoes WHERE deleted_at IS NULL ORDER BY id DESC');
+        // Cotacoes criadas automaticamente pra republicar um lote fracassado/deserto
+        // (Cotacao::ehRepublicacaoLote) nao aparecem na listagem geral - sao
+        // sub-registros do Processo, so acessiveis a partir dele.
+        $stmt = $pdo->query('SELECT * FROM cotacoes WHERE deleted_at IS NULL AND eh_republicacao_lote = 0 ORDER BY id DESC');
 
         $cotacoes = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $linha) {
@@ -234,7 +242,8 @@ class Cotacao
     {
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare(
-            'SELECT * FROM cotacoes WHERE servidor_id = :servidor_id AND status = :status AND deleted_at IS NULL ORDER BY id DESC'
+            'SELECT * FROM cotacoes WHERE servidor_id = :servidor_id AND status = :status
+             AND deleted_at IS NULL AND eh_republicacao_lote = 0 ORDER BY id DESC'
         );
         $stmt->execute(['servidor_id' => $servidorId, 'status' => StatusCotacao::EmAndamento->value]);
 
@@ -266,7 +275,8 @@ class Cotacao
             (int) $linha['id'],
             $linha['criado_em'] ?? '',
             $linha['demanda_id'] !== null ? (int) $linha['demanda_id'] : null,
-            $linha['deleted_at'] ?? null
+            $linha['deleted_at'] ?? null,
+            (bool) ($linha['eh_republicacao_lote'] ?? false)
         );
     }
 }

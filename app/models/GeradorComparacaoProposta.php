@@ -17,6 +17,8 @@ class GeradorComparacaoProposta
 {
     private Licitacao $licitacao;
     private Cotacao $cotacao;
+    /** @var array<int, Lote> lotes ATUAIS a exibir (ja resolvidos por Licitacao::buscarLotesAtivos - considera republicacoes) */
+    private array $lotes;
     /** @var array<int, Empresa> empresa vencedora de cada lote, indexado por lote_id */
     private array $empresasPorLote;
     private ?Servidor $conferidoPor;
@@ -29,6 +31,7 @@ class GeradorComparacaoProposta
     const TAMANHO_PADRAO = 11;
 
     /**
+     * @param array<int, Lote> $lotes lotes atuais a exibir (ja resolvidos considerando republicacoes)
      * @param array<int, Empresa> $empresasPorLote empresa vencedora de cada
      * lote (indexado por lote_id) - lotes ainda sem empresa definida podem
      * ficar de fora do array.
@@ -36,11 +39,13 @@ class GeradorComparacaoProposta
     public function __construct(
         Licitacao $licitacao,
         Cotacao $cotacao,
+        array $lotes,
         array $empresasPorLote,
         ?Servidor $conferidoPor = null
     ) {
         $this->licitacao = $licitacao;
         $this->cotacao = $cotacao;
+        $this->lotes = $lotes;
         $this->empresasPorLote = $empresasPorLote;
         $this->conferidoPor = $conferidoPor;
 
@@ -105,13 +110,14 @@ class GeradorComparacaoProposta
         $secao = $this->documento->addSection();
         $secao->addText('COMPARAÇÃO POR LOTE E ITEM', ['bold' => true, 'size' => 12], ['spaceAfter' => 300]);
 
-        foreach ($this->cotacao->buscarLotes() as $lote) {
+        foreach ($this->lotes as $lote) {
             $this->montarTabelaLote($secao, $lote);
         }
     }
 
     private function montarTabelaLote($secao, Lote $lote): void
     {
+        $cotacaoDoLote = Cotacao::buscarPorId($lote->cotacaoId) ?? $this->cotacao;
         $estiloTabela = ['borderSize' => 6, 'borderColor' => '000000', 'cellMargin' => 80];
         $estiloCabecalho = ['bgColor' => 'D9D9D9'];
         $fonteCabecalho = ['bold' => true, 'size' => 8];
@@ -145,7 +151,7 @@ class GeradorComparacaoProposta
         $subtotalTemPendente = false;
 
         foreach ($lote->buscarItens() as $item) {
-            $resultado = $item->analisar($this->cotacao->criterioConsolidacao);
+            $resultado = $item->analisar($cotacaoDoLote->criterioConsolidacao);
             $valorReferencia = $resultado['valor_referencia'] ?? 0;
             $propostaItem = ItemPropostaVencedora::buscarPorLicitacaoEItem($this->licitacao->id, $item->id);
 

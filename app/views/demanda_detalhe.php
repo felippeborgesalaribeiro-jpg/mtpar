@@ -241,7 +241,12 @@ $modoEdicao = ($modo === 'editar');
                     <i class="ti ti-clipboard-check" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
                     Conferir proposta vencedora
                 </a>
-                <?php if ($licitacao->estaFinalizada()): ?>
+                <?php if ($resumoLotes !== null && $resumoLotes['com_vencedor'] < $resumoLotes['total']): ?>
+                    <span class="badge bg-primary-subtle text-primary d-flex align-items-center px-2">
+                        <i class="ti ti-list-check" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+                        &nbsp;<?= $resumoLotes['com_vencedor'] ?> de <?= $resumoLotes['total'] ?> lotes com vencedor definido
+                    </span>
+                <?php elseif ($licitacao->estaFinalizada()): ?>
                     <span class="badge bg-success-subtle text-success d-flex align-items-center px-2">
                         <i class="ti ti-circle-check" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
                         &nbsp;Processo finalizado em <?= date('d/m/Y', strtotime($licitacao->dataAdjudicacaoHomologacao)) ?>

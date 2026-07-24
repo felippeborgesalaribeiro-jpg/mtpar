@@ -159,6 +159,28 @@ final class CotacaoTest extends DatabaseTestCase
         $this->assertEqualsWithDelta(372.0, $cotacao->calcularValorTotal(), 0.001);
     }
 
+    public function testCotacaoDeRepublicacaoDeLoteNaoAparecemEmBuscarTodas(): void
+    {
+        $servidor = $this->criarServidor();
+
+        $cotacaoNormal = new Cotacao('MTPAR-PRO-2026/00009', '', '', '', '', $servidor->id);
+        $cotacaoNormal->salvar();
+
+        $cotacaoRepublicacao = new Cotacao('MTPAR-PRO-2026/00009-R2', '', '', '', '', $servidor->id, ehRepublicacaoLote: true);
+        $cotacaoRepublicacao->salvar();
+
+        $todas = Cotacao::buscarTodas();
+        $ids = array_map(fn($c) => $c->id, $todas);
+
+        $this->assertContains($cotacaoNormal->id, $ids);
+        $this->assertNotContains($cotacaoRepublicacao->id, $ids);
+
+        // Mas continua acessivel por id normalmente (so nao aparece na lista).
+        $recarregada = Cotacao::buscarPorId($cotacaoRepublicacao->id);
+        $this->assertNotNull($recarregada);
+        $this->assertTrue($recarregada->ehRepublicacaoLote);
+    }
+
     public function testCotacaoCriadaSemDemandaPodeSerVinculadaDepois(): void
     {
         $servidor = $this->criarServidor();

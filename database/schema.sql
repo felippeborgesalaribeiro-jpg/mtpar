@@ -87,6 +87,7 @@ CREATE TABLE IF NOT EXISTS cotacoes (
     criado_em TEXT NOT NULL DEFAULT (datetime('now')),
     demanda_id INTEGER REFERENCES demandas(id),
     deleted_at TEXT DEFAULT NULL,
+    eh_republicacao_lote INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY (servidor_id) REFERENCES servidores(id)
 );
 
@@ -108,6 +109,43 @@ CREATE TABLE IF NOT EXISTS lotes_proposta_vencedora (
     FOREIGN KEY (lote_id) REFERENCES lotes(id) ON DELETE CASCADE,
     FOREIGN KEY (empresa_vencedora_id) REFERENCES empresas(id),
     UNIQUE (licitacao_id, lote_id)
+);
+
+-- Marca um lote (de qualquer rodada) como fracassado ou deserto. So existe
+-- linha aqui pra lotes que de fato fracassaram/desertaram - "aguardando
+-- julgamento" e "homologado" sao inferidos (ausencia de linha / presenca em
+-- lotes_proposta_vencedora), nao guardados aqui.
+CREATE TABLE IF NOT EXISTS situacoes_lote (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    licitacao_id INTEGER NOT NULL,
+    lote_id INTEGER NOT NULL,
+    situacao TEXT NOT NULL,
+    motivo TEXT NOT NULL DEFAULT '',
+    data_situacao TEXT NOT NULL,
+    criado_em TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (licitacao_id) REFERENCES licitacoes(id) ON DELETE CASCADE,
+    FOREIGN KEY (lote_id) REFERENCES lotes(id) ON DELETE CASCADE,
+    UNIQUE (licitacao_id, lote_id)
+);
+
+-- Encadeia um lote fracassado/deserto (lote_anterior_id) com o lote novo
+-- criado numa cotacao de republicacao (lote_novo_id) - permite reconstruir
+-- a cadeia completa de rodadas de um mesmo "slot" de lote.
+CREATE TABLE IF NOT EXISTS republicacoes_lote (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    licitacao_id INTEGER NOT NULL,
+    lote_anterior_id INTEGER NOT NULL,
+    lote_novo_id INTEGER NOT NULL,
+    cotacao_nova_id INTEGER NOT NULL,
+    numero_rodada INTEGER NOT NULL,
+    situacao_anterior TEXT NOT NULL,
+    motivo TEXT NOT NULL DEFAULT '',
+    criado_em TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (licitacao_id) REFERENCES licitacoes(id) ON DELETE CASCADE,
+    FOREIGN KEY (lote_anterior_id) REFERENCES lotes(id) ON DELETE CASCADE,
+    FOREIGN KEY (lote_novo_id) REFERENCES lotes(id) ON DELETE CASCADE,
+    FOREIGN KEY (cotacao_nova_id) REFERENCES cotacoes(id) ON DELETE CASCADE,
+    UNIQUE (lote_anterior_id)
 );
 
 CREATE TABLE IF NOT EXISTS itens (

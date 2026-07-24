@@ -195,6 +195,14 @@ switch ($action) {
         (new PropostaVencedoraController())->gerarDocumento();
         break;
 
+    case 'marcar_situacao_lote':
+        (new PropostaVencedoraController())->marcarSituacaoLote();
+        break;
+
+    case 'republicar_lote':
+        (new PropostaVencedoraController())->republicarLote();
+        break;
+
     case 'gerar_termo_adjudicacao':
         (new PropostaVencedoraController())->gerarTermoAdjudicacao();
         break;

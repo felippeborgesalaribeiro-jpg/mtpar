@@ -181,6 +181,47 @@ class Licitacao
         return $this->dataAdjudicacaoHomologacao !== null;
     }
 
+    /**
+     * @return array<int, array{lote_original: Lote, lote_atual: Lote, rodada: int}>
+     *
+     * Pra cada lote da Cotacao vinculada, segue a cadeia de republicacoes
+     * (lotes_republicacoes) ate achar o lote ATUAL daquele "slot" - o lote
+     * original se nunca fracassou, ou o lote da rodada mais recente se ja
+     * foi republicado uma ou mais vezes.
+     */
+    public function buscarLotesAtivos(): array
+    {
+        require_once __DIR__ . '/Cotacao.php';
+        require_once __DIR__ . '/Lote.php';
+        require_once __DIR__ . '/RepublicacaoLote.php';
+
+        $cotacao = Cotacao::buscarPorDemandaId($this->demandaId);
+
+        if ($cotacao === null) {
+            return [];
+        }
+
+        $lotesAtivos = [];
+
+        foreach ($cotacao->buscarLotes() as $loteOriginal) {
+            $atual = $loteOriginal;
+            $rodada = 1;
+
+            while (($proxima = RepublicacaoLote::buscarPorLoteAnterior($atual->id)) !== null) {
+                $atual = Lote::buscarPorId($proxima->loteNovoId);
+                $rodada = $proxima->numeroRodada;
+            }
+
+            $lotesAtivos[] = [
+                'lote_original' => $loteOriginal,
+                'lote_atual' => $atual,
+                'rodada' => $rodada,
+            ];
+        }
+
+        return $lotesAtivos;
+    }
+
     public function calcularDiasNaLicitacao(): int
     {
         $dataInicio = new DateTime($this->dataRecebimento);

@@ -19,6 +19,8 @@ class GeradorTermoAdjudicacaoHomologacao
 {
     private Licitacao $licitacao;
     private Cotacao $cotacao;
+    /** @var array<int, Lote> lotes ATUAIS a exibir (ja resolvidos por Licitacao::buscarLotesAtivos - considera republicacoes) */
+    private array $lotes;
     /** @var array<int, Empresa> empresa vencedora de cada lote, indexado por lote_id */
     private array $empresasPorLote;
     /** @var array<int, string> categoria opcional de cada lote (ex.: "AMPLA CONCORRÊNCIA"), indexado por lote_id */
@@ -34,18 +36,21 @@ class GeradorTermoAdjudicacaoHomologacao
     const LARGURA_TABELA_LOTE = 10100;
 
     /**
+     * @param array<int, Lote> $lotes lotes atuais a exibir (ja resolvidos considerando republicacoes)
      * @param array<int, Empresa> $empresasPorLote
      * @param array<int, string> $categoriasPorLote
      */
     public function __construct(
         Licitacao $licitacao,
         Cotacao $cotacao,
+        array $lotes,
         array $empresasPorLote,
         array $categoriasPorLote,
         string $data
     ) {
         $this->licitacao = $licitacao;
         $this->cotacao = $cotacao;
+        $this->lotes = $lotes;
         $this->empresasPorLote = $empresasPorLote;
         $this->categoriasPorLote = $categoriasPorLote;
         $this->data = $data;
@@ -100,7 +105,7 @@ class GeradorTermoAdjudicacaoHomologacao
     private function listaNumerosLotes(): string
     {
         $numeros = [];
-        foreach ($this->cotacao->buscarLotes() as $lote) {
+        foreach ($this->lotes as $lote) {
             if (isset($this->empresasPorLote[$lote->id])) {
                 $numeros[] = $lote->numero;
             }
@@ -128,10 +133,10 @@ class GeradorTermoAdjudicacaoHomologacao
     private function montarParagrafoResolutivo($secao): void
     {
         $lotesComEmpresa = array_filter(
-            $this->cotacao->buscarLotes(),
+            $this->lotes,
             fn($lote) => isset($this->empresasPorLote[$lote->id])
         );
-        $loteUnico = count($lotesComEmpresa) === 1 && count($this->cotacao->buscarLotes()) === 1;
+        $loteUnico = count($lotesComEmpresa) === 1 && count($this->lotes) === 1;
 
         $paragrafo = $secao->addTextRun(['alignment' => Jc::BOTH, 'spaceAfter' => 300]);
         $paragrafo->addText(
@@ -156,7 +161,7 @@ class GeradorTermoAdjudicacaoHomologacao
 
     private function montarTabelasPorLote($secao): void
     {
-        foreach ($this->cotacao->buscarLotes() as $lote) {
+        foreach ($this->lotes as $lote) {
             if (!isset($this->empresasPorLote[$lote->id])) {
                 continue;
             }

@@ -5,6 +5,8 @@ require_once __DIR__ . '/../models/Licitacao.php';
 require_once __DIR__ . '/../models/Servidor.php';
 require_once __DIR__ . '/../models/Cotacao.php';
 require_once __DIR__ . '/../models/ProcessoVantajosidade.php';
+require_once __DIR__ . '/../models/LotePropostaVencedora.php';
+require_once __DIR__ . '/../models/SituacaoLote.php';
 require_once __DIR__ . '/../helpers/auth.php';
 
 class DemandaController
@@ -36,8 +38,44 @@ class DemandaController
         $licitacao = Licitacao::buscarPorDemandaId($demanda->id);
         $cotacao = $demanda->buscarCotacaoVinculada();
         $vantajosidade = $demanda->buscarVantajosidadeVinculada();
+        $resumoLotes = $this->montarResumoLotes($licitacao);
 
         require __DIR__ . '/../views/demanda_detalhe.php';
+    }
+
+    /**
+     * So retorna um resumo (pra mostrar em vez do badge simples de
+     * "Processo finalizado") quando ha mais de um lote ou algum lote
+     * fracassou/desertou - senao mantem o comportamento simples de antes.
+     */
+    private function montarResumoLotes(?Licitacao $licitacao): ?array
+    {
+        if ($licitacao === null) {
+            return null;
+        }
+
+        $lotesAtivos = $licitacao->buscarLotesAtivos();
+        $temFracasso = false;
+        $comVencedor = 0;
+
+        foreach ($lotesAtivos as $entrada) {
+            $loteAtualId = $entrada['lote_atual']->id;
+
+            if (SituacaoLote::buscarPorLicitacaoELote($licitacao->id, $loteAtualId) !== null) {
+                $temFracasso = true;
+            } elseif (LotePropostaVencedora::buscarPorLicitacaoELote($licitacao->id, $loteAtualId) !== null) {
+                $comVencedor++;
+            }
+        }
+
+        if (count($lotesAtivos) <= 1 && !$temFracasso) {
+            return null;
+        }
+
+        return [
+            'total' => count($lotesAtivos),
+            'com_vencedor' => $comVencedor,
+        ];
     }
 
     public function criar(): void

@@ -30,7 +30,7 @@ require __DIR__ . '/partials/header.php';
     </div>
 <?php else: ?>
 
-<?php if (count($lotes) > 1): ?>
+<?php if (count($lotesAtivos) > 1): ?>
 <div class="d-flex justify-content-end mb-2">
     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalSelecionarLotes">
         <i class="ti ti-filter" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
@@ -84,20 +84,98 @@ require __DIR__ . '/partials/header.php';
     </div>
 
     <!-- Lotes -->
-    <?php foreach ($lotes as $lote): ?>
+    <?php foreach ($lotesAtivos as $entradaLote): ?>
         <?php
+        $lote = $entradaLote['lote_atual'];
+        $rodada = $entradaLote['rodada'];
         $itens = $lote->buscarItens();
         $loteProposta = $lotesComEmpresa[$lote->id] ?? null;
         $empresaDoLote = $loteProposta !== null ? $loteProposta->buscarEmpresa() : null;
+        $situacaoLote = $situacoesLote[$lote->id] ?? null;
+        $republicacaoDesteRodada = $rodada > 1 ? RepublicacaoLote::buscarPorLoteAnterior($lote->id) : null;
+        $origemDestaRodada = $rodada > 1 ? RepublicacaoLote::buscarPorLoteNovo($lote->id) : null;
+        $cotacaoDoLote = Cotacao::buscarPorId($lote->cotacaoId) ?? $cotacao;
         ?>
-        <div class="card shadow-sm mb-3" data-lote data-lote-numero="<?= htmlspecialchars($lote->numero) ?>">
-            <div class="card-header bg-white d-flex align-items-center justify-content-between py-2">
+        <div class="card shadow-sm mb-3" data-lote data-lote-id="<?= $lote->id ?>" data-lote-numero="<?= htmlspecialchars($lote->numero) ?>">
+            <div class="card-header bg-white d-flex align-items-center justify-content-between py-2 flex-wrap gap-2">
                 <span class="fw-semibold small">
                     <i class="ti ti-package" aria-hidden="true" style="font-size:15px; color: var(--brand-blue-dark); vertical-align: -2px;"></i>
                     Lote <?= htmlspecialchars($lote->numero) ?>
+                    <?php if ($rodada > 1): ?>
+                        <span class="badge bg-info-subtle text-info ms-1" style="font-size:10px;">Rodada <?= $rodada ?></span>
+                    <?php endif; ?>
                 </span>
-                <span class="text-muted small"><?= count($itens) ?> ite<?= count($itens) === 1 ? 'm' : 'ns' ?></span>
+                <div class="d-flex align-items-center gap-2">
+                    <?php if ($situacaoLote !== null): ?>
+                        <span class="badge <?= $situacaoLote->situacao === 'DESERTO' ? 'bg-dark-subtle text-dark' : 'bg-danger-subtle text-danger' ?>" style="font-size:10px;">
+                            <?= $situacaoLote->situacao === 'DESERTO' ? 'Deserto' : 'Fracassado' ?>
+                        </span>
+                    <?php elseif ($empresaDoLote !== null): ?>
+                        <span class="badge bg-success-subtle text-success" style="font-size:10px;">Vencedor definido</span>
+                    <?php else: ?>
+                        <span class="badge bg-secondary-subtle text-secondary" style="font-size:10px;">Aguardando julgamento</span>
+                    <?php endif; ?>
+                    <span class="text-muted small"><?= count($itens) ?> ite<?= count($itens) === 1 ? 'm' : 'ns' ?></span>
+                    <?php if ($situacaoLote === null): ?>
+                        <button type="button" class="btn btn-sm btn-outline-danger btn-marcar-fracasso"
+                                data-lote-id="<?= $lote->id ?>" data-lote-numero="<?= htmlspecialchars($lote->numero) ?>">
+                            <i class="ti ti-alert-triangle" aria-hidden="true" style="font-size:12px; vertical-align:-1px;"></i>
+                            Fracassado/Deserto
+                        </button>
+                    <?php endif; ?>
+                </div>
             </div>
+
+            <?php if ($rodada > 1 && $origemDestaRodada !== null): ?>
+                <div class="px-3 pt-2 d-flex flex-wrap align-items-center gap-2">
+                    <p class="text-muted small mb-0 fst-italic">
+                        <i class="ti ti-history" aria-hidden="true" style="font-size:12px; vertical-align:-1px;"></i>
+                        Rodada anterior deu <?= $origemDestaRodada->situacaoAnterior === 'DESERTO' ? 'deserta' : 'fracassada' ?>
+                        <?= $origemDestaRodada->motivo !== '' ? ' — ' . htmlspecialchars($origemDestaRodada->motivo) : '' ?>.
+                        Republicado nesta Rodada <?= $rodada ?>.
+                    </p>
+                    <a href="index.php?action=cotacao&id=<?= $cotacaoDoLote->id ?>" class="btn btn-sm btn-outline-primary ms-auto">
+                        <i class="ti ti-search" aria-hidden="true" style="font-size:12px; vertical-align:-1px;"></i>
+                        Ver cotação <?= htmlspecialchars($cotacaoDoLote->numeroProcesso) ?>
+                    </a>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($situacaoLote !== null): ?>
+                <div class="card-body">
+                    <p class="small mb-2">
+                        <strong><?= $situacaoLote->situacao === 'DESERTO' ? 'Deserto' : 'Fracassado' ?></strong>
+                        em <?= date('d/m/Y', strtotime($situacaoLote->dataSituacao)) ?>
+                        <?php if ($situacaoLote->motivo !== ''): ?> — <?= htmlspecialchars($situacaoLote->motivo) ?><?php endif; ?>
+                    </p>
+
+                    <?php if ($republicacaoDesteRodada !== null): ?>
+                        <?php $cotacaoNova = Cotacao::buscarPorId($republicacaoDesteRodada->cotacaoNovaId); ?>
+                        <div class="border border-dashed rounded p-2" style="background: var(--brand-blue-soft, #E1F8FF);">
+                            <p class="mb-1 small fw-semibold text-primary">
+                                <i class="ti ti-refresh" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+                                Rodada <?= $republicacaoDesteRodada->numeroRodada ?> — republicação
+                            </p>
+                            <p class="mb-2 small text-muted">Nova pesquisa de preço criada só com os itens deste lote.</p>
+                            <?php if ($cotacaoNova !== null): ?>
+                                <a href="index.php?action=cotacao&id=<?= $cotacaoNova->id ?>" class="btn btn-sm btn-outline-primary">
+                                    <i class="ti ti-search" aria-hidden="true" style="font-size:12px; vertical-align:-1px;"></i>
+                                    Ver cotação <?= htmlspecialchars($cotacaoNova->numeroProcesso) ?>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    <?php else: ?>
+                        <form method="post" action="index.php?action=republicar_lote">
+                            <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
+                            <input type="hidden" name="lote_id" value="<?= $lote->id ?>">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="ti ti-refresh" aria-hidden="true" style="font-size:12px; vertical-align:-1px;"></i>
+                                Republicar este lote
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                </div>
+            <?php else: ?>
 
             <!-- Empresa vencedora deste lote -->
             <div class="card-body border-bottom empresa-lote-widget" data-lote-id="<?= $lote->id ?>">
@@ -164,7 +242,7 @@ require __DIR__ . '/partials/header.php';
                     <tbody>
                         <?php foreach ($itens as $item): ?>
                             <?php
-                            $resultado = $item->analisar($cotacao->criterioConsolidacao);
+                            $resultado = $item->analisar($cotacaoDoLote->criterioConsolidacao);
                             $valorReferencia = $resultado['valor_referencia'] ?? 0;
                             $propostaExistente = $valoresPropostos[$item->id] ?? null;
                             ?>
@@ -198,6 +276,7 @@ require __DIR__ . '/partials/header.php';
                     </tfoot>
                 </table>
             </div>
+            <?php endif; ?>
         </div>
     <?php endforeach; ?>
 
@@ -211,6 +290,52 @@ require __DIR__ . '/partials/header.php';
     </div>
 </form>
 
+<!-- Modal: marcar lote como fracassado/deserto -->
+<div class="modal fade" id="modalMarcarFracasso" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="index.php?action=marcar_situacao_lote">
+                <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
+                <input type="hidden" name="lote_id" id="fracassoLoteId" value="">
+                <div class="modal-header">
+                    <h5 class="modal-title">Marcar <span id="fracassoLoteLabel">este lote</span> como fracassado ou deserto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">Isso encerra a rodada atual do lote e libera a opção de republicar.</p>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">O que aconteceu?</label>
+                        <div class="d-flex gap-2">
+                            <label class="border rounded p-2 flex-fill text-center small" style="cursor:pointer;">
+                                <input type="radio" name="situacao" value="FRACASSADO" class="form-check-input me-1" checked>
+                                Fracassado<br><span class="text-muted">houve interessados, nenhum habilitado</span>
+                            </label>
+                            <label class="border rounded p-2 flex-fill text-center small" style="cursor:pointer;">
+                                <input type="radio" name="situacao" value="DESERTO" class="form-check-input me-1">
+                                Deserto<br><span class="text-muted">ninguém apareceu</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Justificativa / observação</label>
+                        <textarea name="motivo" class="form-control form-control-sm" rows="2"></textarea>
+                    </div>
+                    <div class="form-check border rounded p-2">
+                        <input class="form-check-input" type="checkbox" name="republicar_agora" id="checkRepublicarAgora" checked>
+                        <label class="form-check-label small" for="checkRepublicarAgora">
+                            Já criar a cotação de republicação agora, com os mesmos itens do lote
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-sm btn-danger">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Modal: selecionar lotes -->
 <div class="modal fade" id="modalSelecionarLotes" tabindex="-1">
     <div class="modal-dialog">
@@ -222,7 +347,8 @@ require __DIR__ . '/partials/header.php';
             <div class="modal-body">
                 <p class="text-muted small">Não precisa ser sequencial — marque só os lotes que você quer trabalhar agora. Os demais continuam guardados, só ficam ocultos por enquanto.</p>
                 <div class="d-flex flex-wrap gap-2">
-                    <?php foreach ($lotes as $lote): ?>
+                    <?php foreach ($lotesAtivos as $entradaLote): ?>
+                        <?php $lote = $entradaLote['lote_atual']; ?>
                         <div class="form-check form-check-inline border rounded px-2 py-1">
                             <input class="form-check-input checkbox-lote" type="checkbox" value="<?= $lote->id ?>" id="chkLote<?= $lote->id ?>" checked>
                             <label class="form-check-label small" for="chkLote<?= $lote->id ?>">Lote <?= htmlspecialchars($lote->numero) ?></label>
@@ -256,7 +382,8 @@ require __DIR__ . '/partials/header.php';
                                value="<?= $licitacao->dataAdjudicacaoHomologacao ?? date('Y-m-d') ?>">
                     </div>
                     <?php $temLoteComEmpresa = false; ?>
-                    <?php foreach ($lotes as $lote): ?>
+                    <?php foreach ($lotesAtivos as $entradaLote): ?>
+                        <?php $lote = $entradaLote['lote_atual']; ?>
                         <?php $loteProposta = $lotesComEmpresa[$lote->id] ?? null; ?>
                         <?php if ($loteProposta !== null): ?>
                             <?php $temLoteComEmpresa = true; ?>
@@ -321,6 +448,11 @@ tr.lote-subtotal.ok td { background-color: #d1e7dd; }
 
         document.querySelectorAll('[data-lote]').forEach(function (lote) {
             if (lote.style.display === 'none') return;
+
+            // Lotes fracassados/desertos nao tem tabela de itens nem subtotal -
+            // ficam de fora do calculo geral.
+            var subtotalRowCheck = lote.querySelector('.lote-subtotal');
+            if (!subtotalRowCheck) return;
 
             var subEstimado = 0, subProposto = 0, subTemPendente = false, subAlerta = false;
 
@@ -423,7 +555,7 @@ tr.lote-subtotal.ok td { background-color: #d1e7dd; }
                 .map(function (c) { return c.value; });
 
             document.querySelectorAll('[data-lote]').forEach(function (lote) {
-                var loteId = lote.querySelector('.campo-empresa-id') ? lote.querySelector('.campo-empresa-id').name.match(/\[(\d+)\]/)[1] : null;
+                var loteId = lote.dataset.loteId || null;
                 lote.style.display = marcados.indexOf(loteId) === -1 ? 'none' : '';
             });
         });
@@ -568,6 +700,16 @@ tr.lote-subtotal.ok td { background-color: #d1e7dd; }
     }
 
     document.querySelectorAll('.empresa-lote-widget').forEach(inicializarWidgetEmpresa);
+
+    /* ---------- marcar lote como fracassado/deserto ---------- */
+    document.querySelectorAll('.btn-marcar-fracasso').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            document.getElementById('fracassoLoteId').value = btn.dataset.loteId;
+            document.getElementById('fracassoLoteLabel').textContent = 'o Lote ' + btn.dataset.loteNumero;
+            var modal = new bootstrap.Modal(document.getElementById('modalMarcarFracasso'));
+            modal.show();
+        });
+    });
 
     /* ---------- botões salvar / gerar documento ---------- */
     var btnGerar = document.getElementById('btnGerar');

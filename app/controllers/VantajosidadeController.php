@@ -23,6 +23,28 @@ class VantajosidadeController
         require __DIR__ . '/../views/vantajosidade_lista.php';
     }
 
+    /**
+     * Formulario enxuto de vantajosidade nova ja vinculada a uma demanda
+     * especifica - acessado a partir da tela do Processo, sem passar
+     * pelo assistente de 3 modais da lista geral de Vantajosidades.
+     */
+    public function formularioParaDemanda(): void
+    {
+        exigirLogin();
+
+        $demandaId = (int) ($_GET['demanda_id'] ?? 0);
+        $demanda = Demanda::buscarPorId($demandaId);
+
+        if ($demanda === null) {
+            echo 'Processo não encontrado.';
+            return;
+        }
+
+        $servidores = Servidor::buscarTodos();
+
+        require __DIR__ . '/../views/vantajosidade_nova_para_demanda.php';
+    }
+
     public function criar(): void
     {
         exigirLogin();

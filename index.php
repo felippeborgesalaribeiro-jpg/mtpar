@@ -108,8 +108,12 @@ switch ($action) {
         (new CotacaoController())->criar();
         break;
 
-    case 'criar_cotacao_com_demanda':
+    case 'criar_cotacao_com_demanda_nova':
         (new CotacaoController())->criarComDemandaNova();
+        break;
+
+    case 'criar_cotacao_para_demanda':
+        (new CotacaoController())->formularioParaDemanda();
         break;
 
     case 'finalizar_cotacao':
@@ -220,8 +224,12 @@ switch ($action) {
         (new VantajosidadeController())->criar();
         break;
 
-    case 'criar_vantajosidade_com_demanda':
+    case 'criar_vantajosidade_com_demanda_nova':
         (new VantajosidadeController())->criarComDemandaNova();
+        break;
+
+    case 'criar_vantajosidade_para_demanda':
+        (new VantajosidadeController())->formularioParaDemanda();
         break;
 
     case 'finalizar_vantajosidade':

@@ -29,7 +29,7 @@ $statusLabel = [
             <p class="small mb-0">
                 <i class="ti ti-link" aria-hidden="true" style="font-size: 13px; vertical-align: -1px; color: var(--brand-blue-dark);"></i>
                 Vinculada à Demanda nº <?= htmlspecialchars($demandaVinculada->numeroProcesso) ?>
-                <a href="index.php?action=ver_demanda&id=<?= $demandaVinculada->id ?>" class="text-decoration-none">
+                <a href="index.php?action=ver_demanda&id=<?= $demandaVinculada->id ?>&origem=cotacao&origem_id=<?= $cotacao->id ?>" class="text-decoration-none">
                     (ver processo <i class="ti ti-arrow-right" aria-hidden="true" style="font-size: 11px;"></i>)
                 </a>
             </p>

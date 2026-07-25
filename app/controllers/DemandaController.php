@@ -39,8 +39,33 @@ class DemandaController
         $cotacao = $demanda->buscarCotacaoVinculada();
         $vantajosidade = $demanda->buscarVantajosidadeVinculada();
         $resumoLotes = $this->montarResumoLotes($licitacao);
+        [$linkVoltar, $labelVoltar] = $this->resolverVoltar();
 
         require __DIR__ . '/../views/demanda_detalhe.php';
+    }
+
+    /**
+     * A tela do Processo e aberta a partir de varios lugares (lista de
+     * Demandas, lista de Licitacoes, tela da Cotacao). O botao "Voltar"
+     * deve levar de volta pra onde a pessoa realmente veio, nao sempre
+     * pra lista geral de Demandas.
+     *
+     * @return array{0: string, 1: string} [link, label]
+     */
+    private function resolverVoltar(): array
+    {
+        $origem = $_GET['origem'] ?? '';
+        $origemId = (int) ($_GET['origem_id'] ?? 0);
+
+        if ($origem === 'licitacoes') {
+            return ['index.php?action=licitacoes', 'Voltar para Licitações'];
+        }
+
+        if ($origem === 'cotacao' && $origemId > 0) {
+            return ['index.php?action=cotacao&id=' . $origemId, 'Voltar para a Cotação'];
+        }
+
+        return ['index.php?action=demandas', 'Voltar'];
     }
 
     /**
@@ -135,7 +160,11 @@ class DemandaController
             }
         }
 
-        header('Location: index.php?action=ver_demanda&id=' . $demanda->id);
+        $origem = trim($_POST['origem'] ?? '');
+        $origemId = (int) ($_POST['origem_id'] ?? 0);
+        $querystringOrigem = $origem !== '' ? '&origem=' . urlencode($origem) . ($origemId > 0 ? '&origem_id=' . $origemId : '') : '';
+
+        header('Location: index.php?action=ver_demanda&id=' . $demanda->id . $querystringOrigem);
         exit;
     }
 

@@ -21,6 +21,7 @@ $coresStatus = [
 
 $corStatus = $coresStatus[$demanda->status] ?? 'bg-secondary-subtle text-secondary';
 $modoEdicao = ($modo === 'editar');
+$querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['origem']) . (isset($_GET['origem_id']) ? '&origem_id=' . (int) $_GET['origem_id'] : '') : '';
 ?>
 
 <?php if ($modoEdicao): ?>
@@ -41,7 +42,7 @@ $modoEdicao = ($modo === 'editar');
     </div>
     <div class="d-flex gap-2">
         <?php if ($modoEdicao): ?>
-            <a href="index.php?action=ver_demanda&id=<?= $demanda->id ?>" class="btn btn-sm btn-secondary">
+            <a href="index.php?action=ver_demanda&id=<?= $demanda->id ?><?= $querystringOrigem ?>" class="btn btn-sm btn-secondary">
                 <i class="ti ti-x" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
                 Cancelar
             </a>
@@ -50,11 +51,11 @@ $modoEdicao = ($modo === 'editar');
                 Salvar alterações
             </button>
         <?php else: ?>
-            <a href="index.php?action=demandas" class="btn btn-sm btn-secondary">
+            <a href="<?= htmlspecialchars($linkVoltar) ?>" class="btn btn-sm btn-secondary">
                 <i class="ti ti-arrow-left" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
-                Voltar
+                <?= htmlspecialchars($labelVoltar) ?>
             </a>
-            <a href="index.php?action=ver_demanda&id=<?= $demanda->id ?>&modo=editar" class="btn btn-sm btn-outline-primary">
+            <a href="index.php?action=ver_demanda&id=<?= $demanda->id ?>&modo=editar<?= $querystringOrigem ?>" class="btn btn-sm btn-outline-primary">
                 <i class="ti ti-edit" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
                 Editar
             </a>
@@ -74,6 +75,8 @@ $modoEdicao = ($modo === 'editar');
 <!-- ================================================================ -->
 <form id="formEdicao" method="POST" action="index.php?action=editar_demanda_inline">
     <input type="hidden" name="demanda_id" value="<?= $demanda->id ?>">
+    <input type="hidden" name="origem" value="<?= htmlspecialchars($_GET['origem'] ?? '') ?>">
+    <input type="hidden" name="origem_id" value="<?= htmlspecialchars($_GET['origem_id'] ?? '') ?>">
 
     <div class="card shadow-sm mb-3">
         <div class="card-header bg-white d-flex align-items-center gap-2 py-2">
@@ -331,12 +334,13 @@ $modoEdicao = ($modo === 'editar');
 <div class="card shadow-sm mb-3" style="border: 0.5px dashed #ced4da;">
     <div class="card-body d-flex align-items-center gap-3 py-3">
         <i class="ti ti-clipboard-x text-muted" aria-hidden="true" style="font-size:22px;"></i>
-        <div>
+        <div class="flex-grow-1">
             <p class="mb-0 small fw-semibold text-muted">Nenhuma pesquisa de preço vinculada</p>
-            <a href="index.php?action=cotacoes" class="small">
-                Ir para pesquisas de preço
-            </a>
         </div>
+        <a href="index.php?action=criar_cotacao_para_demanda&demanda_id=<?= $demanda->id ?>" class="btn btn-sm btn-outline-primary">
+            <i class="ti ti-plus" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+            Iniciar pesquisa de preço
+        </a>
     </div>
 </div>
 <?php endif; ?>
@@ -374,6 +378,19 @@ $modoEdicao = ($modo === 'editar');
                 Abrir vantajosidade
             </a>
         </div>
+    </div>
+</div>
+<?php elseif ($cotacao === null): ?>
+<div class="card shadow-sm mb-3" style="border: 0.5px dashed #ced4da;">
+    <div class="card-body d-flex align-items-center gap-3 py-3">
+        <i class="ti ti-scale text-muted" aria-hidden="true" style="font-size:22px;"></i>
+        <div class="flex-grow-1">
+            <p class="mb-0 small fw-semibold text-muted">Nenhuma comprovação de vantajosidade vinculada</p>
+        </div>
+        <a href="index.php?action=criar_vantajosidade_para_demanda&demanda_id=<?= $demanda->id ?>" class="btn btn-sm btn-outline-success">
+            <i class="ti ti-plus" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+            Iniciar comprovação de vantajosidade
+        </a>
     </div>
 </div>
 <?php endif; ?>

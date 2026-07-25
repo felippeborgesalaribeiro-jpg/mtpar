@@ -22,6 +22,28 @@ class CotacaoController
         require __DIR__ . '/../views/cotacoes.php';
     }
 
+    /**
+     * Formulario enxuto de cotacao nova ja vinculada a uma demanda
+     * especifica - acessado a partir da tela do Processo, sem passar
+     * pelo assistente de 3 modais da lista geral de Cotacoes.
+     */
+    public function formularioParaDemanda(): void
+    {
+        exigirLogin();
+
+        $demandaId = (int) ($_GET['demanda_id'] ?? 0);
+        $demanda = Demanda::buscarPorId($demandaId);
+
+        if ($demanda === null) {
+            echo 'Processo não encontrado.';
+            return;
+        }
+
+        $servidores = Servidor::buscarTodos();
+
+        require __DIR__ . '/../views/cotacao_nova_para_demanda.php';
+    }
+
     public function criar(): void
     {
         exigirLogin();

@@ -105,7 +105,7 @@ $statusLabel = [
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1">
-                                        <a href="index.php?action=ver_demanda&id=<?= $licitacao->demandaId ?>"
+                                        <a href="index.php?action=ver_demanda&id=<?= $licitacao->demandaId ?>&origem=licitacoes"
                                            class="btn btn-sm btn-outline-primary"
                                            title="Ver processo">
                                             <i class="ti ti-eye" aria-hidden="true" style="font-size: 13px;"></i>

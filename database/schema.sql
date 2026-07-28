@@ -179,6 +179,9 @@ CREATE TABLE IF NOT EXISTS processos_vantajosidade (
     criado_em TEXT NOT NULL DEFAULT (datetime('now')),
     demanda_id INTEGER REFERENCES demandas(id),
     deleted_at TEXT DEFAULT NULL,
+    tipo TEXT NOT NULL DEFAULT 'ATA',
+    numero_contrato TEXT NOT NULL DEFAULT '',
+    valor_total_objeto REAL,
     FOREIGN KEY (servidor_id) REFERENCES servidores(id)
 );
 

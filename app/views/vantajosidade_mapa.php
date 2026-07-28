@@ -1,5 +1,6 @@
 <?php
-$titulo = 'Mapa de Vantajosidade - Ata ' . $processo->numeroAta;
+$ehContrato = $processo->ehContratoAditivo();
+$titulo = 'Mapa de Vantajosidade - ' . ($ehContrato ? 'Aditivo Contrato ' . $processo->numeroContrato : 'Ata ' . $processo->numeroAta);
 require __DIR__ . '/partials/header.php';
 ?>
 
@@ -23,13 +24,32 @@ require __DIR__ . '/partials/header.php';
 <div class="card shadow-sm mb-3">
     <div class="card-body small">
         <div class="row">
-            <div class="col-md-3"><b>Ata:</b> <?= htmlspecialchars($processo->numeroAta) ?></div>
-            <div class="col-md-3"><b>Órgão gerenciador:</b> <?= htmlspecialchars($processo->orgaoGerenciador) ?></div>
+            <?php if ($ehContrato): ?>
+                <div class="col-md-3"><b>Contrato:</b> <?= htmlspecialchars($processo->numeroContrato) ?></div>
+                <div class="col-md-3"><b>Valor total do objeto:</b> <?= $processo->valorTotalObjeto !== null ? formatarMoeda($processo->valorTotalObjeto) : '—' ?></div>
+            <?php else: ?>
+                <div class="col-md-3"><b>Ata:</b> <?= htmlspecialchars($processo->numeroAta) ?></div>
+                <div class="col-md-3"><b>Órgão gerenciador:</b> <?= htmlspecialchars($processo->orgaoGerenciador) ?></div>
+            <?php endif; ?>
             <div class="col-md-3"><b>Servidor:</b> <?= htmlspecialchars($servidor->nome ?? '—') ?></div>
             <div class="col-md-3"><b>Data:</b> <?= date('d/m/Y') ?></div>
         </div>
         <?php if ($processo->objeto !== ''): ?>
             <div class="mt-2"><b>Objeto:</b> <?= htmlspecialchars($processo->objeto) ?></div>
+        <?php endif; ?>
+        <?php if ($ehContrato): ?>
+            <?php $indiceAditivo = $processo->calcularIndiceAditivo(); ?>
+            <div class="mt-2">
+                <b>Índice do aditivo:</b>
+                <?php if ($indiceAditivo !== null): ?>
+                    <span class="<?= $processo->indiceAditivoDentroDoLimiteLegal() ? 'text-success' : 'text-danger' ?> fw-bold">
+                        <?= formatarNumero($indiceAditivo, 1) ?>%
+                    </span>
+                    (limite legal: <?= formatarNumero(ProcessoVantajosidade::LIMITE_LEGAL_ADITIVO_PERCENTUAL, 0) ?>%)
+                <?php else: ?>
+                    —
+                <?php endif; ?>
+            </div>
         <?php endif; ?>
     </div>
 </div>
@@ -54,7 +74,7 @@ require __DIR__ . '/partials/header.php';
                         <tr>
                             <th>Item</th>
                             <th style="min-width: 220px;">Descrição</th>
-                            <th>Preço Ata</th>
+                            <th><?= $ehContrato ? 'Valor referência' : 'Preço Ata' ?></th>
                             <?php for ($i = 1; $i <= $maxFontes; $i++): ?>
                                 <th>Fonte <?= $i ?></th>
                             <?php endfor; ?>

@@ -23,14 +23,38 @@ require __DIR__ . '/partials/header.php';
         <form method="post" action="index.php?action=criar_vantajosidade">
             <input type="hidden" name="demanda_id" value="<?= $demanda->id ?>">
 
-            <div class="row g-3 mb-3">
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Este processo é referente a:</label>
+                <div class="d-flex gap-2">
+                    <label class="border rounded p-2 flex-fill text-center small" style="cursor:pointer;">
+                        <input type="radio" name="tipo" value="ATA" class="form-check-input me-1 campo-tipo-vant" checked>
+                        Ata de Registro de Preços<br><span class="text-muted">adesão/carona</span>
+                    </label>
+                    <label class="border rounded p-2 flex-fill text-center small" style="cursor:pointer;">
+                        <input type="radio" name="tipo" value="CONTRATO_ADITIVO" class="form-check-input me-1 campo-tipo-vant">
+                        Aditivo de Contrato<br><span class="text-muted">acréscimo de até 25%</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="grupo-tipo-ata row g-3 mb-3">
                 <div class="col-md-6">
                     <label class="form-label small fw-semibold">Número da Ata</label>
-                    <input type="text" name="numero_ata" class="form-control form-control-sm" required>
+                    <input type="text" name="numero_ata" class="form-control form-control-sm campo-numero-ata">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label small fw-semibold">Órgão gerenciador</label>
                     <input type="text" name="orgao_gerenciador" class="form-control form-control-sm">
+                </div>
+            </div>
+            <div class="grupo-tipo-contrato row g-3 mb-3 d-none">
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Número do contrato</label>
+                    <input type="text" name="numero_contrato" class="form-control form-control-sm campo-numero-contrato" placeholder="Ex: 012/2026">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Valor total do objeto (contrato original)</label>
+                    <input type="text" name="valor_total_objeto" class="form-control form-control-sm campo-valor-total-objeto" placeholder="0,00">
                 </div>
             </div>
             <div class="mb-4">
@@ -54,5 +78,29 @@ require __DIR__ . '/partials/header.php';
         </form>
     </div>
 </div>
+
+<script>
+(function () {
+    var gruposAta = document.querySelectorAll('.grupo-tipo-ata');
+    var gruposContrato = document.querySelectorAll('.grupo-tipo-contrato');
+    var camposTipo = document.querySelectorAll('.campo-tipo-vant');
+
+    function aplicarTipoVantajosidade() {
+        var ehContrato = document.querySelector('.campo-tipo-vant:checked').value === 'CONTRATO_ADITIVO';
+
+        gruposAta.forEach(function (g) { g.classList.toggle('d-none', ehContrato); });
+        gruposContrato.forEach(function (g) { g.classList.toggle('d-none', !ehContrato); });
+
+        document.querySelectorAll('.campo-numero-ata').forEach(function (c) { c.required = !ehContrato; });
+        document.querySelectorAll('.campo-numero-contrato, .campo-valor-total-objeto').forEach(function (c) { c.required = ehContrato; });
+    }
+
+    camposTipo.forEach(function (campo) {
+        campo.addEventListener('change', aplicarTipoVantajosidade);
+    });
+
+    aplicarTipoVantajosidade();
+})();
+</script>
 
 <?php require __DIR__ . '/partials/footer.php'; ?>

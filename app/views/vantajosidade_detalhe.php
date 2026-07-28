@@ -1,5 +1,6 @@
 <?php
-$titulo = 'Vantajosidade - Ata ' . $processo->numeroAta . ' - MT Par';
+$ehContrato = $processo->ehContratoAditivo();
+$titulo = ($ehContrato ? 'Vantajosidade - Aditivo Contrato ' . $processo->numeroContrato : 'Vantajosidade - Ata ' . $processo->numeroAta) . ' - MT Par';
 require __DIR__ . '/partials/header.php';
 
 $statusLabel = [
@@ -13,10 +14,20 @@ $statusLabel = [
     <div>
         <h4 class="m-0">
             <i class="ti ti-scale" aria-hidden="true" style="font-size: 22px; vertical-align: -3px; color: var(--brand-blue-dark);"></i>
-            Ata <?= htmlspecialchars($processo->numeroAta) ?>
+            <?php if ($ehContrato): ?>
+                Aditivo — Contrato <?= htmlspecialchars($processo->numeroContrato) ?>
+            <?php else: ?>
+                Ata <?= htmlspecialchars($processo->numeroAta) ?>
+            <?php endif; ?>
             <span class="badge <?= $classeBadgeStatus ?>"><?= $labelStatus ?></span>
         </h4>
-        <p class="text-muted mb-0"><?= htmlspecialchars($processo->orgaoGerenciador) ?></p>
+        <?php if ($ehContrato): ?>
+            <p class="text-muted mb-0">
+                <span class="badge bg-warning-subtle text-warning">Aditivo de contrato</span>
+            </p>
+        <?php else: ?>
+            <p class="text-muted mb-0"><?= htmlspecialchars($processo->orgaoGerenciador) ?></p>
+        <?php endif; ?>
         <?php if ($demandaVinculada !== null): ?>
             <p class="small mb-0">
                 <i class="ti ti-link" aria-hidden="true" style="font-size: 13px; vertical-align: -1px; color: var(--brand-blue-dark);"></i>
@@ -65,10 +76,56 @@ $statusLabel = [
     </div>
 </div>
 
+<?php if ($ehContrato): ?>
+    <?php
+    $indiceAditivo = $processo->calcularIndiceAditivo();
+    $dentroDoLimite = $processo->indiceAditivoDentroDoLimiteLegal();
+    ?>
+    <div class="card shadow-sm mb-4" style="border-left: 3px solid <?= $dentroDoLimite === false ? '#dc3545' : '#ffc107' ?>;">
+        <div class="card-body">
+            <p class="fw-semibold small mb-3">
+                <i class="ti ti-percentage" aria-hidden="true" style="font-size: 14px; vertical-align: -2px;"></i>
+                Índice do aditivo
+            </p>
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <p class="text-muted small mb-1">Valor total do objeto</p>
+                    <p class="fs-5 fw-bold m-0"><?= $processo->valorTotalObjeto !== null ? formatarMoeda($processo->valorTotalObjeto) : '—' ?></p>
+                </div>
+                <div class="col-md-4">
+                    <p class="text-muted small mb-1">Valor apurado do aditivo</p>
+                    <p class="fs-5 fw-bold m-0"><?= formatarMoeda($processo->calcularValorTotalItens()) ?></p>
+                </div>
+                <div class="col-md-4">
+                    <p class="text-muted small mb-1">Índice do aditivo</p>
+                    <?php if ($indiceAditivo !== null): ?>
+                        <p class="fs-5 fw-bold m-0 <?= $dentroDoLimite ? 'text-success' : 'text-danger' ?>">
+                            <?= formatarNumero($indiceAditivo, 1) ?>%
+                        </p>
+                    <?php else: ?>
+                        <p class="fs-5 fw-bold m-0 text-muted">—</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php if ($indiceAditivo !== null && !$dentroDoLimite): ?>
+                <p class="text-danger small mb-0 mt-2">
+                    <i class="ti ti-alert-triangle" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+                    Este aditivo ultrapassa o limite legal de <?= formatarNumero(ProcessoVantajosidade::LIMITE_LEGAL_ADITIVO_PERCENTUAL, 0) ?>% do valor total do contrato.
+                </p>
+            <?php elseif ($indiceAditivo === null): ?>
+                <p class="text-muted small mb-0 mt-2">
+                    <i class="ti ti-info-circle" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+                    Adicione itens e preços abaixo para o sistema calcular o índice automaticamente.
+                </p>
+            <?php endif; ?>
+        </div>
+    </div>
+<?php endif; ?>
+
 <div class="d-flex justify-content-between align-items-center mb-3">
     <span class="fs-6 fw-semibold" style="color: var(--brand-blue-dark);">
         <i class="ti ti-list" aria-hidden="true" style="font-size: 18px; vertical-align: -3px;"></i>
-        Itens da Ata
+        <?= $ehContrato ? 'Itens do aditivo' : 'Itens da Ata' ?>
     </span>
     <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalNovoItem">
         <i class="ti ti-plus" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
@@ -117,7 +174,7 @@ $statusLabel = [
                 <b><?= htmlspecialchars($item->descricao) ?></b>
                 <span class="text-muted small">(<?= formatarNumero($item->quantidade) ?> <?= htmlspecialchars($item->unidade) ?>)</span>
                 &nbsp;—&nbsp;
-                <b>Preço da Ata:</b>
+                <b><?= $ehContrato ? 'Valor de referência do contrato:' : 'Preço da Ata:' ?></b>
                 <span class="badge bg-info text-white"><?= formatarMoeda($item->precoAta) ?></span>
             </p>
 
@@ -133,7 +190,7 @@ $statusLabel = [
                             <th>Parâmetro</th>
                             <th>Fonte</th>
                             <th>Preço mercado</th>
-                            <th>% em relação à Ata</th>
+                            <th><?= $ehContrato ? '% em relação ao contrato' : '% em relação à Ata' ?></th>
                             <th></th>
                         </tr>
                     </thead>
@@ -274,7 +331,7 @@ $statusLabel = [
                                 <input type="text" name="quantidade" class="form-control" value="<?= formatarNumero($item->quantidade) ?>">
                             </div>
                             <div class="col-4 mb-3">
-                                <label class="form-label">Preço da Ata</label>
+                                <label class="form-label"><?= $ehContrato ? 'Valor de referência' : 'Preço da Ata' ?></label>
                                 <input type="text" name="preco_ata" class="form-control" value="<?= formatarNumero($item->precoAta) ?>" required>
                             </div>
                         </div>
@@ -322,8 +379,8 @@ $statusLabel = [
                             <input type="text" name="quantidade" class="form-control" value="1">
                         </div>
                         <div class="col-4 mb-3">
-                            <label class="form-label">Preço da Ata</label>
-                            <input type="text" name="preco_ata" class="form-control" placeholder="Preço unitário" required>
+                            <label class="form-label"><?= $ehContrato ? 'Valor de referência' : 'Preço da Ata' ?></label>
+                            <input type="text" name="preco_ata" class="form-control" placeholder="Valor unitário" required>
                         </div>
                     </div>
                 </div>

@@ -9,6 +9,10 @@ class ProcessoVantajosidade
     const STATUS_EM_ANDAMENTO = 'EM_ANDAMENTO';
     const STATUS_FINALIZADO   = 'FINALIZADO';
 
+    const TIPO_ATA               = 'ATA';
+    const TIPO_CONTRATO_ADITIVO  = 'CONTRATO_ADITIVO';
+    const LIMITE_LEGAL_ADITIVO_PERCENTUAL = 25.0;
+
     public ?int $id;
     public string $numeroAta;
     public string $orgaoGerenciador;
@@ -17,6 +21,9 @@ class ProcessoVantajosidade
     public string $status;
     public ?int $demandaId;
     public ?string $deletedAt;
+    public string $tipo;
+    public string $numeroContrato;
+    public ?float $valorTotalObjeto;
 
     public function __construct(
         string $numeroAta,
@@ -26,7 +33,10 @@ class ProcessoVantajosidade
         string $status = self::STATUS_EM_ANDAMENTO,
         ?int $id = null,
         ?int $demandaId = null,
-        ?string $deletedAt = null
+        ?string $deletedAt = null,
+        string $tipo = self::TIPO_ATA,
+        string $numeroContrato = '',
+        ?float $valorTotalObjeto = null
     ) {
         $this->id               = $id;
         $this->numeroAta        = $numeroAta;
@@ -36,6 +46,50 @@ class ProcessoVantajosidade
         $this->status           = $status;
         $this->demandaId        = $demandaId;
         $this->deletedAt        = $deletedAt;
+        $this->tipo             = $tipo;
+        $this->numeroContrato   = $numeroContrato;
+        $this->valorTotalObjeto = $valorTotalObjeto;
+    }
+
+    public function ehContratoAditivo(): bool
+    {
+        return $this->tipo === self::TIPO_CONTRATO_ADITIVO;
+    }
+
+    /**
+     * Soma do valor de referência (preco_ata * quantidade) de todos os
+     * itens do processo - no caso de aditivo de contrato, representa o
+     * valor total que está sendo pleiteado no aditivo.
+     */
+    public function calcularValorTotalItens(): float
+    {
+        $total = 0.0;
+        foreach ($this->buscarItens() as $item) {
+            $total += $item->precoAta * $item->quantidade;
+        }
+
+        return $total;
+    }
+
+    /**
+     * Percentual que o aditivo representa em relação ao valor total do
+     * objeto do contrato. Retorna null quando não se aplica (tipo ATA ou
+     * sem valor total do objeto informado).
+     */
+    public function calcularIndiceAditivo(): ?float
+    {
+        if (!$this->ehContratoAditivo() || $this->valorTotalObjeto === null || $this->valorTotalObjeto == 0.0) {
+            return null;
+        }
+
+        return ($this->calcularValorTotalItens() / $this->valorTotalObjeto) * 100;
+    }
+
+    public function indiceAditivoDentroDoLimiteLegal(): ?bool
+    {
+        $indice = $this->calcularIndiceAditivo();
+
+        return $indice === null ? null : $indice <= self::LIMITE_LEGAL_ADITIVO_PERCENTUAL;
     }
 
     public function salvar(): int
@@ -44,15 +98,16 @@ class ProcessoVantajosidade
 
         if ($this->id === null) {
             $stmt = $pdo->prepare(
-                'INSERT INTO processos_vantajosidade (numero_ata, orgao_gerenciador, objeto, servidor_id, status, demanda_id)
-                 VALUES (:numero_ata, :orgao_gerenciador, :objeto, :servidor_id, :status, :demanda_id)'
+                'INSERT INTO processos_vantajosidade (numero_ata, orgao_gerenciador, objeto, servidor_id, status, demanda_id, tipo, numero_contrato, valor_total_objeto)
+                 VALUES (:numero_ata, :orgao_gerenciador, :objeto, :servidor_id, :status, :demanda_id, :tipo, :numero_contrato, :valor_total_objeto)'
             );
             $stmt->execute($this->paramsParaSalvar());
             $this->id = (int) $pdo->lastInsertId();
         } else {
             $stmt = $pdo->prepare(
                 'UPDATE processos_vantajosidade SET numero_ata = :numero_ata, orgao_gerenciador = :orgao_gerenciador,
-                 objeto = :objeto, servidor_id = :servidor_id, status = :status, demanda_id = :demanda_id WHERE id = :id'
+                 objeto = :objeto, servidor_id = :servidor_id, status = :status, demanda_id = :demanda_id,
+                 tipo = :tipo, numero_contrato = :numero_contrato, valor_total_objeto = :valor_total_objeto WHERE id = :id'
             );
             $stmt->execute(array_merge($this->paramsParaSalvar(), ['id' => $this->id]));
         }
@@ -69,6 +124,9 @@ class ProcessoVantajosidade
             'servidor_id'       => $this->servidorId,
             'status'            => $this->status,
             'demanda_id'        => $this->demandaId,
+            'tipo'              => $this->tipo,
+            'numero_contrato'   => $this->numeroContrato,
+            'valor_total_objeto' => $this->valorTotalObjeto,
         ];
     }
 
@@ -192,7 +250,10 @@ class ProcessoVantajosidade
             $linha['status'],
             (int) $linha['id'],
             $linha['demanda_id'] !== null ? (int) $linha['demanda_id'] : null,
-            $linha['deleted_at'] ?? null
+            $linha['deleted_at'] ?? null,
+            $linha['tipo'] ?? self::TIPO_ATA,
+            $linha['numero_contrato'] ?? '',
+            isset($linha['valor_total_objeto']) && $linha['valor_total_objeto'] !== null ? (float) $linha['valor_total_objeto'] : null
         );
     }
 }

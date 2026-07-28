@@ -49,30 +49,61 @@ class VantajosidadeController
     {
         exigirLogin();
 
+        $tipo = $_POST['tipo'] ?? ProcessoVantajosidade::TIPO_ATA;
         $numeroAta = trim($_POST['numero_ata'] ?? '');
         $orgaoGerenciador = trim($_POST['orgao_gerenciador'] ?? '');
+        $numeroContrato = trim($_POST['numero_contrato'] ?? '');
+        $valorTotalObjeto = $_POST['valor_total_objeto'] ?? '';
         $objeto = trim($_POST['objeto'] ?? '');
         $servidorId = (int) ($_POST['servidor_id'] ?? 0);
         $demandaId = (int) ($_POST['demanda_id'] ?? 0) ?: null;
 
-        if ($numeroAta === '' || $servidorId === 0) {
-            echo 'Número da Ata e servidor responsável são obrigatórios.';
+        $erro = $this->validarDadosPorTipo($tipo, $numeroAta, $numeroContrato, $valorTotalObjeto, $servidorId);
+        if ($erro !== null) {
+            echo $erro;
             return;
         }
 
         $processo = new ProcessoVantajosidade(
-            $numeroAta,
+            $tipo === ProcessoVantajosidade::TIPO_CONTRATO_ADITIVO ? '' : $numeroAta,
             $orgaoGerenciador,
             $objeto,
             $servidorId,
             ProcessoVantajosidade::STATUS_EM_ANDAMENTO,
             null,
-            $demandaId
+            $demandaId,
+            null,
+            $tipo,
+            $numeroContrato,
+            $valorTotalObjeto !== '' ? converterMoedaBrParaFloat($valorTotalObjeto) : null
         );
         $processo->salvar();
 
         header('Location: index.php?action=vantajosidade&id=' . $processo->id);
         exit;
+    }
+
+    /**
+     * @return string|null mensagem de erro, ou null se os dados forem validos
+     */
+    private function validarDadosPorTipo(string $tipo, string $numeroAta, string $numeroContrato, string $valorTotalObjeto, int $servidorId): ?string
+    {
+        if ($servidorId === 0) {
+            return 'Servidor responsável é obrigatório.';
+        }
+
+        if ($tipo === ProcessoVantajosidade::TIPO_CONTRATO_ADITIVO) {
+            if ($numeroContrato === '' || $valorTotalObjeto === '') {
+                return 'Número do contrato e valor total do objeto são obrigatórios para aditivo de contrato.';
+            }
+            return null;
+        }
+
+        if ($numeroAta === '') {
+            return 'Número da Ata é obrigatório.';
+        }
+
+        return null;
     }
 
     public function criarComDemandaNova(): void
@@ -92,24 +123,32 @@ class VantajosidadeController
         $demanda = new Demanda($numeroProcessoDemanda, $dataRecebimento, '', $setorDemandante, $objetoDemanda);
         $demanda->salvar();
 
+        $tipo = $_POST['tipo'] ?? ProcessoVantajosidade::TIPO_ATA;
         $numeroAta = trim($_POST['numero_ata'] ?? '');
         $orgaoGerenciador = trim($_POST['orgao_gerenciador'] ?? '');
+        $numeroContrato = trim($_POST['numero_contrato'] ?? '');
+        $valorTotalObjeto = $_POST['valor_total_objeto'] ?? '';
         $objeto = trim($_POST['objeto'] ?? '');
         $servidorId = (int) ($_POST['servidor_id'] ?? 0);
 
-        if ($servidorId === 0) {
-            echo 'Servidor responsável é obrigatório.';
+        $erro = $this->validarDadosPorTipo($tipo, $numeroAta, $numeroContrato, $valorTotalObjeto, $servidorId);
+        if ($erro !== null) {
+            echo $erro;
             return;
         }
 
         $processo = new ProcessoVantajosidade(
-            $numeroAta,
+            $tipo === ProcessoVantajosidade::TIPO_CONTRATO_ADITIVO ? '' : $numeroAta,
             $orgaoGerenciador !== '' ? $orgaoGerenciador : $setorDemandante,
             $objeto !== '' ? $objeto : $objetoDemanda,
             $servidorId,
             ProcessoVantajosidade::STATUS_EM_ANDAMENTO,
             null,
-            $demanda->id
+            $demanda->id,
+            null,
+            $tipo,
+            $numeroContrato,
+            $valorTotalObjeto !== '' ? converterMoedaBrParaFloat($valorTotalObjeto) : null
         );
         $processo->salvar();
 

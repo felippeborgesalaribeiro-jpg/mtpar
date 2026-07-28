@@ -358,8 +358,12 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
     <div class="card-body d-flex align-items-center justify-content-between">
         <div class="row g-3 flex-grow-1">
             <div class="col-md-4">
-                <p class="text-muted mb-1" style="font-size:10px; text-transform:uppercase; letter-spacing:.05em;">Nº da Ata</p>
-                <p class="mb-0 small fw-semibold"><?= htmlspecialchars($vantajosidade->numeroAta) ?></p>
+                <p class="text-muted mb-1" style="font-size:10px; text-transform:uppercase; letter-spacing:.05em;">
+                    <?= $vantajosidade->ehContratoAditivo() ? 'Nº do Contrato' : 'Nº da Ata' ?>
+                </p>
+                <p class="mb-0 small fw-semibold">
+                    <?= htmlspecialchars($vantajosidade->ehContratoAditivo() ? $vantajosidade->numeroContrato : $vantajosidade->numeroAta) ?>
+                </p>
             </div>
             <div class="col-md-4">
                 <p class="text-muted mb-1" style="font-size:10px; text-transform:uppercase; letter-spacing:.05em;">Status</p>
@@ -368,8 +372,16 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
                 </span>
             </div>
             <div class="col-md-4">
-                <p class="text-muted mb-1" style="font-size:10px; text-transform:uppercase; letter-spacing:.05em;">Órgão gerenciador</p>
-                <p class="mb-0 small fw-semibold"><?= htmlspecialchars($vantajosidade->orgaoGerenciador ?: '—') ?></p>
+                <?php if ($vantajosidade->ehContratoAditivo()): ?>
+                    <p class="text-muted mb-1" style="font-size:10px; text-transform:uppercase; letter-spacing:.05em;">Índice do aditivo</p>
+                    <?php $indiceAditivoDemanda = $vantajosidade->calcularIndiceAditivo(); ?>
+                    <p class="mb-0 small fw-semibold <?= $indiceAditivoDemanda !== null && !$vantajosidade->indiceAditivoDentroDoLimiteLegal() ? 'text-danger' : '' ?>">
+                        <?= $indiceAditivoDemanda !== null ? formatarNumero($indiceAditivoDemanda, 1) . '%' : '—' ?>
+                    </p>
+                <?php else: ?>
+                    <p class="text-muted mb-1" style="font-size:10px; text-transform:uppercase; letter-spacing:.05em;">Órgão gerenciador</p>
+                    <p class="mb-0 small fw-semibold"><?= htmlspecialchars($vantajosidade->orgaoGerenciador ?: '—') ?></p>
+                <?php endif; ?>
             </div>
         </div>
         <div class="ms-3">

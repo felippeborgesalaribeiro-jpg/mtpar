@@ -81,7 +81,7 @@ foreach ($processos as $processo) {
             <?php
             $servidor = $processo->buscarServidor();
             [$label, $classeBadge] = $statusLabel[$processo->status] ?? ['Indefinido', 'bg-secondary'];
-            $buscaTexto = mb_strtolower($processo->numeroAta . ' ' . $processo->orgaoGerenciador . ' ' . $processo->objeto);
+            $buscaTexto = mb_strtolower($processo->numeroAta . ' ' . $processo->numeroContrato . ' ' . $processo->orgaoGerenciador . ' ' . $processo->objeto);
             ?>
             <div class="col-md-4 <?= $processo->status === ProcessoVantajosidade::STATUS_FINALIZADO ? 'd-none' : '' ?>"
                  data-status="<?= htmlspecialchars($processo->status) ?>"
@@ -92,11 +92,21 @@ foreach ($processos as $processo) {
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h6 class="card-title mb-0">
                                     <i class="ti ti-scale" aria-hidden="true" style="font-size: 16px; color: var(--brand-blue-dark); vertical-align: -2px;"></i>
-                                    Ata <?= htmlspecialchars($processo->numeroAta) ?>
+                                    <?php if ($processo->ehContratoAditivo()): ?>
+                                        Aditivo — Contrato <?= htmlspecialchars($processo->numeroContrato) ?>
+                                    <?php else: ?>
+                                        Ata <?= htmlspecialchars($processo->numeroAta) ?>
+                                    <?php endif; ?>
                                 </h6>
                                 <span class="badge <?= $classeBadge ?>"><?= $label ?></span>
                             </div>
-                            <p class="card-text text-muted small mb-1"><?= htmlspecialchars($processo->orgaoGerenciador ?: '—') ?></p>
+                            <?php if ($processo->ehContratoAditivo()): ?>
+                                <p class="card-text small mb-1">
+                                    <span class="badge bg-warning-subtle text-warning" style="font-size:10px;">Aditivo de contrato</span>
+                                </p>
+                            <?php else: ?>
+                                <p class="card-text text-muted small mb-1"><?= htmlspecialchars($processo->orgaoGerenciador ?: '—') ?></p>
+                            <?php endif; ?>
                             <?php if ($processo->demandaId !== null): ?>
                                 <p class="card-text small mb-1 text-info">
                                     <i class="ti ti-link" aria-hidden="true" style="font-size: 12px; vertical-align: -1px;"></i>
@@ -312,13 +322,41 @@ foreach ($processos as $processo) {
                     <input type="hidden" name="demanda_objeto" id="inputDemandaObjetoOcultoVant" value="">
 
                     <div class="mb-3">
-                        <label class="form-label">Número da Ata</label>
-                        <input type="text" name="numero_ata" class="form-control" placeholder="Ex: 009/2024/SEPLAG" required>
+                        <label class="form-label small fw-semibold">Este processo é referente a:</label>
+                        <div class="d-flex gap-2">
+                            <label class="border rounded p-2 flex-fill text-center small" style="cursor:pointer;">
+                                <input type="radio" name="tipo" value="ATA" class="form-check-input me-1 campo-tipo-vant" checked>
+                                Ata de Registro de Preços<br><span class="text-muted">adesão/carona</span>
+                            </label>
+                            <label class="border rounded p-2 flex-fill text-center small" style="cursor:pointer;">
+                                <input type="radio" name="tipo" value="CONTRATO_ADITIVO" class="form-check-input me-1 campo-tipo-vant">
+                                Aditivo de Contrato<br><span class="text-muted">acréscimo de até 25%</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Órgão gerenciador</label>
-                        <input type="text" name="orgao_gerenciador" id="inputOrgaoGerenciadorVant" class="form-control">
+
+                    <div class="grupo-tipo-ata">
+                        <div class="mb-3">
+                            <label class="form-label">Número da Ata</label>
+                            <input type="text" name="numero_ata" class="form-control campo-numero-ata" placeholder="Ex: 009/2024/SEPLAG">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Órgão gerenciador</label>
+                            <input type="text" name="orgao_gerenciador" id="inputOrgaoGerenciadorVant" class="form-control">
+                        </div>
                     </div>
+                    <div class="grupo-tipo-contrato d-none">
+                        <div class="mb-3">
+                            <label class="form-label">Número do contrato</label>
+                            <input type="text" name="numero_contrato" class="form-control campo-numero-contrato" placeholder="Ex: 012/2026">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Valor total do objeto (contrato original)</label>
+                            <input type="text" name="valor_total_objeto" class="form-control campo-valor-total-objeto" placeholder="0,00">
+                            <div class="form-text">O índice do aditivo (%) é calculado automaticamente a partir dos itens do mapa comparativo.</div>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">Objeto</label>
                         <textarea name="objeto" id="inputObjetoVant" class="form-control" rows="2"></textarea>
@@ -342,6 +380,28 @@ foreach ($processos as $processo) {
 </div>
 
 <script>
+(function () {
+    var gruposAta = document.querySelectorAll('.grupo-tipo-ata');
+    var gruposContrato = document.querySelectorAll('.grupo-tipo-contrato');
+    var camposTipo = document.querySelectorAll('.campo-tipo-vant');
+
+    function aplicarTipoVantajosidade() {
+        var ehContrato = document.querySelector('.campo-tipo-vant:checked').value === 'CONTRATO_ADITIVO';
+
+        gruposAta.forEach(function (g) { g.classList.toggle('d-none', ehContrato); });
+        gruposContrato.forEach(function (g) { g.classList.toggle('d-none', !ehContrato); });
+
+        document.querySelectorAll('.campo-numero-ata').forEach(function (c) { c.required = !ehContrato; });
+        document.querySelectorAll('.campo-numero-contrato, .campo-valor-total-objeto').forEach(function (c) { c.required = ehContrato; });
+    }
+
+    camposTipo.forEach(function (campo) {
+        campo.addEventListener('change', aplicarTipoVantajosidade);
+    });
+
+    aplicarTipoVantajosidade();
+})();
+
 function prepararModalVantajosidade(origem) {
     const form = document.getElementById('formDadosVantajosidade');
     const aviso = document.getElementById('avisoVinculoVant');

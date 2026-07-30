@@ -9,6 +9,7 @@ require_once __DIR__ . '/../models/Demanda.php';
 require_once __DIR__ . '/../models/AnaliseVantajosidade.php';
 require_once __DIR__ . '/../helpers/auth.php';
 require_once __DIR__ . '/../helpers/formatacao.php';
+require_once __DIR__ . '/../helpers/config.php';
 
 class VantajosidadeController
 {
@@ -339,6 +340,69 @@ class VantajosidadeController
         $preco->excluir();
 
         header('Location: index.php?action=vantajosidade&id=' . $processoId);
+        exit;
+    }
+
+    public function formularioAnaliseCritica(): void
+    {
+        exigirLogin();
+
+        $processoId = (int) ($_GET['id'] ?? 0);
+        $processo = ProcessoVantajosidade::buscarPorId($processoId);
+
+        if ($processo === null) {
+            echo 'Processo não encontrado.';
+            return;
+        }
+
+        if ($processo->status !== ProcessoVantajosidade::STATUS_FINALIZADO) {
+            echo 'Este processo ainda não foi finalizado.';
+            return;
+        }
+
+        $servidorResponsavelId = $processo->servidorId;
+
+        $servidores = array_filter(
+            Servidor::buscarTodos(),
+            fn($servidor) => $servidor->id !== $servidorResponsavelId
+        );
+
+        $validador = Servidor::buscarPorId(SERVIDOR_VALIDADOR_PADRAO_ID);
+
+        require __DIR__ . '/../views/vantajosidade_analise_critica_formulario.php';
+    }
+
+    public function gerarAnaliseCritica(): void
+    {
+        exigirLogin();
+
+        $processoId    = (int) ($_POST['processo_id'] ?? 0);
+        $elaboradoPorId = (int) ($_POST['elaborado_por_id'] ?? 0);
+        $numeroDfd     = trim($_POST['numero_dfd'] ?? '');
+
+        $processo     = ProcessoVantajosidade::buscarPorId($processoId);
+        $elaboradoPor = Servidor::buscarPorId($elaboradoPorId);
+        $validador    = Servidor::buscarPorId(SERVIDOR_VALIDADOR_PADRAO_ID);
+
+        if ($processo === null || $elaboradoPor === null || $validador === null) {
+            echo 'Dados insuficientes para gerar o documento.';
+            return;
+        }
+
+        require_once __DIR__ . '/../models/GeradorAnaliseCriticaVantajosidade.php';
+
+        $gerador        = new GeradorAnaliseCriticaVantajosidade($processo, $elaboradoPor, $validador, $numeroDfd);
+        $caminhoArquivo = $gerador->gerar();
+        $identificador  = $processo->ehContratoAditivo() ? $processo->numeroContrato : $processo->numeroAta;
+        $nomeArquivo    = 'Analise_Critica_Vantajosidade_' . preg_replace('/[^A-Za-z0-9]/', '_', $identificador) . '.docx';
+
+        session_write_close();
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        header('Content-Disposition: attachment; filename="' . $nomeArquivo . '"');
+        header('Content-Length: ' . filesize($caminhoArquivo));
+        readfile($caminhoArquivo);
+        unlink($caminhoArquivo);
         exit;
     }
 

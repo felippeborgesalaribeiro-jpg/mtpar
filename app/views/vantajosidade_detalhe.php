@@ -52,6 +52,12 @@ $statusLabel = [
             <i class="ti ti-table" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
             Ver mapa de vantajosidade
         </a>
+        <?php if ($processo->status === ProcessoVantajosidade::STATUS_FINALIZADO): ?>
+            <a href="index.php?action=analise_critica_vantajosidade_formulario&id=<?= $processo->id ?>" class="btn btn-sm btn-warning text-dark">
+                <i class="ti ti-file-report" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+                Gerar análise crítica
+            </a>
+        <?php endif; ?>
         <?php if ($processo->status === ProcessoVantajosidade::STATUS_EM_ANDAMENTO): ?>
             <a href="index.php?action=finalizar_vantajosidade&id=<?= $processo->id ?>"
                class="btn btn-sm btn-success"

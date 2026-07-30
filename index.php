@@ -268,6 +268,14 @@ switch ($action) {
         (new VantajosidadeController())->mapa();
         break;
 
+    case 'analise_critica_vantajosidade_formulario':
+        (new VantajosidadeController())->formularioAnaliseCritica();
+        break;
+
+    case 'gerar_analise_critica_vantajosidade':
+        (new VantajosidadeController())->gerarAnaliseCritica();
+        break;
+
     case 'parametros':
         (new ParametroController())->listar();
         break;

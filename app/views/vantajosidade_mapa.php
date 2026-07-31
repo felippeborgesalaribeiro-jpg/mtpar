@@ -63,14 +63,19 @@ require __DIR__ . '/partials/header.php';
     $maxFontes = max($maxFontes, 1);
     ?>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header text-white fw-bold" style="background-color: var(--brand-deep);">
+    <div class="card shadow-sm mb-4 card-tabela-longa">
+        <div class="card-header text-white fw-bold titulo-lote-tela" style="background-color: var(--brand-deep);">
             Lote <?= htmlspecialchars($numeroLote) ?>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-bordered table-sm align-middle mb-0">
                     <thead class="table-dark">
+                        <tr class="titulo-lote-print">
+                            <th colspan="<?= $maxFontes + 5 ?>" style="background-color: var(--brand-deep); color: #fff;">
+                                Lote <?= htmlspecialchars($numeroLote) ?>
+                            </th>
+                        </tr>
                         <tr>
                             <th>Item</th>
                             <th style="min-width: 220px;">Descrição</th>

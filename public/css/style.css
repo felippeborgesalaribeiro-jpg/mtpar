@@ -350,8 +350,62 @@ a:hover > .card {
         border: 1px solid rgba(0, 0, 0, 0.15);
     }
 
+    /* Cartoes com tabelas longas (mapa comparativo, mapas de vantajosidade):
+       a tabela em si pode quebrar entre paginas - sem isso, o navegador
+       empurra o cartao inteiro pra proxima pagina assim que ele nao cabe
+       inteiro, deixando um vao enorme em branco no fim da pagina anterior.
+       So a linha (tr) evita quebrar no meio. */
+    .card-tabela-longa {
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+    }
+
+    .card-tabela-longa tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .card-tabela-longa thead {
+        display: table-header-group;
+    }
+
+    /* Titulo do lote some da barra normal (que nao repete em paginas
+       novas) e aparece como uma linha extra dentro do cabecalho da
+       tabela, que o navegador repete automaticamente a cada pagina. */
+    .titulo-lote-tela {
+        display: none;
+    }
+
+    .titulo-lote-print {
+        display: table-row !important;
+    }
+
+    .card-tabela-longa .card-header {
+        page-break-after: avoid;
+    }
+
+    .card-tabela-longa .valor-total-lote {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .card-tabela-longa table {
+        font-size: 8.5px;
+    }
+
+    .card-tabela-longa th,
+    .card-tabela-longa td {
+        padding: 3px 4px !important;
+    }
+
     @page {
         size: A4 landscape;
         margin: 10mm;
+    }
+}
+
+@media screen {
+    .titulo-lote-print {
+        display: none;
     }
 }

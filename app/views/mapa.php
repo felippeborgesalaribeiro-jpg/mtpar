@@ -49,14 +49,19 @@ require __DIR__ . '/partials/header.php';
     $maxFornecedores = max($maxFornecedores, 1);
     ?>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header text-white fw-bold" style="background-color: var(--brand-deep);">
+    <div class="card shadow-sm mb-4 card-tabela-longa">
+        <div class="card-header text-white fw-bold titulo-lote-tela" style="background-color: var(--brand-deep);">
             Resumo: Lote <?= htmlspecialchars($lote->numero) ?>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-bordered table-sm align-middle mb-0">
                     <thead class="table-dark">
+                        <tr class="titulo-lote-print">
+                            <th colspan="<?= $maxFornecedores + 7 ?>" style="background-color: var(--brand-deep); color: #fff;">
+                                Resumo: Lote <?= htmlspecialchars($lote->numero) ?>
+                            </th>
+                        </tr>
                         <tr>
                             <th>Item</th>
                             <th style="min-width: 260px;">Especificação</th>
@@ -94,7 +99,7 @@ require __DIR__ . '/partials/header.php';
                     </tbody>
                 </table>
             </div>
-            <div class="p-3 text-end">
+            <div class="p-3 text-end valor-total-lote">
                 <span class="fs-5">
                     <b>Valor total do Lote <?= htmlspecialchars($lote->numero) ?>:</b>
                     <span class="badge bg-success fs-6">

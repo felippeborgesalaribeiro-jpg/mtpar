@@ -11,7 +11,7 @@ $servidorLogado = usuarioLogado();
     <link rel="icon" type="image/png" href="public/img/favicon.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="public/css/style.css">
+    <link rel="stylesheet" href="public/css/style.css?v=<?= @filemtime(__DIR__ . '/../../../public/css/style.css') ?: time() ?>">
 </head>
 <body>
 

@@ -135,7 +135,7 @@ $statusLabel = [
 <?php endif; ?>
 
 <?php foreach ($lotes as $lote): ?>
-    <div class="card shadow-sm mb-3" id="lote-<?= $lote->id ?>">
+    <div class="card shadow-sm mb-3 card-tabela-longa" id="lote-<?= $lote->id ?>">
         <div class="card-header d-flex justify-content-between align-items-center text-white" style="background-color: var(--brand-deep);">
             <span class="fw-bold">
                 <i class="ti ti-box" aria-hidden="true" style="font-size: 15px; vertical-align: -2px;"></i>
@@ -168,6 +168,7 @@ $statusLabel = [
                 <div class="border rounded p-3 mb-3" id="item-<?= $item->id ?>" style="background-color: #fafbfc;">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="m-0">
+                            <span class="text-muted small lote-contexto-print">Lote <?= htmlspecialchars($lote->numero) ?> ·</span>
                             <span class="badge bg-secondary"><?= $item->numero ?></span>
                             <?= htmlspecialchars($item->descricao) ?>
                             <span class="text-muted small">(<?= formatarNumero($item->quantidade) ?> <?= htmlspecialchars($item->unidade) ?>)</span>

@@ -398,6 +398,13 @@ a:hover > .card {
         padding: 3px 4px !important;
     }
 
+    /* Contexto do lote repetido dentro de cada bloco de item (cotacao.php),
+       ja que blocos avulsos (nao linhas de tabela) nao tem como repetir
+       um cabecalho automaticamente entre paginas. */
+    .lote-contexto-print {
+        display: inline !important;
+    }
+
     @page {
         size: A4 landscape;
         margin: 10mm;
@@ -406,6 +413,10 @@ a:hover > .card {
 
 @media screen {
     .titulo-lote-print {
+        display: none;
+    }
+
+    .lote-contexto-print {
         display: none;
     }
 }

@@ -67,6 +67,25 @@ class Lote
         return max($numeros) + 1;
     }
 
+    /**
+     * Renumera os itens do lote sequencialmente (1, 2, 3...), preservando a
+     * ordem atual (por numero). Itens movidos de outro lote (Item::moverParaLote)
+     * levam o numero que tinham la, entao sem isso o lote acumula buracos e
+     * numeros fora de ordem depois de varias reorganizacoes.
+     */
+    public function renumerarItens(): void
+    {
+        $itens = $this->buscarItens();
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare('UPDATE itens SET numero = :numero WHERE id = :id');
+
+        $numero = 1;
+        foreach ($itens as $item) {
+            $stmt->execute(['numero' => $numero, 'id' => $item->id]);
+            $numero++;
+        }
+    }
+
     public static function buscarPorId(int $id): ?Lote
     {
         $pdo = Database::getConnection();

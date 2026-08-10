@@ -141,12 +141,24 @@ $statusLabel = [
                 <i class="ti ti-box" aria-hidden="true" style="font-size: 15px; vertical-align: -2px;"></i>
                 Lote <?= htmlspecialchars($lote->numero) ?>
             </span>
-            <a href="index.php?action=excluir_lote&id=<?= $lote->id ?>"
-               class="btn btn-sm btn-outline-light"
-               onclick="return confirm('Excluir este lote e todos os itens/preços dele?')">
-                <i class="ti ti-trash" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
-                Excluir lote
-            </a>
+            <div>
+                <?php if ($servidorLogado !== null && $servidorLogado->ehAdmin()): ?>
+                    <form method="post" action="index.php?action=renumerar_itens_lote" class="d-inline"
+                          onsubmit="return confirm('Renumerar os itens deste lote sequencialmente (1, 2, 3...), mantendo a ordem atual?')">
+                        <input type="hidden" name="lote_id" value="<?= $lote->id ?>">
+                        <button type="submit" class="btn btn-sm btn-outline-light">
+                            <i class="ti ti-sort-ascending-numbers" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+                            Renumerar itens
+                        </button>
+                    </form>
+                <?php endif; ?>
+                <a href="index.php?action=excluir_lote&id=<?= $lote->id ?>"
+                   class="btn btn-sm btn-outline-light"
+                   onclick="return confirm('Excluir este lote e todos os itens/preços dele?')">
+                    <i class="ti ti-trash" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+                    Excluir lote
+                </a>
+            </div>
         </div>
         <div class="card-body">
 

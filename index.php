@@ -148,6 +148,10 @@ switch ($action) {
         (new LoteController())->moverItem();
         break;
 
+    case 'renumerar_itens_lote':
+        (new LoteController())->renumerarItens();
+        break;
+
     case 'adicionar_preco':
         (new PrecoController())->adicionar();
         break;

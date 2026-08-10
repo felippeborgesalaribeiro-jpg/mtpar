@@ -141,7 +141,39 @@ class LoteController
 
         $item->moverParaLote($loteDestino->id, $loteDestino->proximoNumeroItem());
 
+        // Fecha o buraco deixado no lote de origem e garante que o destino
+        // tambem fique sequencial (corrige numeracao torta acumulada de
+        // reorganizacoes anteriores, nao so a deste movimento).
+        $loteAtual->renumerarItens();
+        if ($loteDestino->id !== $loteAtual->id) {
+            $loteDestino->renumerarItens();
+        }
+
         header('Location: index.php?action=cotacao&id=' . $loteAtual->cotacaoId . '#item-' . $item->id);
+        exit;
+    }
+
+    /**
+     * Renumera os itens de um lote sequencialmente (1, 2, 3...), sem mudar
+     * a ordem. Corrige lotes que ja ficaram com numeracao torta por causa
+     * de reorganizacoes feitas antes desta correcao existir. Restrito a
+     * administrador pelo mesmo motivo de moverItem().
+     */
+    public function renumerarItens(): void
+    {
+        exigirAdmin();
+
+        $loteId = (int) ($_POST['lote_id'] ?? 0);
+        $lote = Lote::buscarPorId($loteId);
+
+        if ($lote === null) {
+            echo 'Lote não encontrado.';
+            return;
+        }
+
+        $lote->renumerarItens();
+
+        header('Location: index.php?action=cotacao&id=' . $lote->cotacaoId . '#lote-' . $lote->id);
         exit;
     }
 

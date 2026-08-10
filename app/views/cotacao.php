@@ -185,6 +185,13 @@ $statusLabel = [
                                 <i class="ti ti-trash" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
                                 Excluir item
                             </a>
+                            <?php if ($servidorLogado !== null && $servidorLogado->ehAdmin()): ?>
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                        data-bs-toggle="modal" data-bs-target="#modalMoverItem<?= $item->id ?>">
+                                    <i class="ti ti-transfer" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+                                    Mover
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </div>
 
@@ -362,6 +369,85 @@ $statusLabel = [
                         </div>
                     </div>
                 </div>
+
+                <?php if ($servidorLogado !== null && $servidorLogado->ehAdmin()): ?>
+                    <div class="modal fade" id="modalMoverItem<?= $item->id ?>" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form method="post" action="index.php?action=mover_item_lote">
+                                    <input type="hidden" name="item_id" value="<?= $item->id ?>">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">
+                                            <i class="ti ti-transfer" aria-hidden="true" style="font-size: 16px; vertical-align: -2px;"></i>
+                                            Mover item para outro lote
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="text-muted small">
+                                            Move o item <b><?= htmlspecialchars($item->descricao) ?></b>
+                                            (atualmente no Lote <?= htmlspecialchars($lote->numero) ?>) para outro lote
+                                            desta mesma cotação. Os preços já cadastrados para este item não são perdidos.
+                                        </p>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input campo-destino-mover<?= $item->id ?>" type="radio"
+                                                       name="destino_tipo" id="moverExistente<?= $item->id ?>" value="existente" checked>
+                                                <label class="form-check-label" for="moverExistente<?= $item->id ?>">
+                                                    Mover para lote existente
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input campo-destino-mover<?= $item->id ?>" type="radio"
+                                                       name="destino_tipo" id="moverNovo<?= $item->id ?>" value="novo">
+                                                <label class="form-check-label" for="moverNovo<?= $item->id ?>">
+                                                    Criar um novo lote e mover
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-0 grupo-mover-existente<?= $item->id ?>">
+                                            <label class="form-label">Lote de destino</label>
+                                            <select name="lote_destino_id" class="form-select">
+                                                <?php foreach ($lotes as $loteOpcao): ?>
+                                                    <?php if ($loteOpcao->id !== $lote->id): ?>
+                                                        <option value="<?= $loteOpcao->id ?>">Lote <?= htmlspecialchars($loteOpcao->numero) ?></option>
+                                                    <?php endif; ?>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <?php if (count($lotes) <= 1): ?>
+                                                <div class="form-text text-warning">
+                                                    Não há outro lote nesta cotação — crie um novo lote ao lado.
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <input type="hidden" name="criar_novo_lote" value="" class="campo-criar-novo-lote<?= $item->id ?>">
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary">Mover item</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                    (function () {
+                        var radios = document.querySelectorAll('.campo-destino-mover<?= $item->id ?>');
+                        var grupoExistente = document.querySelector('.grupo-mover-existente<?= $item->id ?>');
+                        var campoCriarNovo = document.querySelector('.campo-criar-novo-lote<?= $item->id ?>');
+
+                        function atualizar() {
+                            var novo = document.getElementById('moverNovo<?= $item->id ?>').checked;
+                            grupoExistente.style.display = novo ? 'none' : '';
+                            campoCriarNovo.value = novo ? '1' : '';
+                        }
+
+                        radios.forEach(function (radio) {
+                            radio.addEventListener('change', atualizar);
+                        });
+                        atualizar();
+                    })();
+                    </script>
+                <?php endif; ?>
             <?php endforeach; ?>
 
             <form method="post" action="index.php?action=adicionar_item" class="row g-2 mt-2">

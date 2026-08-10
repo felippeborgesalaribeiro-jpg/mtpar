@@ -69,6 +69,24 @@ class Item
         $stmt->execute(['id' => $this->id]);
     }
 
+    /**
+     * Move o item para outro lote (reorganizacao de lotes ja preenchidos).
+     * So muda o vinculo do item - os precos ja cadastrados (tabela precos,
+     * ligada por item_id) continuam intactos, nao precisa recadastrar nada.
+     */
+    public function moverParaLote(int $novoLoteId, int $novoNumero): void
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare('UPDATE itens SET lote_id = :lote_id, numero = :numero WHERE id = :id');
+        $stmt->execute([
+            'lote_id' => $novoLoteId,
+            'numero' => $novoNumero,
+            'id' => $this->id,
+        ]);
+        $this->loteId = $novoLoteId;
+        $this->numero = $novoNumero;
+    }
+
     public function buscarPrecos(): array
     {
         return Preco::buscarPorItem($this->id);

@@ -144,6 +144,10 @@ switch ($action) {
         (new LoteController())->excluirItem();
         break;
 
+    case 'mover_item_lote':
+        (new LoteController())->moverItem();
+        break;
+
     case 'adicionar_preco':
         (new PrecoController())->adicionar();
         break;

@@ -102,6 +102,49 @@ class LoteController
         exit;
     }
 
+    /**
+     * Reorganiza um item pra outro lote da mesma cotacao (ou pra um lote
+     * novo, criado na hora) sem perder os precos ja cadastrados. Restrito
+     * a administrador porque muda a estrutura de um orcamento ja em uso.
+     */
+    public function moverItem(): void
+    {
+        exigirAdmin();
+
+        $itemId = (int) ($_POST['item_id'] ?? 0);
+        $item = Item::buscarPorId($itemId);
+
+        if ($item === null) {
+            echo 'Item não encontrado.';
+            return;
+        }
+
+        $loteAtual = Lote::buscarPorId($item->loteId);
+
+        if ($loteAtual === null) {
+            echo 'Lote não encontrado.';
+            return;
+        }
+
+        if (($_POST['criar_novo_lote'] ?? '') === '1') {
+            $loteDestino = new Lote($loteAtual->cotacaoId, Lote::proximoNumeroLote($loteAtual->cotacaoId));
+            $loteDestino->salvar();
+        } else {
+            $loteDestinoId = (int) ($_POST['lote_destino_id'] ?? 0);
+            $loteDestino = Lote::buscarPorId($loteDestinoId);
+
+            if ($loteDestino === null || $loteDestino->cotacaoId !== $loteAtual->cotacaoId) {
+                echo 'Lote de destino inválido.';
+                return;
+            }
+        }
+
+        $item->moverParaLote($loteDestino->id, $loteDestino->proximoNumeroItem());
+
+        header('Location: index.php?action=cotacao&id=' . $loteAtual->cotacaoId . '#item-' . $item->id);
+        exit;
+    }
+
     public function excluirItem(): void
     {
         exigirLogin();

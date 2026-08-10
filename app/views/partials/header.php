@@ -13,7 +13,7 @@ $servidorLogado = usuarioLogado();
     <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="public/css/style.css?v=<?= @filemtime(__DIR__ . '/../../../public/css/style.css') ?: time() ?>">
 </head>
-<body>
+<body class="<?= isset($bodyClass) ? htmlspecialchars($bodyClass) : '' ?>">
 
 <nav class="navbar app-navbar">
     <div class="container-fluid">

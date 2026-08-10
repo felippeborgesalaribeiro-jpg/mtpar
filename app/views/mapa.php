@@ -1,5 +1,6 @@
 <?php
 $titulo = 'Mapa Comparativo - ' . $cotacao->numeroProcesso;
+$bodyClass = 'pagina-tabela-larga';
 require __DIR__ . '/partials/header.php';
 ?>
 

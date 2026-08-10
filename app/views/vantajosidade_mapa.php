@@ -1,6 +1,7 @@
 <?php
 $ehContrato = $processo->ehContratoAditivo();
 $titulo = 'Mapa de Vantajosidade - ' . ($ehContrato ? 'Aditivo Contrato ' . $processo->numeroContrato : 'Ata ' . $processo->numeroAta);
+$bodyClass = 'pagina-tabela-larga';
 require __DIR__ . '/partials/header.php';
 ?>
 

@@ -279,6 +279,24 @@ a:hover > .card {
     margin-top: 22px;
 }
 
+/* Paginas com tabelas largas (mapa comparativo, mapa de vantajosidade): usa
+   a largura total da janela em vez do container padrao do Bootstrap (que
+   trava em ~1140-1320px). Essas tabelas tem uma coluna por fornecedor/fonte
+   de preco e facilmente passam disso - sem espaco extra, as ultimas colunas
+   ficavam cortadas na tela, sem nenhuma indicacao visual de que dava pra
+   rolar horizontalmente pra ve-las. */
+body.pagina-tabela-larga .container {
+    max-width: 100%;
+    padding-left: 28px;
+    padding-right: 28px;
+}
+
+/* Sombra fixa na borda direita da tabela, pra deixar claro que ha mais
+   colunas quando o conteudo ainda nao couber mesmo com a largura total. */
+body.pagina-tabela-larga .table-responsive {
+    box-shadow: inset -10px 0 8px -8px rgba(14, 46, 61, 0.15);
+}
+
 /* Cabecalho de impressao - some na tela, aparece so no papel/PDF */
 .print-header {
     display: none;

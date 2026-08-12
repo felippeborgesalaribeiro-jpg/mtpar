@@ -109,76 +109,11 @@ $statusLabel = [
                                            class="btn btn-sm btn-outline-primary"
                                            title="Ver processo">
                                             <i class="ti ti-eye" aria-hidden="true" style="font-size: 13px;"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary"
-                                                data-bs-toggle="modal" data-bs-target="#modalEditarLicitacao<?= $licitacao->id ?>"
-                                                title="Editar">
-                                            <i class="ti ti-edit" aria-hidden="true" style="font-size: 13px;"></i>
-                                        </button>
-                                        <a href="index.php?action=excluir_licitacao&id=<?= $licitacao->id ?>"
-                                           class="btn btn-sm btn-outline-danger"
-                                           onclick="return confirm('Excluir esta licitação?')"
-                                           title="Excluir">
-                                            <i class="ti ti-trash" aria-hidden="true" style="font-size: 13px;"></i>
+                                            Ver processo
                                         </a>
                                     </div>
                                 </td>
                             </tr>
-
-                            <div class="modal fade" id="modalEditarLicitacao<?= $licitacao->id ?>" tabindex="-1">
-                                <div class="modal-dialog modal-lg">
-                                    <div class="modal-content">
-                                        <form method="post" action="index.php?action=editar_licitacao">
-                                            <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Editar licitação — <?= htmlspecialchars($licitacao->numeroProcesso) ?></h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Servidor responsável</label>
-                                                    <select name="servidor_responsavel_id" class="form-select">
-                                                        <option value="">— Selecione —</option>
-                                                        <?php foreach ($servidores as $servidor): ?>
-                                                            <option value="<?= $servidor->id ?>" <?= $licitacao->servidorResponsavelId === $servidor->id ? 'selected' : '' ?>>
-                                                                <?= htmlspecialchars($servidor->nome) ?>
-                                                            </option>
-                                                        <?php endforeach; ?>
-                                                    </select>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Edital de licitação</label>
-                                                    <input type="text" name="edital_licitacao" class="form-control"
-                                                           value="<?= htmlspecialchars($licitacao->editalLicitacao) ?>" placeholder="Nº do edital">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Realização da sessão pública</label>
-                                                    <input type="date" name="realizacao_sessao_publica" class="form-control"
-                                                           value="<?= htmlspecialchars($licitacao->realizacaoSessaoPublica ?? '') ?>">
-                                                </div>
-                                                <p class="text-muted small mb-2">
-                                                    Valor estimado: <strong><?= $licitacao->valorEstimado !== null ? formatarMoeda($licitacao->valorEstimado) : '—' ?></strong>
-                                                    <br>
-                                                    <span class="fst-italic">Puxado automaticamente do mapa de pesquisa de preços da Cotação vinculada.</span>
-                                                </p>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Valor adjudicado</label>
-                                                    <input type="text" name="valor_adjudicado" class="form-control"
-                                                           value="<?= $licitacao->valorAdjudicado !== null ? formatarNumero($licitacao->valorAdjudicado) : '' ?>">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Encaminhado para pactuação do contrato</label>
-                                                    <input type="date" name="encaminhado_pactuacao_contrato" class="form-control"
-                                                           value="<?= htmlspecialchars($licitacao->encaminhadoPactuacaoContrato ?? '') ?>">
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="submit" class="btn btn-primary">Salvar</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
                         <?php endforeach; ?>
                     </tbody>
                 </table>

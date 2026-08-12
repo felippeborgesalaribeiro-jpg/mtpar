@@ -179,14 +179,18 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
 <?php endif; ?>
 
 <!-- ================================================================ -->
-<!--  LICITAÇÃO VINCULADA (sempre somente leitura)                     -->
+<!--  LICITAÇÃO VINCULADA                                              -->
 <!-- ================================================================ -->
 <?php if ($licitacao !== null): ?>
 <div class="card shadow-sm mb-3" style="border-left: 3px solid var(--brand-blue);">
     <div class="card-header bg-white d-flex align-items-center gap-2 py-2">
         <i class="ti ti-gavel" aria-hidden="true" style="font-size:16px; color: var(--brand-blue-dark);"></i>
         <span class="fw-semibold small">Licitação vinculada</span>
-        <span class="text-muted small ms-1">— somente leitura</span>
+        <button type="button" class="btn btn-sm btn-outline-secondary ms-auto"
+                data-bs-toggle="modal" data-bs-target="#modalEditarLicitacao">
+            <i class="ti ti-edit" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+            Editar
+        </button>
     </div>
     <div class="card-body">
         <div class="row g-3 mb-2">
@@ -233,12 +237,7 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
                 </span>
             </div>
         </div>
-        <div class="mt-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
-            <small class="text-muted">
-                <i class="ti ti-info-circle" aria-hidden="true" style="font-size:12px; vertical-align:-1px;"></i>
-                Para editar os dados da licitação, acesse o módulo
-                <a href="index.php?action=licitacoes">Licitações</a>.
-            </small>
+        <div class="mt-3 d-flex align-items-center justify-content-end flex-wrap gap-2">
             <div class="d-flex gap-2">
                 <a href="index.php?action=proposta_vencedora&id=<?= $licitacao->id ?>" class="btn btn-sm btn-outline-primary">
                     <i class="ti ti-clipboard-check" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
@@ -261,6 +260,61 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
                     </button>
                 <?php endif; ?>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditarLicitacao" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="index.php?action=editar_licitacao">
+                <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar licitação — <?= htmlspecialchars($licitacao->numeroProcesso) ?></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Servidor responsável</label>
+                        <select name="servidor_responsavel_id" class="form-select">
+                            <option value="">— Selecione —</option>
+                            <?php foreach ($servidores as $servidor): ?>
+                                <option value="<?= $servidor->id ?>" <?= $licitacao->servidorResponsavelId === $servidor->id ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($servidor->nome) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Edital de licitação</label>
+                        <input type="text" name="edital_licitacao" class="form-control"
+                               value="<?= htmlspecialchars($licitacao->editalLicitacao) ?>" placeholder="Nº do edital">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Realização da sessão pública</label>
+                        <input type="date" name="realizacao_sessao_publica" class="form-control"
+                               value="<?= htmlspecialchars($licitacao->realizacaoSessaoPublica ?? '') ?>">
+                    </div>
+                    <p class="text-muted small mb-2">
+                        Valor estimado: <strong><?= $licitacao->valorEstimado !== null ? formatarMoeda($licitacao->valorEstimado) : '—' ?></strong>
+                        <br>
+                        <span class="fst-italic">Puxado automaticamente do mapa de pesquisa de preços da Cotação vinculada.</span>
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label">Valor adjudicado</label>
+                        <input type="text" name="valor_adjudicado" class="form-control"
+                               value="<?= $licitacao->valorAdjudicado !== null ? formatarNumero($licitacao->valorAdjudicado) : '' ?>">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Encaminhado para pactuação do contrato</label>
+                        <input type="date" name="encaminhado_pactuacao_contrato" class="form-control"
+                               value="<?= htmlspecialchars($licitacao->encaminhadoPactuacaoContrato ?? '') ?>">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -295,14 +349,13 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
 <?php endif; ?>
 
 <!-- ================================================================ -->
-<!--  PESQUISA DE PREÇO VINCULADA (sempre somente leitura)             -->
+<!--  PESQUISA DE PREÇO VINCULADA                                      -->
 <!-- ================================================================ -->
 <?php if ($cotacao !== null): ?>
 <div class="card shadow-sm mb-3" style="border-left: 3px solid #0891b2;">
     <div class="card-header bg-white d-flex align-items-center gap-2 py-2">
         <i class="ti ti-clipboard-list" aria-hidden="true" style="font-size:16px; color:#0891b2;"></i>
         <span class="fw-semibold small">Pesquisa de preço vinculada</span>
-        <span class="text-muted small ms-1">— somente leitura</span>
     </div>
     <div class="card-body d-flex align-items-center justify-content-between">
         <div class="row g-3 flex-grow-1">

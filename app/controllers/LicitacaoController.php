@@ -40,7 +40,7 @@ class LicitacaoController
 
         $licitacao->salvar();
 
-        header('Location: index.php?action=licitacoes');
+        header('Location: index.php?action=ver_demanda&id=' . $licitacao->demandaId);
         exit;
     }
 

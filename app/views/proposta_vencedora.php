@@ -445,6 +445,7 @@ tr.lote-subtotal.ok td { background-color: #d1e7dd; }
         var totalEstimadoGeral = 0;
         var totalPropostoGeral = 0;
         var algumAlerta = false;
+        var algumPendente = false;
 
         document.querySelectorAll('[data-lote]').forEach(function (lote) {
             if (lote.style.display === 'none') return;
@@ -509,30 +510,50 @@ tr.lote-subtotal.ok td { background-color: #d1e7dd; }
                 if (subAcima) algumAlerta = true;
             }
 
+            algumPendente = algumPendente || subTemPendente;
             totalEstimadoGeral += subEstimado;
             totalPropostoGeral += subProposto;
         });
 
         document.getElementById('totalEstimado').textContent = fmtMoeda(totalEstimadoGeral);
-        document.getElementById('totalProposto').textContent = fmtMoeda(totalPropostoGeral);
+        document.getElementById('totalProposto').textContent = fmtMoeda(totalPropostoGeral) + (algumPendente ? ' *' : '');
 
-        var economia = totalEstimadoGeral - totalPropostoGeral;
-        var economiaPerc = totalEstimadoGeral > 0 ? (economia / totalEstimadoGeral) * 100 : 0;
         var ecoEl = document.getElementById('totalEconomicidade');
-        ecoEl.textContent = fmtMoeda(Math.abs(economia)) + ' (' + fmtPercent(Math.abs(economiaPerc)) + ')';
-        ecoEl.className = 'mb-0 small fw-semibold tabular-nums ' + (economia >= 0 ? 'text-success' : 'text-danger');
+        var economia = 0;
 
-        var acimaGeral = totalPropostoGeral > totalEstimadoGeral;
+        // Enquanto faltar preencher a proposta de algum item, o total
+        // "proposto" fica artificialmente baixo (os itens pendentes contam
+        // como zero) - mostrar economicidade nesse momento dava a impressao
+        // de 100% de economia so por falta de preenchimento, nao porque a
+        // proposta realmente veio mais barata. So calcula quando todos os
+        // itens visiveis ja tiverem proposta lancada.
+        if (algumPendente) {
+            ecoEl.textContent = '—';
+            ecoEl.className = 'mb-0 small fw-semibold tabular-nums text-muted';
+        } else {
+            economia = totalEstimadoGeral - totalPropostoGeral;
+            var economiaPerc = totalEstimadoGeral > 0 ? (economia / totalEstimadoGeral) * 100 : 0;
+            ecoEl.textContent = fmtMoeda(Math.abs(economia)) + ' (' + fmtPercent(Math.abs(economiaPerc)) + ')';
+            ecoEl.className = 'mb-0 small fw-semibold tabular-nums ' + (economia >= 0 ? 'text-success' : 'text-danger');
+        }
+
+        var acimaGeral = !algumPendente && totalPropostoGeral > totalEstimadoGeral;
         algumAlerta = algumAlerta || acimaGeral || document.querySelectorAll('.row-alert').length > 0;
 
         var cardResumo = document.getElementById('cardResumo');
         var verdictText = document.getElementById('verdictText');
         var verdictDot = document.getElementById('verdictDot');
-        var corEstado = algumAlerta ? '#dc3545' : '#198754';
+        var corEstado = algumAlerta ? '#dc3545' : (algumPendente ? '#6c757d' : '#198754');
         cardResumo.style.borderLeftColor = corEstado;
         verdictDot.style.background = corEstado;
-        verdictDot.style.boxShadow = '0 0 0 4px ' + (algumAlerta ? 'rgba(220,53,69,.16)' : 'rgba(25,135,84,.16)');
-        verdictText.textContent = algumAlerta ? 'Existem itens acima do valor de referência' : 'Proposta dentro do estimado';
+        verdictDot.style.boxShadow = '0 0 0 4px ' + (algumAlerta ? 'rgba(220,53,69,.16)' : (algumPendente ? 'rgba(108,117,125,.16)' : 'rgba(25,135,84,.16)'));
+        if (algumAlerta) {
+            verdictText.textContent = 'Existem itens acima do valor de referência';
+        } else if (algumPendente) {
+            verdictText.textContent = 'Aguardando propostas';
+        } else {
+            verdictText.textContent = 'Proposta dentro do estimado';
+        }
     }
 
     var campoUltimoItem = document.getElementById('campoUltimoItem');

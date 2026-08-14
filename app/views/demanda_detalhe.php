@@ -99,14 +99,20 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
                 <div class="col-md-4">
                     <label class="form-label small">Setor demandante</label>
                     <input type="text" name="setor_demandante" class="form-control form-control-sm"
-                           value="<?= htmlspecialchars($demanda->setorDemandante) ?>">
+                           value="<?= htmlspecialchars($demanda->setorDemandante) ?>"
+                           list="listaSetoresDemandantes" autocomplete="off">
+                    <datalist id="listaSetoresDemandantes">
+                        <?php foreach ($setoresDemandantes as $setor): ?>
+                            <option value="<?= htmlspecialchars($setor->nome) ?>">
+                        <?php endforeach; ?>
+                    </datalist>
                 </div>
             </div>
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label class="form-label small">Status</label>
                     <select name="status" class="form-select form-select-sm">
-                        <?php foreach (Demanda::STATUS_OPCOES as $opcao): ?>
+                        <?php foreach (Demanda::opcoesStatus() as $opcao): ?>
                             <option value="<?= $opcao ?>" <?= $demanda->status === $opcao ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($opcao) ?>
                             </option>
@@ -150,6 +156,49 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
         <span class="fw-semibold small">Dados do processo</span>
     </div>
     <div class="card-body">
+        <?php if ($demanda->status === Demanda::STATUS_CANCELADO): ?>
+            <div class="alert alert-dark small py-2 mb-3">
+                <i class="ti ti-ban" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+                Processo cancelado — fora do andamento normal.
+            </div>
+        <?php else: ?>
+            <?php
+            $indiceEtapaAtual = array_search($demanda->status, $sequenciaEtapas, true);
+            $indiceEtapaEfetivo = $indiceEtapaAtual === false ? -1 : $indiceEtapaAtual;
+            ?>
+            <div class="d-flex mb-3" style="overflow-x:auto;">
+                <?php foreach ($sequenciaEtapas as $i => $nomeEtapa): ?>
+                    <?php
+                    $atingida = $i <= $indiceEtapaEfetivo;
+                    $ehAtual = $i === $indiceEtapaEfetivo;
+                    $corAntes = $i > 0 && $i <= $indiceEtapaEfetivo ? 'var(--brand-green-dark)' : 'var(--line)';
+                    $corDepois = $i < count($sequenciaEtapas) - 1 && ($i + 1) <= $indiceEtapaEfetivo ? 'var(--brand-green-dark)' : 'var(--line)';
+                    ?>
+                    <div class="d-flex flex-column align-items-center flex-shrink-0" style="min-width:104px;">
+                        <div class="d-flex align-items-center w-100">
+                            <div class="flex-grow-1" style="height:2px; background:<?= $i === 0 ? 'transparent' : $corAntes ?>;"></div>
+                            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width:22px; height:22px; font-size:10px; font-weight:700;
+                                        background:<?= $atingida ? 'var(--brand-green-dark)' : '#fff' ?>;
+                                        border:2px solid <?= $atingida ? 'var(--brand-green-dark)' : 'var(--ink-faint)' ?>;
+                                        color:<?= $atingida ? '#fff' : 'var(--ink-faint)' ?>;">
+                                <?php if ($atingida): ?>
+                                    <i class="ti ti-check" aria-hidden="true" style="font-size:11px;"></i>
+                                <?php else: ?>
+                                    <?= $i + 1 ?>
+                                <?php endif; ?>
+                            </div>
+                            <div class="flex-grow-1" style="height:2px; background:<?= $i === count($sequenciaEtapas) - 1 ? 'transparent' : $corDepois ?>;"></div>
+                        </div>
+                        <span class="text-center mt-1" style="font-size:9.5px; line-height:1.25; max-width:100px;
+                              color:<?= $ehAtual ? 'var(--brand-blue-dark)' : ($atingida ? 'var(--brand-green-dark)' : 'var(--ink-faint)') ?>;
+                              font-weight:<?= $ehAtual ? '700' : '500' ?>;">
+                            <?= htmlspecialchars($nomeEtapa) ?>
+                        </span>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
         <div class="row g-3 mb-3">
             <div class="col-md-4">
                 <p class="text-muted mb-1" style="font-size:10px; text-transform:uppercase; letter-spacing:.05em;">Status</p>
@@ -263,6 +312,53 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
         </div>
     </div>
 </div>
+
+<!-- ================================================================ -->
+<!--  SITUAÇÃO NO APLIC (TCE-MT)                                       -->
+<!-- ================================================================ -->
+<?php
+$statusAplicLabelDemanda = [
+    StatusAplic::NaoAplicavel->value => ['Ainda não aplicável', 'bg-secondary-subtle text-secondary'],
+    StatusAplic::Pendente->value => ['Pendente de envio', 'bg-warning-subtle text-warning'],
+    StatusAplic::Enviado->value => ['Enviado', 'bg-success-subtle text-success'],
+];
+$statusAplicDemanda = $licitacao->statusAplic();
+[$aplicTextoDemanda, $aplicClasseDemanda] = $statusAplicLabelDemanda[$statusAplicDemanda->value];
+?>
+<?php if ($statusAplicDemanda !== StatusAplic::NaoAplicavel): ?>
+<div class="card shadow-sm mb-3" style="border-left: 3px solid var(--brand-blue);">
+    <div class="card-header bg-white d-flex align-items-center gap-2 py-2">
+        <i class="ti ti-building-bank" aria-hidden="true" style="font-size:16px; color: var(--brand-blue-dark);"></i>
+        <span class="fw-semibold small">Situação no Aplic (TCE-MT)</span>
+    </div>
+    <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div>
+            <span class="badge <?= $aplicClasseDemanda ?>"><?= $aplicTextoDemanda ?></span>
+            <?php if ($licitacao->enviadoAplicEm !== null): ?>
+                <span class="text-muted small ms-1">confirmado em <?= date('d/m/Y', strtotime($licitacao->enviadoAplicEm)) ?></span>
+            <?php endif; ?>
+        </div>
+        <?php if ($statusAplicDemanda === StatusAplic::Pendente): ?>
+            <form method="post" action="index.php?action=marcar_enviado_aplic">
+                <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
+                <button type="submit" class="btn btn-sm btn-outline-primary">
+                    <i class="ti ti-send" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+                    Marcar como enviado
+                </button>
+            </form>
+        <?php else: ?>
+            <form method="post" action="index.php?action=desmarcar_enviado_aplic"
+                  onsubmit="return confirm('Desfazer a confirmação de envio deste processo ao Aplic?')">
+                <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                    <i class="ti ti-arrow-back-up" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+                    Desfazer
+                </button>
+            </form>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>
 
 <div class="modal fade" id="modalEditarLicitacao" tabindex="-1">
     <div class="modal-dialog modal-lg">

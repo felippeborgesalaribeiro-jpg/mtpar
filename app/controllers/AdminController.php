@@ -37,10 +37,15 @@ class AdminController
         require_once __DIR__ . '/../models/Demanda.php';
         require_once __DIR__ . '/../models/Cotacao.php';
         require_once __DIR__ . '/../models/ProcessoVantajosidade.php';
+        require_once __DIR__ . '/../models/SetorDemandante.php';
+        require_once __DIR__ . '/../models/EtapaProcesso.php';
 
         $totalLixeira = Demanda::contarExcluidas()
             + Cotacao::contarExcluidas()
             + ProcessoVantajosidade::contarExcluidos();
+
+        $setoresDemandantes = SetorDemandante::buscarTodos();
+        $etapasProcesso = EtapaProcesso::buscarTodas();
 
         require_once __DIR__ . '/../views/admin/index.php';
     }

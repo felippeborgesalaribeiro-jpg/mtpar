@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/EtapaProcesso.php';
 
 class Demanda
 {
@@ -8,22 +9,20 @@ class Demanda
     const STATUS_CONCLUIDO = 'CONCLUÍDO';
     const STATUS_CANCELADO = 'CANCELADO';
 
-    const STATUS_OPCOES = [
-        'EM ANDAMENTO',
-        'CONCLUÍDO',
-        'ELABORAÇÃO DE TR',
-        'ELABORAÇÃO DE PESQUISA DE PREÇO',
-        'AVISO DE LICITAÇÃO',
-        'AVISO DE DISPENSA DE LICITAÇÃO',
-        'EMISSÃO DE PED RESERVA',
-        'FASE DE HABILITAÇÃO',
-        'CANCELADO',
-        'ENVIADO PARA CONDES',
-        'ENVIADO PARA PARECER JURÍDICO',
-        'ENVIADO PARA PGE',
-        'SANEAMENTO DE PROCESSO',
-        'PUBLICADO',
-    ];
+    /**
+     * EM ANDAMENTO, CONCLUÍDO e CANCELADO sao fixos porque tem logica de
+     * negocio amarrada a essas strings exatas (ver DemandaController -
+     * criacao automatica da Licitacao ao concluir, filtros de contagem).
+     * As etapas do meio vem de EtapaProcesso, cadastradas pelo admin e
+     * usadas tanto no dropdown de status quanto no stepper visual da
+     * tela do Processo.
+     */
+    public static function opcoesStatus(): array
+    {
+        $etapas = array_map(fn(EtapaProcesso $etapa) => $etapa->nome, EtapaProcesso::buscarTodas());
+
+        return array_merge([self::STATUS_EM_ANDAMENTO], $etapas, [self::STATUS_CONCLUIDO, self::STATUS_CANCELADO]);
+    }
 
     public ?int $id;
     public string $numeroProcesso;

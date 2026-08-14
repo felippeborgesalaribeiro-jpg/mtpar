@@ -32,6 +32,27 @@ CREATE TABLE IF NOT EXISTS demandas (
     FOREIGN KEY (servidor_responsavel_id) REFERENCES servidores(id)
 );
 
+-- Lista mestre de setores demandantes, mantida so pelo admin. As tabelas
+-- demandas/licitacoes/cotacoes continuam guardando o nome do setor como
+-- texto solto (mesmo padrao ja usado hoje) - esta tabela so alimenta o
+-- autocomplete, nao vira chave estrangeira.
+CREATE TABLE IF NOT EXISTS setores_demandantes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL UNIQUE,
+    criado_em TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Etapas intermediarias configuraveis do fluxo da Demanda (entre "EM
+-- ANDAMENTO" e "CONCLUÍDO"/"CANCELADO", que continuam fixas no codigo porque
+-- tem logica de negocio amarrada a essas strings exatas). "ordem" define a
+-- posicao no stepper visual da tela do Processo.
+CREATE TABLE IF NOT EXISTS etapas_processo (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL UNIQUE,
+    ordem INTEGER NOT NULL,
+    criado_em TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS empresas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,
@@ -57,6 +78,7 @@ CREATE TABLE IF NOT EXISTS licitacoes (
     empresa_vencedora_id INTEGER,
     observacoes_proposta_vencedora TEXT NOT NULL DEFAULT '',
     data_adjudicacao_homologacao TEXT,
+    enviado_aplic_em TEXT,
     criado_em TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (demanda_id) REFERENCES demandas(id) ON DELETE CASCADE,
     FOREIGN KEY (servidor_responsavel_id) REFERENCES servidores(id),

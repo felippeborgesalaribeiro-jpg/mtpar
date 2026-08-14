@@ -78,8 +78,8 @@ $coresStatus = [
     Módulos
 </p>
 
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
+<div class="row row-cols-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4">
+    <div class="col">
         <a href="index.php?action=demandas" class="text-decoration-none">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
@@ -92,7 +92,7 @@ $coresStatus = [
             </div>
         </a>
     </div>
-    <div class="col-md-3">
+    <div class="col">
         <a href="index.php?action=licitacoes" class="text-decoration-none">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
@@ -105,7 +105,7 @@ $coresStatus = [
             </div>
         </a>
     </div>
-    <div class="col-md-3">
+    <div class="col">
         <a href="index.php?action=orcamentos" class="text-decoration-none">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
@@ -118,7 +118,7 @@ $coresStatus = [
             </div>
         </a>
     </div>
-    <div class="col-md-3">
+    <div class="col">
         <a href="index.php?action=relatorios_licitacao" class="text-decoration-none">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
@@ -127,6 +127,19 @@ $coresStatus = [
                     </div>
                     <p class="fw-semibold mb-1 mt-3 text-dark">Relatórios</p>
                     <p class="text-muted small mb-0">Licitações por unidade, servidor e ano</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col">
+        <a href="index.php?action=aplic" class="text-decoration-none">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="rounded-3 bg-danger-subtle d-inline-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                        <i class="ti ti-building-bank text-danger" aria-hidden="true" style="font-size: 20px;"></i>
+                    </div>
+                    <p class="fw-semibold mb-1 mt-3 text-dark">Aplic (TCE-MT)</p>
+                    <p class="text-muted small mb-0">Controle de envio ao Tribunal de Contas</p>
                 </div>
             </div>
         </a>
@@ -242,12 +255,19 @@ $coresStatus = [
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Setor demandante</label>
-                            <input type="text" name="setor_demandante" class="form-control">
+                            <input type="text" name="setor_demandante" class="form-control"
+                                   list="listaSetoresDemandantes" autocomplete="off"
+                                   placeholder="Comece a digitar para buscar...">
+                            <datalist id="listaSetoresDemandantes">
+                                <?php foreach ($setoresDemandantes as $setor): ?>
+                                    <option value="<?= htmlspecialchars($setor->nome) ?>">
+                                <?php endforeach; ?>
+                            </datalist>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Status</label>
                             <select name="status" class="form-select">
-                                <?php foreach (Demanda::STATUS_OPCOES as $opcao): ?>
+                                <?php foreach (Demanda::opcoesStatus() as $opcao): ?>
                                     <option value="<?= $opcao ?>"><?= htmlspecialchars($opcao) ?></option>
                                 <?php endforeach; ?>
                             </select>

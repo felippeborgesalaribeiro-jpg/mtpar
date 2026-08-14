@@ -127,10 +127,10 @@ require __DIR__ . '/../partials/header.php';
         </div>
     </div>
 
-    <!-- CARDS: LIXEIRA + EM BREVE -->
+    <!-- CARDS: LIXEIRA + CADASTROS -->
     <div class="row g-4">
 
-        <div class="col-md-6">
+        <div class="col-md-3">
             <div class="card shadow-sm h-100">
                 <div class="card-body d-flex flex-column align-items-center justify-content-center py-4 text-center">
                     <i class="ti ti-trash" aria-hidden="true" style="font-size:32px; color:#dc3545; margin-bottom:8px;"></i>
@@ -151,7 +151,35 @@ require __DIR__ . '/../partials/header.php';
             </div>
         </div>
 
-        <div class="col-md-6">
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column align-items-center justify-content-center py-4 text-center">
+                    <i class="ti ti-building-community" aria-hidden="true" style="font-size:32px; color:var(--brand-blue-dark); margin-bottom:8px;"></i>
+                    <div class="fw-semibold mb-1">Setores Demandantes</div>
+                    <div class="text-muted small mb-3"><?= count($setoresDemandantes) ?> cadastrado(s)</div>
+                    <a href="index.php?action=setores_demandantes" class="btn btn-sm btn-outline-primary">
+                        <i class="ti ti-list-details" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+                        Gerenciar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column align-items-center justify-content-center py-4 text-center">
+                    <i class="ti ti-route" aria-hidden="true" style="font-size:32px; color:var(--brand-blue-dark); margin-bottom:8px;"></i>
+                    <div class="fw-semibold mb-1">Etapas do Processo</div>
+                    <div class="text-muted small mb-3"><?= count($etapasProcesso) ?> cadastrada(s)</div>
+                    <a href="index.php?action=etapas_processo" class="btn btn-sm btn-outline-primary">
+                        <i class="ti ti-list-details" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+                        Gerenciar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
             <div class="card shadow-sm h-100" style="opacity:.55; pointer-events:none;">
                 <div class="card-body d-flex flex-column align-items-center justify-content-center py-4 text-muted">
                     <i class="ti ti-settings" aria-hidden="true" style="font-size:32px; margin-bottom:8px;"></i>

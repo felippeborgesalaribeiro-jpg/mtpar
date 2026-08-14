@@ -16,6 +16,9 @@ require_once __DIR__ . '/app/controllers/MapaController.php';
 require_once __DIR__ . '/app/controllers/RelatorioController.php';
 require_once __DIR__ . '/app/controllers/RelatoriosLicitacaoController.php';
 require_once __DIR__ . '/app/controllers/EmpresaController.php';
+require_once __DIR__ . '/app/controllers/SetorDemandanteController.php';
+require_once __DIR__ . '/app/controllers/AplicController.php';
+require_once __DIR__ . '/app/controllers/EtapaProcessoController.php';
 require_once __DIR__ . '/app/controllers/PropostaVencedoraController.php';
 require_once __DIR__ . '/app/controllers/VantajosidadeController.php';
 require_once __DIR__ . '/app/controllers/ParametroController.php';
@@ -193,6 +196,58 @@ switch ($action) {
 
     case 'criar_empresa':
         (new EmpresaController())->criar();
+        break;
+
+    case 'setores_demandantes':
+        (new SetorDemandanteController())->listar();
+        break;
+
+    case 'criar_setor_demandante':
+        (new SetorDemandanteController())->criar();
+        break;
+
+    case 'editar_setor_demandante':
+        (new SetorDemandanteController())->editar();
+        break;
+
+    case 'excluir_setor_demandante':
+        (new SetorDemandanteController())->excluir();
+        break;
+
+    case 'aplic':
+        (new AplicController())->painel();
+        break;
+
+    case 'marcar_enviado_aplic':
+        (new AplicController())->marcarEnviado();
+        break;
+
+    case 'desmarcar_enviado_aplic':
+        (new AplicController())->desmarcarEnviado();
+        break;
+
+    case 'etapas_processo':
+        (new EtapaProcessoController())->listar();
+        break;
+
+    case 'criar_etapa_processo':
+        (new EtapaProcessoController())->criar();
+        break;
+
+    case 'editar_etapa_processo':
+        (new EtapaProcessoController())->editar();
+        break;
+
+    case 'excluir_etapa_processo':
+        (new EtapaProcessoController())->excluir();
+        break;
+
+    case 'mover_etapa_processo_cima':
+        (new EtapaProcessoController())->moverParaCima();
+        break;
+
+    case 'mover_etapa_processo_baixo':
+        (new EtapaProcessoController())->moverParaBaixo();
         break;
 
     case 'proposta_vencedora':

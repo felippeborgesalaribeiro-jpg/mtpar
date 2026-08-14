@@ -4,6 +4,7 @@ require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Demanda.php';
 require_once __DIR__ . '/Servidor.php';
 require_once __DIR__ . '/StatusLicitacao.php';
+require_once __DIR__ . '/StatusAplic.php';
 
 class Licitacao
 {
@@ -23,6 +24,7 @@ class Licitacao
     public string $criadoEm;
     public string $observacoesPropostaVencedora;
     public ?string $dataAdjudicacaoHomologacao;
+    public ?string $enviadoAplicEm;
 
     public function __construct(
         int $demandaId,
@@ -40,7 +42,8 @@ class Licitacao
         ?int $id = null,
         string $criadoEm = '',
         string $observacoesPropostaVencedora = '',
-        ?string $dataAdjudicacaoHomologacao = null
+        ?string $dataAdjudicacaoHomologacao = null,
+        ?string $enviadoAplicEm = null
     ) {
         $this->id = $id;
         $this->demandaId = $demandaId;
@@ -58,6 +61,7 @@ class Licitacao
         $this->criadoEm = $criadoEm;
         $this->observacoesPropostaVencedora = $observacoesPropostaVencedora;
         $this->dataAdjudicacaoHomologacao = $dataAdjudicacaoHomologacao;
+        $this->enviadoAplicEm = $enviadoAplicEm;
     }
 
     public static function criarApartirDeDemanda(Demanda $demanda): Licitacao
@@ -92,10 +96,12 @@ class Licitacao
             $stmt = $pdo->prepare(
                 'INSERT INTO licitacoes (demanda_id, numero_processo, link_sigadoc, setor_demandante, data_recebimento,
                  objeto, servidor_responsavel_id, edital_licitacao, realizacao_sessao_publica, valor_estimado,
-                 valor_adjudicado, encaminhado_pactuacao_contrato, observacoes_proposta_vencedora, data_adjudicacao_homologacao)
+                 valor_adjudicado, encaminhado_pactuacao_contrato, observacoes_proposta_vencedora, data_adjudicacao_homologacao,
+                 enviado_aplic_em)
                  VALUES (:demanda_id, :numero_processo, :link_sigadoc, :setor_demandante, :data_recebimento,
                  :objeto, :servidor_responsavel_id, :edital_licitacao, :realizacao_sessao_publica, :valor_estimado,
-                 :valor_adjudicado, :encaminhado_pactuacao_contrato, :observacoes_proposta_vencedora, :data_adjudicacao_homologacao)'
+                 :valor_adjudicado, :encaminhado_pactuacao_contrato, :observacoes_proposta_vencedora, :data_adjudicacao_homologacao,
+                 :enviado_aplic_em)'
             );
             $stmt->execute($this->paramsParaSalvar());
             $this->id = (int) $pdo->lastInsertId();
@@ -107,7 +113,8 @@ class Licitacao
                  realizacao_sessao_publica = :realizacao_sessao_publica, valor_estimado = :valor_estimado,
                  valor_adjudicado = :valor_adjudicado, encaminhado_pactuacao_contrato = :encaminhado_pactuacao_contrato,
                  observacoes_proposta_vencedora = :observacoes_proposta_vencedora,
-                 data_adjudicacao_homologacao = :data_adjudicacao_homologacao
+                 data_adjudicacao_homologacao = :data_adjudicacao_homologacao,
+                 enviado_aplic_em = :enviado_aplic_em
                  WHERE id = :id'
             );
             $stmt->execute(array_merge($this->paramsParaSalvar(), ['id' => $this->id]));
@@ -133,6 +140,7 @@ class Licitacao
             'encaminhado_pactuacao_contrato' => $this->encaminhadoPactuacaoContrato,
             'observacoes_proposta_vencedora' => $this->observacoesPropostaVencedora,
             'data_adjudicacao_homologacao' => $this->dataAdjudicacaoHomologacao,
+            'enviado_aplic_em' => $this->enviadoAplicEm,
         ];
     }
 
@@ -263,6 +271,37 @@ class Licitacao
         return StatusLicitacao::AguardandoPublicacao;
     }
 
+    /**
+     * Estado derivado, igual ao status() - nada aqui e digitado a mao alem
+     * do clique de "marcar como enviado". Pendente so aparece quando o
+     * processo ja tem resultado (Homologada pra frente); antes disso nao
+     * ha nada que o Aplic precise, entao fica "nao aplicavel".
+     */
+    public function statusAplic(): StatusAplic
+    {
+        if ($this->enviadoAplicEm !== null) {
+            return StatusAplic::Enviado;
+        }
+
+        if ($this->estaFinalizada()) {
+            return StatusAplic::Pendente;
+        }
+
+        return StatusAplic::NaoAplicavel;
+    }
+
+    public function marcarEnviadoAplic(): void
+    {
+        $this->enviadoAplicEm = (new DateTime('now'))->format('Y-m-d H:i:s');
+        $this->salvar();
+    }
+
+    public function desmarcarEnviadoAplic(): void
+    {
+        $this->enviadoAplicEm = null;
+        $this->salvar();
+    }
+
     public function calcularEconomicidadeReais(): ?float
     {
         if ($this->valorEstimado === null || $this->valorAdjudicado === null) {
@@ -369,7 +408,8 @@ class Licitacao
             (int) $linha['id'],
             $linha['criado_em'] ?? '',
             $linha['observacoes_proposta_vencedora'] ?? '',
-            $linha['data_adjudicacao_homologacao'] ?? null
+            $linha['data_adjudicacao_homologacao'] ?? null,
+            $linha['enviado_aplic_em'] ?? null
         );
 
         $licitacao->sincronizarValorEstimado();

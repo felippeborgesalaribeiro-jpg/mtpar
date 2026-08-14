@@ -5,6 +5,7 @@ require_once __DIR__ . '/../models/StatusCotacao.php';
 require_once __DIR__ . '/../models/Servidor.php';
 require_once __DIR__ . '/../models/Demanda.php';
 require_once __DIR__ . '/../models/Licitacao.php';
+require_once __DIR__ . '/../models/SetorDemandante.php';
 require_once __DIR__ . '/../helpers/auth.php';
 
 class DashboardController
@@ -25,6 +26,7 @@ class DashboardController
         $licitacoesPublicadas = Licitacao::contarPublicadas();
         $licitacoesHomologadas = Licitacao::contarHomologadas();
         $valorHomologadas = Licitacao::somarValorAdjudicadoHomologadas();
+        $setoresDemandantes = SetorDemandante::buscarTodos();
 
         require __DIR__ . '/../views/dashboard.php';
     }

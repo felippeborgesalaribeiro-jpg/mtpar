@@ -7,6 +7,8 @@ require_once __DIR__ . '/../models/Cotacao.php';
 require_once __DIR__ . '/../models/ProcessoVantajosidade.php';
 require_once __DIR__ . '/../models/LotePropostaVencedora.php';
 require_once __DIR__ . '/../models/SituacaoLote.php';
+require_once __DIR__ . '/../models/SetorDemandante.php';
+require_once __DIR__ . '/../models/EtapaProcesso.php';
 require_once __DIR__ . '/../helpers/auth.php';
 
 class DemandaController
@@ -40,6 +42,12 @@ class DemandaController
         $vantajosidade = $demanda->buscarVantajosidadeVinculada();
         $resumoLotes = $this->montarResumoLotes($licitacao);
         [$linkVoltar, $labelVoltar] = $this->resolverVoltar();
+        $setoresDemandantes = SetorDemandante::buscarTodos();
+        $sequenciaEtapas = array_merge(
+            [Demanda::STATUS_EM_ANDAMENTO],
+            array_map(fn(EtapaProcesso $etapa) => $etapa->nome, EtapaProcesso::buscarTodas()),
+            [Demanda::STATUS_CONCLUIDO]
+        );
 
         require __DIR__ . '/../views/demanda_detalhe.php';
     }

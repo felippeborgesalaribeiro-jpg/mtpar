@@ -9,6 +9,7 @@ use Licitacao;
 use Lote;
 use Preco;
 use Servidor;
+use StatusAplic;
 use StatusLicitacao;
 use Tests\DatabaseTestCase;
 
@@ -18,6 +19,7 @@ require_once __DIR__ . '/../../app/models/StatusCotacao.php';
 require_once __DIR__ . '/../../app/models/Demanda.php';
 require_once __DIR__ . '/../../app/models/Licitacao.php';
 require_once __DIR__ . '/../../app/models/StatusLicitacao.php';
+require_once __DIR__ . '/../../app/models/StatusAplic.php';
 require_once __DIR__ . '/../../app/models/Lote.php';
 require_once __DIR__ . '/../../app/models/Item.php';
 require_once __DIR__ . '/../../app/models/Preco.php';
@@ -102,6 +104,33 @@ final class LicitacaoTest extends DatabaseTestCase
 
         $licitacao->encaminhadoPactuacaoContrato = '2026-02-01';
         $this->assertSame(StatusLicitacao::EncaminhadaParaContratacao, $licitacao->status());
+    }
+
+    public function testStatusAplicSoFicaPendenteDepoisDeFinalizadaESoVaraEnviadoComOClique(): void
+    {
+        $demanda = $this->criarDemanda();
+        $licitacao = Licitacao::criarApartirDeDemanda($demanda);
+
+        // Antes de homologada, nao ha nada pro Aplic ainda.
+        $this->assertSame(StatusAplic::NaoAplicavel, $licitacao->statusAplic());
+
+        $licitacao->editalLicitacao = 'Edital 003/2026';
+        $licitacao->valorAdjudicado = 800.0;
+        $this->assertSame(StatusAplic::NaoAplicavel, $licitacao->statusAplic());
+
+        $licitacao->dataAdjudicacaoHomologacao = '2026-01-20';
+        $this->assertSame(StatusAplic::Pendente, $licitacao->statusAplic());
+
+        $licitacao->marcarEnviadoAplic();
+        $this->assertSame(StatusAplic::Enviado, $licitacao->statusAplic());
+        $this->assertNotNull($licitacao->enviadoAplicEm);
+
+        $recarregada = Licitacao::buscarPorId($licitacao->id);
+        $this->assertSame(StatusAplic::Enviado, $recarregada->statusAplic());
+
+        $recarregada->desmarcarEnviadoAplic();
+        $this->assertSame(StatusAplic::Pendente, $recarregada->statusAplic());
+        $this->assertNull($recarregada->enviadoAplicEm);
     }
 
     public function testSalvarUmaLicitacaoJaExistenteAtualizaSemErro(): void

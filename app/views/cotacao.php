@@ -173,7 +173,7 @@ $statusLabel = [
 
             <?php foreach ($itens as $item): ?>
                 <?php
-                $resultado = $item->analisar($cotacao->criterioConsolidacao);
+                $resultado = $item->analisar($cotacao->criterioConsolidacao, null, $cotacao->deveArredondarValorReferencia());
                 $precos    = $item->buscarPrecos();
                 ?>
 

@@ -2,6 +2,7 @@
 
 namespace Tests\Models;
 
+use AnalisePrecos;
 use Cotacao;
 use Demanda;
 use Item;
@@ -157,6 +158,54 @@ final class CotacaoTest extends DatabaseTestCase
 
         // Total esperado: 22 + 50 + 300 = 372.
         $this->assertEqualsWithDelta(372.0, $cotacao->calcularValorTotal(), 0.001);
+    }
+
+    public function testDeveArredondarValorReferenciaComparaComADataDeCorte(): void
+    {
+        $servidor = $this->criarServidor();
+
+        $cotacaoNova = new Cotacao('MTPAR-PRO-2026/00008', '', '', '', '', $servidor->id);
+        $cotacaoNova->salvar();
+        // criado_em so vem preenchido do banco (datetime('now')) - o objeto
+        // recem-salvo em memoria ainda tem a string vazia do construtor.
+        $cotacaoNova = Cotacao::buscarPorId($cotacaoNova->id);
+        $this->assertTrue($cotacaoNova->deveArredondarValorReferencia());
+
+        // Simula uma cotacao criada antes da correcao - criado_em nao e
+        // setavel pelo construtor (sempre vem do datetime('now') do SQLite),
+        // entao "envelhecemos" ela direto no banco, como o teste de status
+        // antigo acima ja faz.
+        \Database::getConnection()
+            ->prepare('UPDATE cotacoes SET criado_em = :valor WHERE id = :id')
+            ->execute(['valor' => '2020-01-01 00:00:00', 'id' => $cotacaoNova->id]);
+
+        $cotacaoAntiga = Cotacao::buscarPorId($cotacaoNova->id);
+        $this->assertFalse($cotacaoAntiga->deveArredondarValorReferencia());
+    }
+
+    public function testCalcularValorTotalNaoArredondaParaCotacaoDeAntesDaCorrecao(): void
+    {
+        $servidor = $this->criarServidor();
+        $cotacao = new Cotacao('MTPAR-PRO-2026/00010', '', '', '', '', $servidor->id, AnalisePrecos::CRITERIO_MEDIA);
+        $cotacao->salvar();
+
+        \Database::getConnection()
+            ->prepare('UPDATE cotacoes SET criado_em = :valor WHERE id = :id')
+            ->execute(['valor' => '2020-01-01 00:00:00', 'id' => $cotacao->id]);
+        $cotacao = Cotacao::buscarPorId($cotacao->id);
+
+        $lote = new Lote($cotacao->id, '01');
+        $lote->salvar();
+        $item = new Item($lote->id, 1, 'Item de teste', 'UN', 100);
+        $item->salvar();
+        foreach ([13.40, 12.50, 14.90, 14.66] as $valor) {
+            (new Preco($item->id, $valor))->salvar();
+        }
+
+        // Sem a correcao, o total bate com o bruto (13.865 x 100 = 1386.50),
+        // nao com o arredondado (13.86 x 100 = 1386.00) - preserva o numero
+        // que ja saiu num Mapa/Relatorio antigo.
+        $this->assertEqualsWithDelta(1386.50, $cotacao->calcularValorTotal(), 0.001);
     }
 
     public function testCotacaoDeRepublicacaoDeLoteNaoAparecemEmBuscarTodas(): void

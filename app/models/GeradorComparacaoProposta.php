@@ -151,7 +151,7 @@ class GeradorComparacaoProposta
         $subtotalTemPendente = false;
 
         foreach ($lote->buscarItens() as $item) {
-            $resultado = $item->analisar($cotacaoDoLote->criterioConsolidacao);
+            $resultado = $item->analisar($cotacaoDoLote->criterioConsolidacao, null, $cotacaoDoLote->deveArredondarValorReferencia());
             $valorReferencia = $resultado['valor_referencia'] ?? 0;
             $propostaItem = ItemPropostaVencedora::buscarPorLicitacaoEItem($this->licitacao->id, $item->id);
 

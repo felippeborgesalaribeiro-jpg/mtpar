@@ -14,12 +14,27 @@ class AnalisePrecos
     private array $precos;
     private string $criterio;
     private array $parametrosPrecoPublico;
+    private bool $arredondarValorReferencia;
 
-    public function __construct(array $precos, string $criterio = self::CRITERIO_MEDIANA, array $parametrosPrecoPublico = [])
-    {
+    /**
+     * $arredondarValorReferencia controla se o valor de referencia final e
+     * arredondado pra centavos na origem (comportamento correto, usado em
+     * toda cotacao nova) ou deixado com a precisao bruta de ponto flutuante
+     * (comportamento antigo, mantido de proposito pra cotacoes de antes da
+     * correcao - ver Cotacao::deveArredondarValorReferencia()). Sem isso,
+     * reabrir uma pesquisa de preco ja realizada mudaria numeros que ja
+     * foram usados num Mapa/Relatorio formal.
+     */
+    public function __construct(
+        array $precos,
+        string $criterio = self::CRITERIO_MEDIANA,
+        array $parametrosPrecoPublico = [],
+        bool $arredondarValorReferencia = true
+    ) {
         $this->precos = $precos;
         $this->criterio = $criterio;
         $this->parametrosPrecoPublico = $parametrosPrecoPublico;
+        $this->arredondarValorReferencia = $arredondarValorReferencia;
     }
 
     public function calcular(): array
@@ -151,8 +166,9 @@ class AnalisePrecos
         // duas casas decimais (preço em reais). Se não arredondar aqui, o
         // valor unitário exibido na tela (já arredondado pra exibição) e o
         // total do lote (unitário vezes quantidade) usam números diferentes
-        // e a conta não bate quando alguém confere na mão.
-        return round($valor, 2);
+        // e a conta não bate quando alguém confere na mão. So nao aplicado
+        // pra cotacoes de antes da correcao (ver arredondarValorReferencia).
+        return $this->arredondarValorReferencia ? round($valor, 2) : $valor;
     }
 
     public function calcularMedia(array $valores): float

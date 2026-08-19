@@ -245,7 +245,7 @@ class GeradorAnaliseCritica
 
             foreach ($itens as $item) {
                 $this->montarTabelaItem($secao, $lote, $item);
-                $resultado       = $item->analisar($this->cotacao->criterioConsolidacao);
+                $resultado       = $item->analisar($this->cotacao->criterioConsolidacao, null, $this->cotacao->deveArredondarValorReferencia());
                 $valorReferencia = $resultado['valor_referencia'] ?? 0;
                 $valorTotalLote += $valorReferencia * $item->quantidade;
             }
@@ -280,7 +280,7 @@ class GeradorAnaliseCritica
         $larguraTotal = $col1 + $col2 + $col3 + $col4;
         $larguraParam = $col1 + $col2 + $col3;
 
-        $resultado       = $item->analisar($this->cotacao->criterioConsolidacao);
+        $resultado       = $item->analisar($this->cotacao->criterioConsolidacao, null, $this->cotacao->deveArredondarValorReferencia());
         $valorReferencia = $resultado['valor_referencia'] ?? 0;
         $valorTotal      = $valorReferencia * $item->quantidade;
         $criterioLabel   = self::CRITERIO_LABEL[$this->cotacao->criterioConsolidacao] ?? 'mediana';

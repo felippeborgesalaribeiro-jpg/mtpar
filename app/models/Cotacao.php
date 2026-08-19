@@ -153,6 +153,21 @@ class Cotacao
     }
 
     /**
+     * A partir desta data, o valor de referencia calculado passa a ser
+     * arredondado pra centavos na origem (ver AnalisePrecos::
+     * calcularValorReferencia). Cotacoes criadas antes disso continuam
+     * usando o calculo antigo pra sempre, mesmo que reabertas depois -
+     * mapas e pesquisas ja realizados nao podem ter os numeros alterados
+     * retroativamente.
+     */
+    const DATA_CORTE_VALOR_REFERENCIA_ARREDONDADO = '2026-08-19';
+
+    public function deveArredondarValorReferencia(): bool
+    {
+        return $this->criadoEm >= self::DATA_CORTE_VALOR_REFERENCIA_ARREDONDADO;
+    }
+
+    /**
      * Mesmo calculo usado no mapa comparativo: soma, por lote, o valor de
      * referencia de cada item (segundo o criterio de consolidacao da cotacao)
      * multiplicado pela quantidade.
@@ -161,10 +176,11 @@ class Cotacao
     {
         $valorTotal = 0.0;
         $parametrosPrecoPublico = Parametro::buscarNomesPrecoPublico();
+        $arredondar = $this->deveArredondarValorReferencia();
 
         foreach ($this->buscarLotes() as $lote) {
             foreach ($lote->buscarItens() as $item) {
-                $resultado = $item->analisar($this->criterioConsolidacao, $parametrosPrecoPublico);
+                $resultado = $item->analisar($this->criterioConsolidacao, $parametrosPrecoPublico, $arredondar);
                 $valorReferencia = $resultado['valor_referencia'] ?? 0;
                 $valorTotal += $valorReferencia * $item->quantidade;
             }

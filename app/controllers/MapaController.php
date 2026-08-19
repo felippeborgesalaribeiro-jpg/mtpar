@@ -31,7 +31,7 @@ class MapaController
             $valorTotalLote = 0.0;
 
             foreach ($itens as $item) {
-                $resultado = $item->analisar($cotacao->criterioConsolidacao, $parametrosPrecoPublico);
+                $resultado = $item->analisar($cotacao->criterioConsolidacao, $parametrosPrecoPublico, $cotacao->deveArredondarValorReferencia());
                 $precos = $item->buscarPrecos();
 
                 $fornecedoresAprovados = [];

@@ -63,4 +63,24 @@ final class AnalisePrecosTest extends TestCase
 
         $this->assertEqualsWithDelta(round($resultado['valor_referencia'], 2), $resultado['valor_referencia'], 0.0001);
     }
+
+    public function testComArredondamentoDesativadoMantemOValorBrutoDeAntesDaCorrecao(): void
+    {
+        // Cotacoes de antes da correcao nao podem ter os numeros mudados
+        // retroativamente (ja viraram Mapa/Relatorio formal) - por isso quem
+        // chama pode desligar o arredondamento e manter o comportamento antigo.
+        $precos = [
+            ['parametro' => 'X', 'valor' => 13.40, 'fonte' => ''],
+            ['parametro' => 'X', 'valor' => 12.50, 'fonte' => ''],
+            ['parametro' => 'X', 'valor' => 14.90, 'fonte' => ''],
+            ['parametro' => 'X', 'valor' => 14.66, 'fonte' => ''],
+        ];
+
+        $analise = new AnalisePrecos($precos, AnalisePrecos::CRITERIO_MEDIA, [], arredondarValorReferencia: false);
+        $resultado = $analise->calcular();
+
+        $valorBrutoEsperado = (13.40 + 12.50 + 14.90 + 14.66) / 4;
+        $this->assertSame($valorBrutoEsperado, $resultado['valor_referencia']);
+        $this->assertNotSame(13.86, $resultado['valor_referencia']);
+    }
 }

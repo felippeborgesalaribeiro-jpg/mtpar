@@ -200,7 +200,7 @@ class GeradorRelatorioPesquisa
 
             foreach ($itens as $item) {
                 $this->montarBlocoItem($secao, $lote, $item, $parametrosPrecoPublico);
-                $resultado = $item->analisar($this->cotacao->criterioConsolidacao, $parametrosPrecoPublico);
+                $resultado = $item->analisar($this->cotacao->criterioConsolidacao, $parametrosPrecoPublico, $this->cotacao->deveArredondarValorReferencia());
                 $valorReferencia = $resultado['valor_referencia'] ?? 0;
                 $valorTotalLote += $valorReferencia * $item->quantidade;
             }
@@ -233,7 +233,7 @@ class GeradorRelatorioPesquisa
         );
 
         $precos = $item->buscarPrecos();
-        $resultado = $item->analisar($this->cotacao->criterioConsolidacao, $parametrosPrecoPublico);
+        $resultado = $item->analisar($this->cotacao->criterioConsolidacao, $parametrosPrecoPublico, $this->cotacao->deveArredondarValorReferencia());
 
         $tabela = $secao->addTable($estiloTabela);
         $tabela->addRow();

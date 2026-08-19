@@ -242,7 +242,7 @@ require __DIR__ . '/partials/header.php';
                     <tbody>
                         <?php foreach ($itens as $item): ?>
                             <?php
-                            $resultado = $item->analisar($cotacaoDoLote->criterioConsolidacao);
+                            $resultado = $item->analisar($cotacaoDoLote->criterioConsolidacao, null, $cotacaoDoLote->deveArredondarValorReferencia());
                             $valorReferencia = $resultado['valor_referencia'] ?? 0;
                             $propostaExistente = $valoresPropostos[$item->id] ?? null;
                             ?>

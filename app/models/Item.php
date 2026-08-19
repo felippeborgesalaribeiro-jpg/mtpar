@@ -96,9 +96,15 @@ class Item
      * @param array<int, string>|null $parametrosPrecoPublico ja calculado por quem chama
      * (ex.: Cotacao::calcularValorTotal() percorrendo varios itens) - evita
      * repetir a mesma consulta a cada item. Se null, busca aqui mesmo.
+     * @param bool $arredondarValorReferencia ver Cotacao::deveArredondarValorReferencia()
+     * - quem chama e que sabe se o item pertence a uma cotacao de antes ou
+     * depois da correcao de arredondamento.
      */
-    public function analisar(string $criterio = AnalisePrecos::CRITERIO_MEDIANA, ?array $parametrosPrecoPublico = null): array
-    {
+    public function analisar(
+        string $criterio = AnalisePrecos::CRITERIO_MEDIANA,
+        ?array $parametrosPrecoPublico = null,
+        bool $arredondarValorReferencia = true
+    ): array {
         $precos = $this->buscarPrecos();
 
         $precosParaCalculo = [];
@@ -111,7 +117,7 @@ class Item
 
         $parametrosPrecoPublico ??= Parametro::buscarNomesPrecoPublico();
 
-        $analise = new AnalisePrecos($precosParaCalculo, $criterio, $parametrosPrecoPublico);
+        $analise = new AnalisePrecos($precosParaCalculo, $criterio, $parametrosPrecoPublico, $arredondarValorReferencia);
 
         return $analise->calcular();
     }

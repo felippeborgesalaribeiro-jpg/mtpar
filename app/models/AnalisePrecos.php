@@ -141,15 +141,18 @@ class AnalisePrecos
             return null;
         }
 
-        switch ($this->criterio) {
-            case self::CRITERIO_MEDIA:
-                return $this->calcularMedia($aprovados);
-            case self::CRITERIO_MENOR_PRECO:
-                return $this->calcularMenorPreco($aprovados);
-            case self::CRITERIO_MEDIANA:
-            default:
-                return $this->calcularMediana($aprovados);
-        }
+        $valor = match ($this->criterio) {
+            self::CRITERIO_MEDIA => $this->calcularMedia($aprovados),
+            self::CRITERIO_MENOR_PRECO => $this->calcularMenorPreco($aprovados),
+            default => $this->calcularMediana($aprovados),
+        };
+
+        // Arredondado pra centavos aqui, na origem - o sistema trabalha só com
+        // duas casas decimais (preço em reais). Se não arredondar aqui, o
+        // valor unitário exibido na tela (já arredondado pra exibição) e o
+        // total do lote (unitário vezes quantidade) usam números diferentes
+        // e a conta não bate quando alguém confere na mão.
+        return round($valor, 2);
     }
 
     public function calcularMedia(array $valores): float

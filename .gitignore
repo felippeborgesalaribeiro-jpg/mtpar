@@ -2,6 +2,14 @@ app/backups/
 backups/
 .phpunit.cache/
 
+# O banco de dados real (com dados de producao/teste de verdade) nao fica
+# mais versionado no Git - ele muda toda vez que alguem usa o sistema, e
+# isso gerava conflito toda vez que o Git tentava sincronizar essa mesma
+# copia entre maquinas diferentes. O schema continua 100% versionado via
+# schema.sql + database/migrate_*.php; so o dado em si passa a viver so
+# localmente em cada instalacao (dev, teste, producao).
+database/mtpar.sqlite
+
 # Dependencias de desenvolvimento (testes) - reproduziveis via "composer install",
 # nao commitadas por causa de binarios internos grandes que vem com elas.
 vendor/bin/

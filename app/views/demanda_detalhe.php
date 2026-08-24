@@ -166,6 +166,15 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
             $indiceEtapaAtual = array_search($demanda->status, $sequenciaEtapas, true);
             $indiceEtapaEfetivo = $indiceEtapaAtual === false ? -1 : $indiceEtapaAtual;
 
+            // Se já existe uma Licitação, a Demanda com certeza passou por
+            // CONCLUÍDO em algum momento (é o único jeito dela existir) -
+            // mesmo que o campo de status tenha sido editado depois pra um
+            // valor anterior, as etapas da Demanda não podem aparecer como
+            // "não alcançadas" enquanto a Licitação já foi mais longe.
+            if ($licitacao !== null) {
+                $indiceEtapaEfetivo = count($sequenciaEtapas) - 1;
+            }
+
             // "CONCLUÍDO" não aparece como nó visível - é só o gatilho técnico
             // que faz o sistema criar a Licitação (continua existindo por
             // baixo dos panos). O "Concluído" que a pessoa quer ver é o de

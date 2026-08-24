@@ -10,6 +10,7 @@ class AnalisePrecos
     const CRITERIO_MEDIA = 'MEDIA';
     const CRITERIO_MEDIANA = 'MEDIANA';
     const CRITERIO_MENOR_PRECO = 'MENOR_PRECO';
+    const CRITERIO_PLANILHA_ORCAMENTARIA = 'PLANILHA_ORCAMENTARIA';
 
     private array $precos;
     private string $criterio;

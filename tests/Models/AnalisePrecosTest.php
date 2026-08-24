@@ -83,4 +83,19 @@ final class AnalisePrecosTest extends TestCase
         $this->assertSame($valorBrutoEsperado, $resultado['valor_referencia']);
         $this->assertNotSame(13.86, $resultado['valor_referencia']);
     }
+
+    public function testCriterioPlanilhaOrcamentariaComUmUnicoPrecoUsaEsseValorDireto(): void
+    {
+        // Planilha orçamentária não tem comparação (só 1 valor por item), e a
+        // tela já restringe a 1 preço por item nesse critério - com um único
+        // preço aprovado, média/mediana/menor preço/planilha dão todas o
+        // mesmo resultado (o próprio valor), então não precisa de um branch
+        // separado em calcularValorReferencia() pra isso funcionar certo.
+        $precos = [['parametro' => '', 'valor' => 1234.56, 'fonte' => '']];
+
+        $analise = new AnalisePrecos($precos, AnalisePrecos::CRITERIO_PLANILHA_ORCAMENTARIA);
+        $resultado = $analise->calcular();
+
+        $this->assertSame(1234.56, $resultado['valor_referencia']);
+    }
 }

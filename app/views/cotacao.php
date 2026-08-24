@@ -175,6 +175,7 @@ $statusLabel = [
                 <?php
                 $resultado = $item->analisar($cotacao->criterioConsolidacao, null, $cotacao->deveArredondarValorReferencia());
                 $precos    = $item->buscarPrecos();
+                $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRITERIO_PLANILHA_ORCAMENTARIA;
                 ?>
 
                 <div class="border rounded p-3 mb-3" id="item-<?= $item->id ?>" style="background-color: #fafbfc;">
@@ -207,12 +208,75 @@ $statusLabel = [
                         </div>
                     </div>
 
-                    <?php if (count($precos) === 0): ?>
+                    <?php if ($ehPlanilhaOrcamentaria): ?>
+                        <?php if (count($precos) === 0): ?>
+                            <p class="text-muted small">
+                                <i class="ti ti-info-circle" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+                                Valor da planilha orçamentária ainda não informado para este item.
+                            </p>
+                            <form method="post" action="index.php?action=adicionar_preco" class="row g-2">
+                                <input type="hidden" name="item_id" value="<?= $item->id ?>">
+                                <div class="col-md-8">
+                                    <input type="text" name="valor" class="form-control form-control-sm"
+                                           placeholder="Valor da planilha orçamentária" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                                        <i class="ti ti-plus" aria-hidden="true" style="font-size: 12px;"></i>
+                                        Incluir valor
+                                    </button>
+                                </div>
+                            </form>
+                        <?php else: ?>
+                            <?php $precoPlanilha = $precos[0]; ?>
+                            <div class="d-flex align-items-center justify-content-between border rounded p-2">
+                                <span>
+                                    <i class="ti ti-file-spreadsheet" aria-hidden="true" style="font-size: 14px; color: var(--brand-blue-dark); vertical-align: -2px;"></i>
+                                    <b>Valor da planilha orçamentária:</b> <?= formatarMoeda($precoPlanilha->valor) ?>
+                                </span>
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                                            data-bs-toggle="modal" data-bs-target="#modalEditarPreco<?= $precoPlanilha->id ?>">
+                                        <i class="ti ti-edit" aria-hidden="true" style="font-size: 12px;"></i>
+                                        Editar
+                                    </button>
+                                    <a href="index.php?action=excluir_preco&id=<?= $precoPlanilha->id ?>"
+                                       class="btn btn-sm btn-outline-danger"
+                                       onclick="return confirm('Excluir o valor da planilha orçamentária deste item?')">
+                                        <i class="ti ti-trash" aria-hidden="true" style="font-size: 12px;"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="modal fade" id="modalEditarPreco<?= $precoPlanilha->id ?>" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form method="post" action="index.php?action=editar_preco">
+                                            <input type="hidden" name="preco_id" value="<?= $precoPlanilha->id ?>">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Editar valor da planilha orçamentária</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <label class="form-label">Valor</label>
+                                                <input type="text" name="valor" class="form-control"
+                                                       value="<?= formatarNumero($precoPlanilha->valor) ?>" required>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="submit" class="btn btn-primary">Salvar</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    <?php elseif (count($precos) === 0): ?>
                         <p class="text-muted small">
                             <i class="ti ti-info-circle" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
                             Nenhum preço coletado ainda para este item.
                         </p>
-                    <?php else: ?>
+                    <?php endif; ?>
+                    <?php if (!$ehPlanilhaOrcamentaria && count($precos) > 0): ?>
                         <table class="table table-sm table-bordered table-hover align-middle">
                             <thead class="table-dark">
                                 <tr>
@@ -310,31 +374,33 @@ $statusLabel = [
                         </table>
                     <?php endif; ?>
 
-                    <form method="post" action="index.php?action=adicionar_preco" class="row g-2">
-                        <input type="hidden" name="item_id" value="<?= $item->id ?>">
-                        <div class="col-md-3">
-                            <select name="parametro" class="form-select form-select-sm">
-                                <option value="">Parâmetro</option>
-                                <?php foreach ($parametros as $parametroOpcao): ?>
-                                    <option value="<?= htmlspecialchars($parametroOpcao->nome) ?>">
-                                        <?= htmlspecialchars($parametroOpcao->nome) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-5">
-                            <input type="text" name="fonte" class="form-control form-control-sm" placeholder="Fonte / fornecedor">
-                        </div>
-                        <div class="col-md-2">
-                            <input type="text" name="valor" class="form-control form-control-sm" placeholder="Preço" required>
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary btn-sm w-100">
-                                <i class="ti ti-plus" aria-hidden="true" style="font-size: 12px;"></i>
-                                Preço
-                            </button>
-                        </div>
-                    </form>
+                    <?php if (!$ehPlanilhaOrcamentaria): ?>
+                        <form method="post" action="index.php?action=adicionar_preco" class="row g-2">
+                            <input type="hidden" name="item_id" value="<?= $item->id ?>">
+                            <div class="col-md-3">
+                                <select name="parametro" class="form-select form-select-sm">
+                                    <option value="">Parâmetro</option>
+                                    <?php foreach ($parametros as $parametroOpcao): ?>
+                                        <option value="<?= htmlspecialchars($parametroOpcao->nome) ?>">
+                                            <?= htmlspecialchars($parametroOpcao->nome) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <input type="text" name="fonte" class="form-control form-control-sm" placeholder="Fonte / fornecedor">
+                            </div>
+                            <div class="col-md-2">
+                                <input type="text" name="valor" class="form-control form-control-sm" placeholder="Preço" required>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary btn-sm w-100">
+                                    <i class="ti ti-plus" aria-hidden="true" style="font-size: 12px;"></i>
+                                    Preço
+                                </button>
+                            </div>
+                        </form>
+                    <?php endif; ?>
 
                     <p class="mb-0 mt-3 small">
                         <i class="ti ti-target-arrow" aria-hidden="true" style="font-size: 14px; vertical-align: -1px; color: var(--brand-blue-dark);"></i>
@@ -543,6 +609,7 @@ $statusLabel = [
                                 <option value="MEDIANA" <?= $cotacao->criterioConsolidacao === 'MEDIANA' ? 'selected' : '' ?>>Mediana</option>
                                 <option value="MEDIA"   <?= $cotacao->criterioConsolidacao === 'MEDIA'   ? 'selected' : '' ?>>Média</option>
                                 <option value="MENOR_PRECO" <?= $cotacao->criterioConsolidacao === 'MENOR_PRECO' ? 'selected' : '' ?>>Menor preço</option>
+                                <option value="PLANILHA_ORCAMENTARIA" <?= $cotacao->criterioConsolidacao === 'PLANILHA_ORCAMENTARIA' ? 'selected' : '' ?>>Planilha Orçamentária</option>
                             </select>
                         </div>
                     </div>

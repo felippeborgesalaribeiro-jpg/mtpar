@@ -65,6 +65,7 @@ require __DIR__ . '/partials/header.php';
                         <option value="MEDIANA">Mediana</option>
                         <option value="MEDIA">Média</option>
                         <option value="MENOR_PRECO">Menor preço</option>
+                        <option value="PLANILHA_ORCAMENTARIA">Planilha Orçamentária</option>
                     </select>
                 </div>
             </div>

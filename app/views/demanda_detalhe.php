@@ -166,8 +166,16 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
             $indiceEtapaAtual = array_search($demanda->status, $sequenciaEtapas, true);
             $indiceEtapaEfetivo = $indiceEtapaAtual === false ? -1 : $indiceEtapaAtual;
 
+            // "CONCLUÍDO" não aparece como nó visível - é só o gatilho técnico
+            // que faz o sistema criar a Licitação (continua existindo por
+            // baixo dos panos). O "Concluído" que a pessoa quer ver é o de
+            // verdade, no fim de tudo: o mesmo momento que a Licitação já
+            // marca automaticamente como "Encaminhada p/ Contratação".
             $nosStepper = [];
             foreach ($sequenciaEtapas as $i => $nomeEtapa) {
+                if ($nomeEtapa === Demanda::STATUS_CONCLUIDO) {
+                    continue;
+                }
                 $nosStepper[] = [
                     'nome' => $nomeEtapa,
                     'atingido' => $i <= $indiceEtapaEfetivo,
@@ -182,7 +190,7 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
                 $etapasLicitacao = [
                     [StatusLicitacao::Publicada, 'Edital Publicado'],
                     [StatusLicitacao::Homologada, 'Homologado'],
-                    [StatusLicitacao::EncaminhadaParaContratacao, 'Encaminhado p/ Contratação'],
+                    [StatusLicitacao::EncaminhadaParaContratacao, 'Concluído'],
                 ];
                 $statusLicitacaoAtual = $licitacao->status();
                 $indiceLicitacaoEfetivo = -1;

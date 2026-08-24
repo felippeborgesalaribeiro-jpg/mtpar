@@ -112,7 +112,7 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
                 <div class="col-md-6">
                     <label class="form-label small">Status</label>
                     <select name="status" class="form-select form-select-sm">
-                        <?php foreach ($opcoesStatus as $opcao): ?>
+                        <?php foreach (Demanda::STATUS_OPCOES as $opcao): ?>
                             <option value="<?= $opcao ?>" <?= $demanda->status === $opcao ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($opcao) ?>
                             </option>
@@ -156,100 +156,6 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
         <span class="fw-semibold small">Dados do processo</span>
     </div>
     <div class="card-body">
-        <?php if ($demanda->status === Demanda::STATUS_CANCELADO): ?>
-            <div class="alert alert-dark small py-2 mb-3">
-                <i class="ti ti-ban" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
-                Processo cancelado — fora do andamento normal.
-            </div>
-        <?php else: ?>
-            <?php
-            $indiceEtapaAtual = array_search($demanda->status, $sequenciaEtapas, true);
-            $indiceEtapaEfetivo = $indiceEtapaAtual === false ? -1 : $indiceEtapaAtual;
-
-            // Se já existe uma Licitação, a Demanda com certeza passou por
-            // CONCLUÍDO em algum momento (é o único jeito dela existir) -
-            // mesmo que o campo de status tenha sido editado depois pra um
-            // valor anterior, as etapas da Demanda não podem aparecer como
-            // "não alcançadas" enquanto a Licitação já foi mais longe.
-            if ($licitacao !== null) {
-                $indiceEtapaEfetivo = count($sequenciaEtapas) - 1;
-            }
-
-            // "CONCLUÍDO" não aparece como nó visível - é só o gatilho técnico
-            // que faz o sistema criar a Licitação (continua existindo por
-            // baixo dos panos). O "Concluído" que a pessoa quer ver é o de
-            // verdade, no fim de tudo: o mesmo momento que a Licitação já
-            // marca automaticamente como "Encaminhada p/ Contratação".
-            $nosStepper = [];
-            foreach ($sequenciaEtapas as $i => $nomeEtapa) {
-                if ($nomeEtapa === Demanda::STATUS_CONCLUIDO) {
-                    continue;
-                }
-                $nosStepper[] = [
-                    'nome' => $nomeEtapa,
-                    'atingido' => $i <= $indiceEtapaEfetivo,
-                    'atual' => $i === $indiceEtapaEfetivo,
-                ];
-            }
-
-            // Dali em diante, a barra continua sozinha com o andamento da
-            // Licitação (nada aqui é editado nesta tela - reflete o que já
-            // foi preenchido em Proposta Vencedora / Finalizar Processo).
-            if ($licitacao !== null) {
-                $etapasLicitacao = [
-                    [StatusLicitacao::Publicada, 'Edital Publicado'],
-                    [StatusLicitacao::Homologada, 'Homologado'],
-                    [StatusLicitacao::EncaminhadaParaContratacao, 'Concluído'],
-                ];
-                $statusLicitacaoAtual = $licitacao->status();
-                $indiceLicitacaoEfetivo = -1;
-                foreach ($etapasLicitacao as $i => [$statusCase, $label]) {
-                    if ($statusCase === $statusLicitacaoAtual) {
-                        $indiceLicitacaoEfetivo = $i;
-                    }
-                }
-                foreach ($etapasLicitacao as $i => [$statusCase, $label]) {
-                    $nosStepper[] = [
-                        'nome' => $label,
-                        'atingido' => $i <= $indiceLicitacaoEfetivo,
-                        'atual' => $i === $indiceLicitacaoEfetivo,
-                    ];
-                }
-            }
-            ?>
-            <div class="d-flex mb-3" style="overflow-x:auto;">
-                <?php foreach ($nosStepper as $i => $no): ?>
-                    <?php
-                    $atingido = $no['atingido'];
-                    $ehAtual = $no['atual'];
-                    $corAntes = $i > 0 && $atingido ? 'var(--brand-green-dark)' : 'var(--line)';
-                    $corDepois = $i < count($nosStepper) - 1 && $nosStepper[$i + 1]['atingido'] ? 'var(--brand-green-dark)' : 'var(--line)';
-                    ?>
-                    <div class="d-flex flex-column align-items-center flex-shrink-0" style="min-width:104px;">
-                        <div class="d-flex align-items-center w-100">
-                            <div class="flex-grow-1" style="height:2px; background:<?= $i === 0 ? 'transparent' : $corAntes ?>;"></div>
-                            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                                 style="width:22px; height:22px; font-size:10px; font-weight:700;
-                                        background:<?= $atingido ? 'var(--brand-green-dark)' : '#fff' ?>;
-                                        border:2px solid <?= $atingido ? 'var(--brand-green-dark)' : 'var(--ink-faint)' ?>;
-                                        color:<?= $atingido ? '#fff' : 'var(--ink-faint)' ?>;">
-                                <?php if ($atingido): ?>
-                                    <i class="ti ti-check" aria-hidden="true" style="font-size:11px;"></i>
-                                <?php else: ?>
-                                    <?= $i + 1 ?>
-                                <?php endif; ?>
-                            </div>
-                            <div class="flex-grow-1" style="height:2px; background:<?= $i === count($nosStepper) - 1 ? 'transparent' : $corDepois ?>;"></div>
-                        </div>
-                        <span class="text-center mt-1" style="font-size:9.5px; line-height:1.25; max-width:100px;
-                              color:<?= $ehAtual ? 'var(--brand-blue-dark)' : ($atingido ? 'var(--brand-green-dark)' : 'var(--ink-faint)') ?>;
-                              font-weight:<?= $ehAtual ? '700' : '500' ?>;">
-                            <?= htmlspecialchars($no['nome']) ?>
-                        </span>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
         <div class="row g-3 mb-3">
             <div class="col-md-4">
                 <p class="text-muted mb-1" style="font-size:10px; text-transform:uppercase; letter-spacing:.05em;">Status</p>

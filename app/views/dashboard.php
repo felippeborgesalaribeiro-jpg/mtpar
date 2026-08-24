@@ -267,7 +267,7 @@ $coresStatus = [
                         <div class="col-md-6">
                             <label class="form-label">Status</label>
                             <select name="status" class="form-select">
-                                <?php foreach (Demanda::opcoesStatus() as $opcao): ?>
+                                <?php foreach (Demanda::STATUS_OPCOES as $opcao): ?>
                                     <option value="<?= $opcao ?>"><?= htmlspecialchars($opcao) ?></option>
                                 <?php endforeach; ?>
                             </select>

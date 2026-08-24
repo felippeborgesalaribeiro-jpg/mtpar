@@ -43,11 +43,24 @@ class DemandaController
         $resumoLotes = $this->montarResumoLotes($licitacao);
         [$linkVoltar, $labelVoltar] = $this->resolverVoltar();
         $setoresDemandantes = SetorDemandante::buscarTodos();
+
+        // "EM ANDAMENTO" nao aparece como etapa visivel no stepper (e so o
+        // "ainda nao chegou em lugar nenhum" implicito) - as etapas
+        // configuraveis pelo admin vem entre ela e CONCLUÍDO.
         $sequenciaEtapas = array_merge(
-            [Demanda::STATUS_EM_ANDAMENTO],
             array_map(fn(EtapaProcesso $etapa) => $etapa->nome, EtapaProcesso::buscarTodas()),
             [Demanda::STATUS_CONCLUIDO]
         );
+
+        // Dropdown de status precisa continuar mostrando o valor atual mesmo
+        // que ele nao esteja mais na lista simplificada de etapas (processo
+        // antigo, cadastrado antes de uma etapa ser removida pelo admin) -
+        // senao salvar o formulario sem mexer no campo trocaria o status
+        // sem querer pro primeiro item da lista.
+        $opcoesStatus = Demanda::opcoesStatus();
+        if (!in_array($demanda->status, $opcoesStatus, true)) {
+            $opcoesStatus[] = $demanda->status;
+        }
 
         require __DIR__ . '/../views/demanda_detalhe.php';
     }

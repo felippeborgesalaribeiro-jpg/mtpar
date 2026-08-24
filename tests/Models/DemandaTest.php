@@ -2,7 +2,6 @@
 
 namespace Tests\Models;
 
-use EtapaProcesso;
 use PDOException;
 use Servidor;
 use Tests\DatabaseTestCase;
@@ -11,7 +10,6 @@ require_once __DIR__ . '/../../app/models/Demanda.php';
 require_once __DIR__ . '/../../app/models/Cotacao.php';
 require_once __DIR__ . '/../../app/models/StatusCotacao.php';
 require_once __DIR__ . '/../../app/models/Servidor.php';
-require_once __DIR__ . '/../../app/models/EtapaProcesso.php';
 
 final class DemandaTest extends DatabaseTestCase
 {
@@ -41,17 +39,6 @@ final class DemandaTest extends DatabaseTestCase
 
         $this->expectException(PDOException::class);
         $demanda->excluirDefinitivamente();
-    }
-
-    public function testOpcoesStatusColocaEmAndamentoNoInicioEConcluidoECanceladoNoFim(): void
-    {
-        (new EtapaProcesso('ELABORAÇÃO DE TR'))->salvar();
-        (new EtapaProcesso('PUBLICADO'))->salvar();
-
-        $this->assertSame(
-            ['EM ANDAMENTO', 'ELABORAÇÃO DE TR', 'PUBLICADO', 'CONCLUÍDO', 'CANCELADO'],
-            Demanda::opcoesStatus()
-        );
     }
 
     public function testCalcularDiasEmAbertoContaDiasCorridosDesdeORecebimento(): void

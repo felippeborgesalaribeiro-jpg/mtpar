@@ -142,8 +142,14 @@ class AdminController
         $demanda = Demanda::buscarExcluidaPorId($id);
 
         if ($demanda !== null) {
-            $demanda->excluirDefinitivamente();
-            $_SESSION['sucesso'] = 'Demanda excluída permanentemente.';
+            try {
+                $demanda->excluirDefinitivamente();
+                $_SESSION['sucesso'] = 'Demanda excluída permanentemente.';
+            } catch (PDOException) {
+                $_SESSION['erro'] = 'Não foi possível excluir: ainda existe uma Cotação ou um processo de '
+                    . 'Vantajosidade vinculado a essa demanda. Exclua-os primeiro (mesmo que ainda não estejam '
+                    . 'na lixeira) e tente novamente.';
+            }
         } else {
             $_SESSION['erro'] = 'Registro não encontrado na lixeira.';
         }
@@ -162,8 +168,12 @@ class AdminController
         $cotacao = Cotacao::buscarExcluidaPorId($id);
 
         if ($cotacao !== null) {
-            $cotacao->excluirDefinitivamente();
-            $_SESSION['sucesso'] = 'Cotação excluída permanentemente.';
+            try {
+                $cotacao->excluirDefinitivamente();
+                $_SESSION['sucesso'] = 'Cotação excluída permanentemente.';
+            } catch (PDOException) {
+                $_SESSION['erro'] = 'Não foi possível excluir: ainda existe algo vinculado a essa cotação.';
+            }
         } else {
             $_SESSION['erro'] = 'Registro não encontrado na lixeira.';
         }
@@ -182,8 +192,12 @@ class AdminController
         $processo = ProcessoVantajosidade::buscarExcluidaPorId($id);
 
         if ($processo !== null) {
-            $processo->excluirDefinitivamente();
-            $_SESSION['sucesso'] = 'Vantajosidade excluída permanentemente.';
+            try {
+                $processo->excluirDefinitivamente();
+                $_SESSION['sucesso'] = 'Vantajosidade excluída permanentemente.';
+            } catch (PDOException) {
+                $_SESSION['erro'] = 'Não foi possível excluir: ainda existe algo vinculado a esse processo.';
+            }
         } else {
             $_SESSION['erro'] = 'Registro não encontrado na lixeira.';
         }

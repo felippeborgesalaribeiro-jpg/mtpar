@@ -151,6 +151,50 @@ final class LicitacaoTest extends DatabaseTestCase
         $this->assertSame($demanda->id, $recarregada->demandaId);
     }
 
+    public function testBuscarTodasNaoResincronizaValorEstimadoMasBuscarPorIdSim(): void
+    {
+        // buscarTodas() e usada em listagens (Licitacoes, Aplic, Relatorios) -
+        // recalcular o mapa de precos inteiro da cotacao vinculada pra cada
+        // linha ali seria caro e desnecessario. So buscarPorId/
+        // buscarPorDemandaId (telas de detalhe/edicao) precisam do valor
+        // sempre em dia.
+        $servidor = $this->criarServidor();
+        $demanda = $this->criarDemanda();
+
+        $cotacao = new Cotacao(
+            $demanda->numeroProcesso,
+            $demanda->setorDemandante,
+            'Dispensa',
+            'Menor preço',
+            $demanda->objeto,
+            $servidor->id,
+            demandaId: $demanda->id
+        );
+        $cotacao->salvar();
+
+        $lote = new Lote($cotacao->id, '01');
+        $lote->salvar();
+        $item = new Item($lote->id, 1, 'Item de teste', 'UN', 1);
+        $item->salvar();
+        (new Preco($item->id, 100))->salvar();
+
+        $licitacao = Licitacao::criarApartirDeDemanda($demanda);
+        $this->assertEqualsWithDelta(100.0, $licitacao->valorEstimado, 0.001);
+
+        // Preco novo adicionado depois que a Licitacao ja foi criada (perto
+        // o bastante do primeiro pra nao ser descartado como excessivo).
+        (new Preco($item->id, 110))->salvar();
+
+        $daListagem = array_values(array_filter(
+            Licitacao::buscarTodas(),
+            fn(Licitacao $l) => $l->id === $licitacao->id
+        ))[0];
+        $this->assertEqualsWithDelta(100.0, $daListagem->valorEstimado, 0.001, 'buscarTodas() não deve resincronizar');
+
+        $doDetalhe = Licitacao::buscarPorId($licitacao->id);
+        $this->assertEqualsWithDelta(105.0, $doDetalhe->valorEstimado, 0.001, 'buscarPorId() deve resincronizar (mediana de 100/110)');
+    }
+
     public function testCriadoEmEhPreenchidoAoRecarregarDoBanco(): void
     {
         $demanda = $this->criarDemanda();

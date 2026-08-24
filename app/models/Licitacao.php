@@ -318,7 +318,7 @@ class Licitacao
 
         $licitacoes = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $linha) {
-            $licitacoes[] = self::fromArray($linha);
+            $licitacoes[] = self::fromArray($linha, sincronizar: false);
         }
 
         return $licitacoes;
@@ -351,7 +351,16 @@ class Licitacao
         return (float) ($stmt->fetchColumn() ?? 0);
     }
 
-    private static function fromArray(array $linha): Licitacao
+    /**
+     * $sincronizar controla se o valor estimado é recalculado (e possivelmente
+     * regravado) na hora de montar o objeto. Isso percorre lotes/itens/preços
+     * da Cotação vinculada inteira - custoso pra fazer em toda linha de uma
+     * listagem (buscarTodas()). Só sincroniza de verdade em carregamentos de
+     * um único registro (buscarPorId/buscarPorDemandaId), usados nas telas de
+     * detalhe/edição onde o valor precisa estar sempre em dia; nas listagens,
+     * usa o que já está persistido (fica "eventualmente" em dia, não live).
+     */
+    private static function fromArray(array $linha, bool $sincronizar = true): Licitacao
     {
         $licitacao = new Licitacao(
             (int) $linha['demanda_id'],
@@ -372,7 +381,9 @@ class Licitacao
             $linha['data_adjudicacao_homologacao'] ?? null
         );
 
-        $licitacao->sincronizarValorEstimado();
+        if ($sincronizar) {
+            $licitacao->sincronizarValorEstimado();
+        }
 
         return $licitacao;
     }

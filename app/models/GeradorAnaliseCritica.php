@@ -406,17 +406,18 @@ class GeradorAnaliseCritica
         if ($resultadoFinal === AnalisePrecos::EXCESSIVO) {
             $diferenca  = $resultado['etapa1'][$indice]['diferenca'] ?? 0;
             $percentual = formatarNumero($diferenca * 100, 1);
-            return "O preço de {$valorFormatado}, ofertado por {$fonte}, foi considerado EXCESSIVAMENTE ELEVADO, "
-                . "tendo em vista que superou em {$percentual}% a média dos demais preços coletados para o item, "
-                . "ultrapassando o limite de 30% (trinta por cento) previsto no art. 47, §3º, inciso I, do Decreto "
-                . "Estadual nº 1.525/2022, razão pela qual sua desconsideração é aqui expressamente fundamentada e "
-                . "descrita, na forma do art. 9º, §5º, do RILC/MTPAR, para fins de composição do preço de referência.";
+            return "O preço ofertado por {$fonte}, no valor de {$valorFormatado}, foi considerado EXCESSIVAMENTE "
+                . "ELEVADO, tendo em vista que superou em {$percentual}% a média dos demais preços coletados para "
+                . "o item, ultrapassando o limite de 30% (trinta por cento) previsto no art. 47, §3º, inciso I, do "
+                . "Decreto Estadual nº 1.525/2022, razão pela qual sua desconsideração é aqui expressamente "
+                . "fundamentada e descrita, na forma do art. 9º, §5º, do RILC/MTPAR, para fins de composição do "
+                . "preço de referência.";
         }
 
         if ($resultadoFinal === AnalisePrecos::INEXEQUIVEL) {
             $comparacao = $resultado['etapa2'][$indice]['comparacao'] ?? 0;
             $percentual = formatarNumero($comparacao * 100, 1);
-            return "O preço de {$valorFormatado}, ofertado por {$fonte}, foi considerado INEXEQUÍVEL, "
+            return "O preço ofertado por {$fonte}, no valor de {$valorFormatado}, foi considerado INEXEQUÍVEL, "
                 . "por corresponder a apenas {$percentual}% da média dos demais preços remanescentes, estando "
                 . "abaixo do limite de 70% (setenta por cento) previsto no art. 47, §3º, inciso II, do Decreto "
                 . "Estadual nº 1.525/2022, razão pela qual sua desconsideração é aqui expressamente fundamentada e "
@@ -424,27 +425,33 @@ class GeradorAnaliseCritica
         }
 
         if ($resultadoFinal === AnalisePrecos::EXCECAO_PRECO_PUBLICO) {
-            return "O preço de {$valorFormatado}, ofertado por {$fonte}, muito embora situado abaixo de 70% "
-                . "(setenta por cento) da média dos demais preços, foi mantido para fins de composição do preço de "
-                . "referência, por se tratar de valor registrado em ata ou previsto em contrato firmado pela "
-                . "Administração Pública, em execução ou executado no período de 1 (um) ano anterior à data da "
-                . "pesquisa de preços, na forma do art. 47, §5º, do Decreto Estadual nº 1.525/2022, não se aplicando, "
-                . "portanto, o critério de inexequibilidade.";
+            return "O preço ofertado por {$fonte}, no valor de {$valorFormatado}, muito embora situado abaixo de "
+                . "70% (setenta por cento) da média dos demais preços, foi mantido para fins de composição do "
+                . "preço de referência, por se tratar de valor registrado em ata ou previsto em contrato firmado "
+                . "pela Administração Pública, em execução ou executado no período de 1 (um) ano anterior à data "
+                . "da pesquisa de preços, na forma do art. 47, §5º, do Decreto Estadual nº 1.525/2022, não se "
+                . "aplicando, portanto, o critério de inexequibilidade.";
         }
 
+        // APROVADO: usa a mesma media dos demais que classificou o item (Etapa
+        // 2 - remanescentes apos a exclusao dos excessivos), igual ao que a
+        // tabela de calculo (montarTabelaCalculoPrecos) ja exibe pra essa
+        // mesma linha - antes usava a diferenca da Etapa 1 (contaminada pelos
+        // precos excessivos ja descartados), que não é o número que aparece
+        // na tabela do item.
         $parametroTexto = $preco->parametro !== '' ? ", referente ao parâmetro {$preco->parametro}" : '';
-        $diferenca      = $resultado['etapa1'][$indice]['diferenca'] ?? null;
+        $comparacao     = $resultado['etapa2'][$indice]['comparacao'] ?? null;
         $textoVariacao  = '';
 
-        if ($diferenca !== null) {
-            $percentualDiferenca = formatarNumero($diferenca * 100, 1);
-            $textoVariacao = " (variação de {$percentualDiferenca}% em relação à média dos demais preços)";
+        if ($comparacao !== null) {
+            $percentual    = formatarNumero($comparacao * 100, 1);
+            $textoVariacao = ", correspondendo a {$percentual}% da média dos demais preços remanescentes";
         }
 
-        return "O preço de {$valorFormatado}, ofertado por {$fonte}{$parametroTexto}, foi considerado APROVADO{$textoVariacao}, "
-            . "por não se enquadrar nas hipóteses de preço excessivo ou inexequível previstas no art. 47, §3º, do "
-            . "Decreto Estadual nº 1.525/2022, mantendo-se dentro da faixa de preços praticados no mercado, na "
-            . "forma do art. 9º, §4º, do RILC/MTPAR.";
+        return "O preço ofertado por {$fonte}{$parametroTexto}, no valor de {$valorFormatado}, foi considerado "
+            . "APROVADO{$textoVariacao}, por não se enquadrar nas hipóteses de preço excessivo ou inexequível "
+            . "previstas no art. 47, §3º, do Decreto Estadual nº 1.525/2022, mantendo-se dentro da faixa de "
+            . "preços praticados no mercado, na forma do art. 9º, §4º, do RILC/MTPAR.";
     }
 
     private function montarSecaoConclusao(): void

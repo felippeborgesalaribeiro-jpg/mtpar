@@ -99,13 +99,17 @@ class Item
      * @param bool $arredondarValorReferencia ver Cotacao::deveArredondarValorReferencia()
      * - quem chama e que sabe se o item pertence a uma cotacao de antes ou
      * depois da correcao de arredondamento.
+     * @param array<int, Preco>|null $precos ja buscados por quem chama (ex.:
+     * um gerador de documento que tambem precisa listar os precos um a um) -
+     * evita repetir a consulta a cada chamada. Se null, busca aqui mesmo.
      */
     public function analisar(
         string $criterio = AnalisePrecos::CRITERIO_MEDIANA,
         ?array $parametrosPrecoPublico = null,
-        bool $arredondarValorReferencia = true
+        bool $arredondarValorReferencia = true,
+        ?array $precos = null
     ): array {
-        $precos = $this->buscarPrecos();
+        $precos ??= $this->buscarPrecos();
 
         $precosParaCalculo = [];
         foreach ($precos as $preco) {

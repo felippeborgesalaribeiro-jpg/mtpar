@@ -7,6 +7,7 @@ $statusLabel = [
     StatusCotacao::Finalizada->value  => ['Finalizada', 'bg-success'],
 ];
 [$labelStatus, $classeBadgeStatus] = $statusLabel[$cotacao->status->value] ?? ['Indefinido', 'bg-secondary'];
+$ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRITERIO_PLANILHA_ORCAMENTARIA;
 ?>
 
 <div class="print-header">
@@ -58,11 +59,7 @@ $statusLabel = [
             <i class="ti ti-table" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
             Ver mapa comparativo
         </a>
-        <?php if ($cotacao->status === StatusCotacao::Finalizada): ?>
-            <a href="index.php?action=gerar_relatorio_pesquisa&id=<?= $cotacao->id ?>" class="btn btn-sm btn-info text-white">
-                <i class="ti ti-clipboard-data" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
-                Relatório de pesquisa de preços
-            </a>
+        <?php if ($cotacao->status === StatusCotacao::Finalizada && !$ehPlanilhaOrcamentaria): ?>
             <a href="index.php?action=relatorio_formulario&id=<?= $cotacao->id ?>" class="btn btn-sm btn-warning text-dark">
                 <i class="ti ti-file-report" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
                 Gerar análise crítica
@@ -84,6 +81,24 @@ $statusLabel = [
         </a>
     </div>
 </div>
+
+<?php if (!empty($_SESSION['sucesso'])): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="ti ti-circle-check" aria-hidden="true" style="font-size:14px; vertical-align:-1px;"></i>
+        <?= $_SESSION['sucesso'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <?php unset($_SESSION['sucesso']); ?>
+<?php endif; ?>
+
+<?php if (!empty($_SESSION['erro'])): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="ti ti-alert-triangle" aria-hidden="true" style="font-size:14px; vertical-align:-1px;"></i>
+        <?= $_SESSION['erro'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <?php unset($_SESSION['erro']); ?>
+<?php endif; ?>
 
 <div class="card shadow-sm mb-4">
     <div class="card-body">
@@ -175,7 +190,6 @@ $statusLabel = [
                 <?php
                 $resultado = $item->analisar($cotacao->criterioConsolidacao, null, $cotacao->deveArredondarValorReferencia());
                 $precos    = $item->buscarPrecos();
-                $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRITERIO_PLANILHA_ORCAMENTARIA;
                 ?>
 
                 <div class="border rounded p-3 mb-3" id="item-<?= $item->id ?>" style="background-color: #fafbfc;">

@@ -251,4 +251,72 @@ final class CotacaoTest extends DatabaseTestCase
         $this->assertSame($demanda->id, $recarregada->demandaId);
         $this->assertSame($demanda->id, $recarregada->buscarDemandaVinculada()->id);
     }
+
+    public function testItensComPrecosInsuficientesListaItemComMenosDeTresAprovados(): void
+    {
+        $servidor = $this->criarServidor();
+        $cotacao = new Cotacao('MTPAR-PRO-2026/00011', '', '', '', '', $servidor->id);
+        $cotacao->salvar();
+
+        $lote = new Lote($cotacao->id, '01');
+        $lote->salvar();
+
+        // Item 1: so 2 precos aprovados (proximos, nenhum excessivo/inexequivel) - abaixo do minimo de 3.
+        $item1 = new Item($lote->id, 1, 'Item com poucos preços', 'UN', 1);
+        $item1->salvar();
+        foreach ([10, 11] as $valor) {
+            (new Preco($item1->id, $valor))->salvar();
+        }
+
+        // Item 2: 3 precos aprovados - atinge o minimo.
+        $item2 = new Item($lote->id, 2, 'Item com preços suficientes', 'UN', 1);
+        $item2->salvar();
+        foreach ([10, 11, 12] as $valor) {
+            (new Preco($item2->id, $valor))->salvar();
+        }
+
+        $pendentes = $cotacao->itensComPrecosInsuficientes();
+
+        $this->assertCount(1, $pendentes);
+        $this->assertSame($item1->id, $pendentes[0]['item']->id);
+        $this->assertSame(2, $pendentes[0]['aprovados']);
+    }
+
+    public function testItensComPrecosInsuficientesConsideraItemSemNenhumPrecoComoPendente(): void
+    {
+        $servidor = $this->criarServidor();
+        $cotacao = new Cotacao('MTPAR-PRO-2026/00012', '', '', '', '', $servidor->id);
+        $cotacao->salvar();
+
+        $lote = new Lote($cotacao->id, '01');
+        $lote->salvar();
+
+        $item = new Item($lote->id, 1, 'Item sem preço', 'UN', 1);
+        $item->salvar();
+
+        $pendentes = $cotacao->itensComPrecosInsuficientes();
+
+        $this->assertCount(1, $pendentes);
+        $this->assertSame(0, $pendentes[0]['aprovados']);
+    }
+
+    public function testItensComPrecosInsuficientesNaoSeAplicaAPlanilhaOrcamentaria(): void
+    {
+        $servidor = $this->criarServidor();
+        $cotacao = new Cotacao(
+            'MTPAR-PRO-2026/00013', '', '', '', '', $servidor->id,
+            AnalisePrecos::CRITERIO_PLANILHA_ORCAMENTARIA
+        );
+        $cotacao->salvar();
+
+        $lote = new Lote($cotacao->id, '01');
+        $lote->salvar();
+
+        // Planilha Orcamentaria: um unico valor, sem comparacao de precos.
+        $item = new Item($lote->id, 1, 'Item de planilha orçamentária', 'UN', 1);
+        $item->salvar();
+        (new Preco($item->id, 1000))->salvar();
+
+        $this->assertSame([], $cotacao->itensComPrecosInsuficientes());
+    }
 }

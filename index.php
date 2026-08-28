@@ -180,11 +180,6 @@ switch ($action) {
         (new RelatorioController())->gerar();
         break;
 
-    case 'gerar_pesquisa':
-    case 'gerar_relatorio_pesquisa':
-        (new RelatorioController())->gerarPesquisa();
-        break;
-
     case 'relatorios_licitacao':
         (new RelatoriosLicitacaoController())->mostrar();
         break;

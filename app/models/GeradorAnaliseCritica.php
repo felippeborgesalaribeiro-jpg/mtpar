@@ -3,6 +3,7 @@
 require_once __DIR__ . '/Cotacao.php';
 require_once __DIR__ . '/Servidor.php';
 require_once __DIR__ . '/AnalisePrecos.php';
+require_once __DIR__ . '/Parametro.php';
 require_once __DIR__ . '/../helpers/extenso.php';
 
 use PhpOffice\PhpWord\PhpWord;
@@ -237,17 +238,21 @@ class GeradorAnaliseCritica
             [], $paragrafo
         );
 
-        $valorGlobalEstimado = 0.0;
+        $valorGlobalEstimado    = 0.0;
+        $parametrosPrecoPublico = Parametro::buscarNomesPrecoPublico();
+        $arredondar             = $this->cotacao->deveArredondarValorReferencia();
 
         foreach ($lotes as $lote) {
             $itens          = $lote->buscarItens();
             $valorTotalLote = 0.0;
 
             foreach ($itens as $item) {
-                $this->montarTabelaItem($secao, $lote, $item);
-                $resultado       = $item->analisar($this->cotacao->criterioConsolidacao, null, $this->cotacao->deveArredondarValorReferencia());
+                $precos          = $item->buscarPrecos();
+                $resultado       = $item->analisar($this->cotacao->criterioConsolidacao, $parametrosPrecoPublico, $arredondar, $precos);
                 $valorReferencia = $resultado['valor_referencia'] ?? 0;
                 $valorTotalLote += $valorReferencia * $item->quantidade;
+
+                $this->montarTabelaItem($secao, $lote, $item, $precos, $resultado);
             }
 
             $secao->addText(
@@ -264,7 +269,7 @@ class GeradorAnaliseCritica
         $secao->addPageBreak();
     }
 
-    private function montarTabelaItem($secao, $lote, $item): void
+    private function montarTabelaItem($secao, $lote, $item, array $precos, array $resultado): void
     {
         $estiloTabela         = ['borderSize' => 6, 'borderColor' => '000000', 'cellMargin' => 80];
         $estiloCelulaCabecalho = ['bgColor' => 'D9D9D9'];
@@ -280,7 +285,6 @@ class GeradorAnaliseCritica
         $larguraTotal = $col1 + $col2 + $col3 + $col4;
         $larguraParam = $col1 + $col2 + $col3;
 
-        $resultado       = $item->analisar($this->cotacao->criterioConsolidacao, null, $this->cotacao->deveArredondarValorReferencia());
         $valorReferencia = $resultado['valor_referencia'] ?? 0;
         $valorTotal      = $valorReferencia * $item->quantidade;
         $criterioLabel   = self::CRITERIO_LABEL[$this->cotacao->criterioConsolidacao] ?? 'mediana';
@@ -335,25 +339,22 @@ class GeradorAnaliseCritica
 
         $secao->addTextBreak();
 
-        $this->montarTabelaCalculoPrecos($secao, $item, $resultado);
+        $this->montarTabelaCalculoPrecos($secao, $precos, $resultado);
 
         $secao->addTextBreak();
 
-        $precos = $item->buscarPrecos();
         foreach ($precos as $indice => $preco) {
             $textoJustificativa = $this->montarJustificativaPreco($preco, $resultado, $indice);
             $secao->addText($textoJustificativa, [], ['alignment' => Jc::BOTH, 'spaceAfter' => 150]);
         }
     }
 
-    private function montarTabelaCalculoPrecos($secao, $item, array $resultado): void
+    private function montarTabelaCalculoPrecos($secao, array $precos, array $resultado): void
     {
         $estiloTabela          = ['borderSize' => 6, 'borderColor' => '000000', 'cellMargin' => 80];
         $estiloCelulaCabecalho = ['bgColor' => 'D9D9D9'];
         $fonteCabecalho        = ['bold' => true, 'size' => 8];
         $fonteCelula           = ['size' => 8];
-
-        $precos = $item->buscarPrecos();
 
         $tabela = $secao->addTable($estiloTabela);
         $tabela->addRow();

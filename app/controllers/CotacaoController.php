@@ -198,6 +198,23 @@ class CotacaoController
             return;
         }
 
+        $itensPendentes = $cotacao->itensComPrecosInsuficientes();
+
+        if (count($itensPendentes) > 0) {
+            $descricoes = array_map(
+                fn($pendente) => 'Lote ' . htmlspecialchars($pendente['lote']->numero) . ' — Item ' . $pendente['item']->numero
+                    . ' (' . $pendente['aprovados'] . ' de ' . Cotacao::MINIMO_PRECOS_APROVADOS_ETAPA2 . ' preços aprovados)',
+                $itensPendentes
+            );
+
+            $_SESSION['erro'] = 'Não é possível finalizar: os itens abaixo ainda não têm o mínimo de '
+                . Cotacao::MINIMO_PRECOS_APROVADOS_ETAPA2 . ' preços aprovados ao final da Etapa 2 (Inexequível) — '
+                . implode('; ', $descricoes) . '.';
+
+            header('Location: index.php?action=cotacao&id=' . $cotacao->id);
+            exit;
+        }
+
         $cotacao->status = StatusCotacao::Finalizada;
         $cotacao->salvar();
 

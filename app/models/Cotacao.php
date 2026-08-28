@@ -168,6 +168,55 @@ class Cotacao
     }
 
     /**
+     * Minimo de precos que precisam sobrar APROVADOS (ou EXCECAO_PRECO_PUBLICO)
+     * ao final da Etapa 2 - Inexequivel pra um item poder entrar no preco de
+     * referencia - art. 9º, §2º, do RILC/MTPAR ("... desde que o calculo
+     * incida sobre um conjunto de tres ou mais precos..."). Nao vale pra
+     * Planilha Orcamentaria, que nao faz comparacao de precos (ver
+     * itensComPrecosInsuficientes()).
+     */
+    const MINIMO_PRECOS_APROVADOS_ETAPA2 = 3;
+
+    /**
+     * Itens que ainda nao atingiram o minimo de precos aprovados exigido pra
+     * fechar a pesquisa (ver MINIMO_PRECOS_APROVADOS_ETAPA2) - usado por
+     * CotacaoController::finalizar() pra travar a finalizacao enquanto isso
+     * nao for corrigido. Planilha Orcamentaria fica de fora dessa regra: e
+     * um valor unico digitado, sem comparacao de precos possivel.
+     *
+     * @return array<int, array{lote: Lote, item: Item, aprovados: int}>
+     */
+    public function itensComPrecosInsuficientes(): array
+    {
+        if ($this->criterioConsolidacao === AnalisePrecos::CRITERIO_PLANILHA_ORCAMENTARIA) {
+            return [];
+        }
+
+        $parametrosPrecoPublico = Parametro::buscarNomesPrecoPublico();
+        $arredondar = $this->deveArredondarValorReferencia();
+        $pendentes = [];
+
+        foreach ($this->buscarLotes() as $lote) {
+            foreach ($lote->buscarItens() as $item) {
+                $resultado = $item->analisar($this->criterioConsolidacao, $parametrosPrecoPublico, $arredondar);
+
+                $aprovados = 0;
+                foreach ($resultado['resultado_final'] as $resultadoItem) {
+                    if ($resultadoItem === AnalisePrecos::APROVADO || $resultadoItem === AnalisePrecos::EXCECAO_PRECO_PUBLICO) {
+                        $aprovados++;
+                    }
+                }
+
+                if ($aprovados < self::MINIMO_PRECOS_APROVADOS_ETAPA2) {
+                    $pendentes[] = ['lote' => $lote, 'item' => $item, 'aprovados' => $aprovados];
+                }
+            }
+        }
+
+        return $pendentes;
+    }
+
+    /**
      * Mesmo calculo usado no mapa comparativo: soma, por lote, o valor de
      * referencia de cada item (segundo o criterio de consolidacao da cotacao)
      * multiplicado pela quantidade.

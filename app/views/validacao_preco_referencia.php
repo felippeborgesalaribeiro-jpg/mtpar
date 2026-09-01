@@ -107,8 +107,7 @@ require __DIR__ . '/partials/header.php';
     <div class="card-body">
         <p class="mb-1"><b>Responsável pela elaboração:</b></p>
         <p class="mb-1">Nome: <?= htmlspecialchars($servidor->nome ?? '') ?></p>
-        <p class="mb-1">Matrícula: <?= htmlspecialchars($servidor->matricula ?? '') ?></p>
-        <p class="mb-0">Data: <?= date('d/m/Y') ?></p>
+        <p class="mb-0">Matrícula: <?= htmlspecialchars($servidor->matricula ?? '') ?></p>
     </div>
 </div>
 

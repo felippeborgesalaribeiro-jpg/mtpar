@@ -59,6 +59,12 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
             <i class="ti ti-table" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
             Ver mapa comparativo
         </a>
+        <?php if ($cotacao->status === StatusCotacao::Finalizada): ?>
+            <a href="index.php?action=validacao_preco_referencia&id=<?= $cotacao->id ?>" class="btn btn-sm btn-info text-white">
+                <i class="ti ti-file-check" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+                Validação do preço de referência
+            </a>
+        <?php endif; ?>
         <?php if ($cotacao->status === StatusCotacao::Finalizada && !$ehPlanilhaOrcamentaria): ?>
             <a href="index.php?action=relatorio_formulario&id=<?= $cotacao->id ?>" class="btn btn-sm btn-warning text-dark">
                 <i class="ti ti-file-report" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>

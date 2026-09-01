@@ -171,6 +171,11 @@ switch ($action) {
         (new MapaController())->mostrar($id);
         break;
 
+    case 'validacao_preco_referencia':
+        $id = (int) ($_GET['id'] ?? 0);
+        (new MapaController())->mostrarValidacao($id);
+        break;
+
     case 'relatorio':
     case 'relatorio_formulario':
         (new RelatorioController())->formulario();

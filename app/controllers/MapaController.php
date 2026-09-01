@@ -11,19 +11,60 @@ class MapaController
     {
         exigirLogin();
 
-        $cotacao = Cotacao::buscarPorId($cotacaoId);
-
+        $cotacao = $this->buscarCotacaoOuEcoar($cotacaoId);
         if ($cotacao === null) {
-            echo 'Cotação não encontrada.';
             return;
         }
 
         $servidor = $cotacao->buscarServidor();
+        [$mapaLotes, $valorGlobalCotacao] = $this->montarMapaLotes($cotacao);
+
+        require __DIR__ . '/../views/mapa.php';
+    }
+
+    /**
+     * Validacao do Preco de Referencia: mesma tabela do mapa comparativo,
+     * mas sem as colunas de fonte/fornecedor - so item, especificacao,
+     * media/criterio, und, qtd, total e o valor total do lote.
+     */
+    public function mostrarValidacao(int $cotacaoId): void
+    {
+        exigirLogin();
+
+        $cotacao = $this->buscarCotacaoOuEcoar($cotacaoId);
+        if ($cotacao === null) {
+            return;
+        }
+
+        $servidor = $cotacao->buscarServidor();
+        [$mapaLotes, $valorGlobalCotacao] = $this->montarMapaLotes($cotacao);
+
+        require __DIR__ . '/../views/validacao_preco_referencia.php';
+    }
+
+    private function buscarCotacaoOuEcoar(int $cotacaoId): ?Cotacao
+    {
+        $cotacao = Cotacao::buscarPorId($cotacaoId);
+
+        if ($cotacao === null) {
+            echo 'Cotação não encontrada.';
+            return null;
+        }
+
+        return $cotacao;
+    }
+
+    /**
+     * @return array{0: array<int, array{lote: Lote, itens: array, valor_total: float}>, 1: float}
+     */
+    private function montarMapaLotes(Cotacao $cotacao): array
+    {
         $lotes = $cotacao->buscarLotes();
 
         $mapaLotes = [];
         $valorGlobalCotacao = 0.0;
         $parametrosPrecoPublico = Parametro::buscarNomesPrecoPublico();
+        $arredondar = $cotacao->deveArredondarValorReferencia();
 
         foreach ($lotes as $lote) {
             $itens = $lote->buscarItens();
@@ -31,8 +72,8 @@ class MapaController
             $valorTotalLote = 0.0;
 
             foreach ($itens as $item) {
-                $resultado = $item->analisar($cotacao->criterioConsolidacao, $parametrosPrecoPublico, $cotacao->deveArredondarValorReferencia());
                 $precos = $item->buscarPrecos();
+                $resultado = $item->analisar($cotacao->criterioConsolidacao, $parametrosPrecoPublico, $arredondar, $precos);
 
                 $fornecedoresAprovados = [];
                 foreach ($precos as $indice => $preco) {
@@ -66,6 +107,6 @@ class MapaController
             $valorGlobalCotacao += $valorTotalLote;
         }
 
-        require __DIR__ . '/../views/mapa.php';
+        return [$mapaLotes, $valorGlobalCotacao];
     }
 }

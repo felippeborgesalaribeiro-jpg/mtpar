@@ -23,6 +23,7 @@ require __DIR__ . '/partials/header.php';
         </p>
 
         <form method="post" action="index.php?action=gerar_relatorio">
+            <?= csrf_input() ?>
             <input type="hidden" name="cotacao_id" value="<?= $cotacao->id ?>">
 
             <div class="mb-3">

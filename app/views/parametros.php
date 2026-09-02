@@ -23,6 +23,7 @@ require __DIR__ . '/partials/header.php';
     <div class="card-body">
         <h6 class="card-subtitle mb-3 text-muted">Cadastrar novo parâmetro</h6>
         <form method="post" action="index.php?action=criar_parametro" class="row g-2 align-items-center">
+            <?= csrf_input() ?>
             <div class="col-md-7">
                 <input type="text" name="nome" class="form-control" placeholder="Ex: Art. 46, I" required>
             </div>
@@ -88,6 +89,7 @@ require __DIR__ . '/partials/header.php';
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <form method="post" action="index.php?action=editar_parametro">
+            <?= csrf_input() ?>
                                         <input type="hidden" name="parametro_id" value="<?= $parametro->id ?>">
                                         <div class="modal-header">
                                             <h5 class="modal-title">Editar parâmetro</h5>

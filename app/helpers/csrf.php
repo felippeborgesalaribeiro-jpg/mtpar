@@ -18,11 +18,6 @@ require_once __DIR__ . '/auth.php';
  * consiga forçar um POST em nome de um usuário já logado, porque essa página
  * não tem como saber qual é o token da sessão dele.
  *
- * NOTA sobre a Etapa 3: enquanto o CSRF ainda estiver sendo aplicado
- * gradualmente pelos formulários, exigir_csrf() ACEITA POSTs sem token e
- * apenas deixa passar em modo de compatibilidade. Uma vez que todos os
- * formulários tenham o campo csrf_input() incluído, basta trocar a linha
- * marcada abaixo pra recusar POSTs sem token de vez.
  */
 
 function csrf_token(): string
@@ -67,14 +62,7 @@ function exigir_csrf(): void
     $enviado = $_POST['csrf_token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
     $esperado = $_SESSION['csrf_token'] ?? '';
 
-    // Modo compatibilidade: enquanto ha formularios sem o campo, deixa
-    // passar POSTs sem token. Assim que todo formulario POST for atualizado,
-    // remover este bloco (o proximo `if` ja cobre a checagem real).
-    if ($enviado === '') {
-        return;
-    }
-
-    if ($esperado === '' || !hash_equals($esperado, (string) $enviado)) {
+    if ($enviado === '' || $esperado === '' || !hash_equals($esperado, (string) $enviado)) {
         http_response_code(403);
         echo 'Sessão inválida ou expirada. Volte, atualize a página e envie o formulário de novo.';
         exit;

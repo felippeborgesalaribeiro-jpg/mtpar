@@ -30,7 +30,6 @@ class LoteController
 
     public function excluir(): void
     {
-        exigir_csrf();
         exigirLogin();
 
         $id = (int) ($_POST['id'] ?? 0);
@@ -180,7 +179,6 @@ class LoteController
 
     public function excluirItem(): void
     {
-        exigir_csrf();
         exigirLogin();
 
         $itemId = (int) ($_POST['id'] ?? 0);

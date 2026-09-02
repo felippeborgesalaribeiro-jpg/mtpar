@@ -21,6 +21,7 @@ require __DIR__ . '/partials/header.php';
 <div class="card shadow-sm">
     <div class="card-body">
         <form method="post" action="index.php?action=criar_cotacao">
+            <?= csrf_input() ?>
             <input type="hidden" name="demanda_id" value="<?= $demanda->id ?>">
 
             <div class="row g-3 mb-3">

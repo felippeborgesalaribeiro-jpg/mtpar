@@ -41,6 +41,7 @@ require __DIR__ . '/../partials/header.php';
     <div class="card-body">
         <h6 class="card-subtitle mb-3 text-muted">Cadastrar novo setor</h6>
         <form method="post" action="index.php?action=criar_setor_demandante" class="row g-2 align-items-center">
+            <?= csrf_input() ?>
             <div class="col-md-10">
                 <input type="text" name="nome" class="form-control" placeholder="Ex: Setor de TI" required>
             </div>
@@ -87,6 +88,7 @@ require __DIR__ . '/../partials/header.php';
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <form method="post" action="index.php?action=editar_setor_demandante">
+            <?= csrf_input() ?>
                                         <input type="hidden" name="setor_id" value="<?= $setor->id ?>">
                                         <div class="modal-header">
                                             <h5 class="modal-title">Editar setor demandante</h5>

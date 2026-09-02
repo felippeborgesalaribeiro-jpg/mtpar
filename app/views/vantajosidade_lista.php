@@ -305,6 +305,7 @@ foreach ($processos as $processo) {
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post" id="formDadosVantajosidade" action="index.php?action=criar_vantajosidade">
+            <?= csrf_input() ?>
                 <div class="modal-header">
                     <h5 class="modal-title">Novo processo de vantajosidade</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

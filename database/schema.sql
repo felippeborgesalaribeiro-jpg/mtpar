@@ -229,3 +229,15 @@ CREATE TABLE IF NOT EXISTS precos_vantajosidade (
     criado_em TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (item_id) REFERENCES itens_vantajosidade(id) ON DELETE CASCADE
 );
+
+-- Registra cada tentativa de login (bem-sucedida ou não) pra permitir
+-- que AuthController bloqueie o usuario temporariamente apos varias
+-- falhas seguidas, evitando ataque de forca bruta.
+CREATE TABLE IF NOT EXISTS tentativas_login (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    identificador TEXT NOT NULL,
+    tentativa_em TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_tentativas_login_ident_em
+    ON tentativas_login (identificador, tentativa_em);

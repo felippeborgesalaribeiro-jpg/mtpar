@@ -197,7 +197,6 @@ class VantajosidadeController
 
     public function excluir(): void
     {
-        exigir_csrf();
         exigirLogin();
 
         $id = (int) ($_POST['id'] ?? 0);
@@ -261,7 +260,6 @@ class VantajosidadeController
 
     public function excluirItem(): void
     {
-        exigir_csrf();
         exigirLogin();
 
         $itemId = (int) ($_POST['id'] ?? 0);
@@ -327,7 +325,6 @@ class VantajosidadeController
 
     public function excluirPreco(): void
     {
-        exigir_csrf();
         exigirLogin();
 
         $precoId = (int) ($_POST['id'] ?? 0);

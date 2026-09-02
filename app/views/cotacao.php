@@ -133,6 +133,7 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
         Lotes
     </span>
     <form method="post" action="index.php?action=criar_lote">
+            <?= csrf_input() ?>
         <input type="hidden" name="cotacao_id" value="<?= $cotacao->id ?>">
         <button type="submit" class="btn btn-primary btn-sm">
             <i class="ti ti-plus" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
@@ -161,6 +162,7 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
                 <?php if ($servidorLogado !== null && $servidorLogado->ehAdmin()): ?>
                     <form method="post" action="index.php?action=renumerar_itens_lote" class="d-inline"
                           onsubmit="return confirm('Renumerar os itens deste lote sequencialmente (1, 2, 3...), mantendo a ordem atual?')">
+            <?= csrf_input() ?>
                         <input type="hidden" name="lote_id" value="<?= $lote->id ?>">
                         <button type="submit" class="btn btn-sm btn-outline-light">
                             <i class="ti ti-sort-ascending-numbers" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
@@ -220,6 +222,7 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
                                 Valor da planilha orçamentária ainda não informado para este item.
                             </p>
                             <form method="post" action="index.php?action=adicionar_preco" class="row g-2">
+            <?= csrf_input() ?>
                                 <input type="hidden" name="item_id" value="<?= $item->id ?>">
                                 <div class="col-md-8">
                                     <input type="text" name="valor" class="form-control form-control-sm"
@@ -253,6 +256,7 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <form method="post" action="index.php?action=editar_preco">
+            <?= csrf_input() ?>
                                             <input type="hidden" name="preco_id" value="<?= $precoPlanilha->id ?>">
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Editar valor da planilha orçamentária</h5>
@@ -330,6 +334,7 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <form method="post" action="index.php?action=editar_preco">
+            <?= csrf_input() ?>
                                                     <input type="hidden" name="preco_id" value="<?= $preco->id ?>">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title">Editar preço</h5>
@@ -373,6 +378,7 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
 
                     <?php if (!$ehPlanilhaOrcamentaria): ?>
                         <form method="post" action="index.php?action=adicionar_preco" class="row g-2">
+            <?= csrf_input() ?>
                             <input type="hidden" name="item_id" value="<?= $item->id ?>">
                             <div class="col-md-3">
                                 <select name="parametro" class="form-select form-select-sm">
@@ -413,6 +419,7 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <form method="post" action="index.php?action=editar_item">
+            <?= csrf_input() ?>
                                 <input type="hidden" name="item_id" value="<?= $item->id ?>">
                                 <div class="modal-header">
                                     <h5 class="modal-title">Editar item</h5>
@@ -450,6 +457,7 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <form method="post" action="index.php?action=mover_item_lote">
+            <?= csrf_input() ?>
                                     <input type="hidden" name="item_id" value="<?= $item->id ?>">
                                     <div class="modal-header">
                                         <h5 class="modal-title">
@@ -526,6 +534,7 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
             <?php endforeach; ?>
 
             <form method="post" action="index.php?action=adicionar_item" class="row g-2 mt-2">
+            <?= csrf_input() ?>
                 <input type="hidden" name="lote_id" value="<?= $lote->id ?>">
                 <div class="col-md-6">
                     <input type="text" name="descricao" class="form-control" placeholder="Descrição do novo item" required>
@@ -555,6 +564,7 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form method="post" action="index.php?action=editar_cotacao">
+            <?= csrf_input() ?>
                 <input type="hidden" name="cotacao_id" value="<?= $cotacao->id ?>">
                 <div class="modal-header">
                     <h5 class="modal-title">

@@ -68,6 +68,7 @@ require __DIR__ . '/../partials/header.php';
 
             <div class="d-flex gap-2 mb-4">
                 <form method="POST" action="index.php?action=admin_backup_criar">
+            <?= csrf_input() ?>
                     <button type="submit" class="btn btn-primary">
                         <i class="ti ti-download" aria-hidden="true" style="font-size:14px; vertical-align:-1px;"></i>
                         Fazer backup agora
@@ -109,7 +110,8 @@ require __DIR__ . '/../partials/header.php';
                                 <td class="text-center text-muted small"><?= htmlspecialchars($bk['data_formatada']) ?></td>
                                 <td class="text-end">
                                     <form method="POST" action="index.php?action=admin_backup_excluir"
-                                          onsubmit="return confirm('Excluir o backup \'<?= htmlspecialchars($bk['nome']) ?>\'?\nEsta ação não pode ser desfeita.')">
+                                          onsubmit="return confirm('Excluir o backup \'<?= htmlspecialchars($bk['nome']) ?>
+            <?= csrf_input() ?>\'?\nEsta ação não pode ser desfeita.')">
                                         <input type="hidden" name="arquivo" value="<?= htmlspecialchars($bk['nome']) ?>">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
                                             <i class="ti ti-trash" aria-hidden="true" style="font-size:13px;"></i>

@@ -59,6 +59,28 @@ final class CsrfTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
+    public function testExigirCsrfRecusaPostSemToken(): void
+    {
+        // POST sem o campo csrf_token de jeito nenhum tem que ser recusado
+        // (regressao: durante a Etapa 3 tinhamos um "modo compat" que
+        // deixava passar - foi removido, so o token valido passa).
+        $csrfPath = realpath(__DIR__ . '/../../app/helpers/csrf.php');
+        $script = <<<PHP
+<?php
+\$_SERVER['REQUEST_METHOD'] = 'POST';
+require '{$csrfPath}';
+\$_SESSION['csrf_token'] = 'token-real';
+exigir_csrf();
+echo 'NAO_PROTEGIDO';
+PHP;
+        $tmp = tempnam(sys_get_temp_dir(), 'csrf');
+        file_put_contents($tmp, $script);
+        $resultado = shell_exec("php {$tmp} 2>&1");
+        unlink($tmp);
+        $this->assertStringNotContainsString('NAO_PROTEGIDO', (string) $resultado);
+        $this->assertStringContainsString('inválida', (string) $resultado);
+    }
+
     public function testExigirCsrfRecusaPostComTokenErrado(): void
     {
         // Roda num subprocesso pq exigir_csrf() chama exit em caso de falha.

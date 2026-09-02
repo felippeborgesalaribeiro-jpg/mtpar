@@ -31,6 +31,12 @@ $action = $_GET['action'] ?? 'login';
 
 $rotasPublicas = ['login', 'fazer_login'];
 
+// Protecao CSRF centralizada: em toda requisicao POST/PUT/DELETE, o token
+// enviado pelo formulario tem que bater com o guardado na sessao. Se nao
+// bater, a requisicao e recusada com 403 antes mesmo de chegar ao
+// controller. Ver app/helpers/csrf.php.
+exigir_csrf();
+
 if (usuarioLogado() === null && !in_array($action, $rotasPublicas)) {
     header('Location: index.php?action=login');
     exit;

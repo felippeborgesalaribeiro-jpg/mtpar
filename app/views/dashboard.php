@@ -229,6 +229,7 @@ $coresStatus = [
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form method="post" action="index.php?action=criar_demanda">
+            <?= csrf_input() ?>
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="ti ti-folder-plus" aria-hidden="true" style="font-size: 18px; vertical-align: -2px;"></i>

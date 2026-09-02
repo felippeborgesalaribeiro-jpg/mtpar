@@ -194,6 +194,7 @@ $statusLabel = [
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post" id="formDadosCotacao" action="index.php?action=criar_cotacao">
+            <?= csrf_input() ?>
                 <div class="modal-header">
                     <h5 class="modal-title">Nova cotação</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

@@ -69,6 +69,7 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
 <!--  MODO EDIÇÃO                                                       -->
 <!-- ================================================================ -->
 <form id="formEdicao" method="POST" action="index.php?action=editar_demanda_inline">
+            <?= csrf_input() ?>
     <input type="hidden" name="demanda_id" value="<?= $demanda->id ?>">
     <input type="hidden" name="origem" value="<?= htmlspecialchars($_GET['origem'] ?? '') ?>">
     <input type="hidden" name="origem_id" value="<?= htmlspecialchars($_GET['origem_id'] ?? '') ?>">
@@ -314,6 +315,7 @@ $statusAplicDemanda = $licitacao->statusAplic();
         </div>
         <?php if ($statusAplicDemanda === StatusAplic::Pendente): ?>
             <form method="post" action="index.php?action=marcar_enviado_aplic">
+            <?= csrf_input() ?>
                 <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
                 <button type="submit" class="btn btn-sm btn-outline-primary">
                     <i class="ti ti-send" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
@@ -323,6 +325,7 @@ $statusAplicDemanda = $licitacao->statusAplic();
         <?php else: ?>
             <form method="post" action="index.php?action=desmarcar_enviado_aplic"
                   onsubmit="return confirm('Desfazer a confirmação de envio deste processo ao Aplic?')">
+            <?= csrf_input() ?>
                 <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
                 <button type="submit" class="btn btn-sm btn-outline-secondary">
                     <i class="ti ti-arrow-back-up" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
@@ -338,6 +341,7 @@ $statusAplicDemanda = $licitacao->statusAplic();
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form method="post" action="index.php?action=editar_licitacao">
+            <?= csrf_input() ?>
                 <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
                 <div class="modal-header">
                     <h5 class="modal-title">Editar licitação — <?= htmlspecialchars($licitacao->numeroProcesso) ?></h5>

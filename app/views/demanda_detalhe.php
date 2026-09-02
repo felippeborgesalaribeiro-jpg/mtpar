@@ -243,27 +243,49 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
                 </span>
             </div>
         </div>
+        <?php
+        // Regra para habilitar o "Gerar Termo": TODOS os lotes ativos precisam
+        // ter uma decisão (empresa vencedora OU marcados como fracassado/deserto).
+        // Gerar o termo também é o ato que ENCERRA a licitação (grava
+        // data_adjudicacao_homologacao) - por isso não existe mais um botão
+        // separado de "Finalizar processo".
+        $resolucaoLotes = $licitacao->verificarResolucaoDosLotes();
+        $lotesAtivosParaTermo = $licitacao->buscarLotesAtivos();
+        ?>
         <div class="mt-3 d-flex align-items-center justify-content-end flex-wrap gap-2">
             <div class="d-flex gap-2">
                 <a href="index.php?action=proposta_vencedora&id=<?= $licitacao->id ?>" class="btn btn-sm btn-outline-primary">
                     <i class="ti ti-clipboard-check" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
                     Conferir proposta vencedora
                 </a>
-                <?php if ($resumoLotes !== null && $resumoLotes['com_vencedor'] < $resumoLotes['total']): ?>
-                    <span class="badge bg-primary-subtle text-primary d-flex align-items-center px-2">
-                        <i class="ti ti-list-check" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
-                        &nbsp;<?= $resumoLotes['com_vencedor'] ?> de <?= $resumoLotes['total'] ?> lotes com vencedor definido
-                    </span>
-                <?php elseif ($licitacao->estaFinalizada()): ?>
+                <?php if ($licitacao->estaFinalizada()): ?>
+                    <a href="index.php?action=gerar_termo_adjudicacao&id=<?= $licitacao->id ?>" class="btn btn-sm btn-outline-dark">
+                        <i class="ti ti-file-download" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+                        Baixar Termo de Adjudicação/Homologação
+                    </a>
                     <span class="badge bg-success-subtle text-success d-flex align-items-center px-2">
                         <i class="ti ti-circle-check" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
-                        &nbsp;Processo finalizado em <?= date('d/m/Y', strtotime($licitacao->dataAdjudicacaoHomologacao)) ?>
+                        &nbsp;Homologado em <?= date('d/m/Y', strtotime($licitacao->dataAdjudicacaoHomologacao)) ?>
                     </span>
-                <?php else: ?>
-                    <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#modalFinalizarProcesso">
+                <?php elseif ($resolucaoLotes['ok']): ?>
+                    <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#modalGerarTermo">
                         <i class="ti ti-stamp" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
-                        Finalizar processo
+                        Gerar Adjudicação/Homologação
                     </button>
+                <?php else: ?>
+                    <button type="button" class="btn btn-sm btn-dark" disabled
+                            title="Todos os lotes precisam ter empresa vencedora salva ou estar marcados como fracassado/deserto.">
+                        <i class="ti ti-stamp" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+                        Gerar Adjudicação/Homologação
+                    </button>
+                    <?php if (count($resolucaoLotes['pendentes']) > 0): ?>
+                        <span class="badge bg-warning-subtle text-warning d-flex align-items-center px-2" style="font-size: 11px;">
+                            <i class="ti ti-alert-triangle" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
+                            &nbsp;Falta resolver
+                            <?= count($resolucaoLotes['pendentes']) === 1 ? 'o lote ' : 'os lotes ' ?>
+                            <?= htmlspecialchars(implode(', ', $resolucaoLotes['pendentes'])) ?>
+                        </span>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>
@@ -367,26 +389,61 @@ $statusAplicDemanda = $licitacao->statusAplic();
     </div>
 </div>
 
-<?php if (!$licitacao->estaFinalizada()): ?>
-<div class="modal fade" id="modalFinalizarProcesso" tabindex="-1">
-    <div class="modal-dialog">
+<?php if (!$licitacao->estaFinalizada() && $resolucaoLotes['ok']): ?>
+<div class="modal fade" id="modalGerarTermo" tabindex="-1">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form method="post" action="index.php?action=finalizar_licitacao" onsubmit="return confirm('Confirma que este processo foi de fato adjudicado e homologado? Depois de finalizado, isso marca oficialmente o encerramento no setor de licitação.');">
-                <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
+            <form method="get" action="index.php" onsubmit="return confirm('Ao gerar o Termo, este processo será oficialmente encerrado com a data informada. Confirmar?');">
+                <input type="hidden" name="action" value="gerar_termo_adjudicacao">
+                <input type="hidden" name="id" value="<?= $licitacao->id ?>">
                 <div class="modal-header">
-                    <h5 class="modal-title">Finalizar processo</h5>
+                    <h5 class="modal-title">Gerar Termo de Adjudicação e Homologação</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-muted small">
-                        Isso marca que o processo foi adjudicado e homologado, encerrando-o no setor de licitação.
-                        Essa ação não pode ser desfeita pela tela — se precisar corrigir a data depois, avise o administrador.
+                    <p class="text-muted small mb-3">
+                        Gerar o termo <b>encerra oficialmente</b> este processo no setor de licitação
+                        (marca a data de adjudicação e homologação). Se precisar corrigir a data
+                        depois, avise o administrador.
                     </p>
-                    <label class="form-label small fw-semibold">Data da adjudicação e homologação</label>
-                    <input type="date" name="data" class="form-control form-control-sm" style="max-width: 220px;" value="<?= date('Y-m-d') ?>" required>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Data da adjudicação e homologação</label>
+                        <input type="date" name="data" class="form-control form-control-sm"
+                               style="max-width: 220px;" value="<?= date('Y-m-d') ?>" required>
+                    </div>
+                    <?php
+                    $temAlgumLoteComEmpresa = false;
+                    foreach ($lotesAtivosParaTermo as $entradaLote) {
+                        if (LotePropostaVencedora::buscarPorLicitacaoELote($licitacao->id, $entradaLote['lote_atual']->id) !== null) {
+                            $temAlgumLoteComEmpresa = true;
+                            break;
+                        }
+                    }
+                    ?>
+                    <?php if ($temAlgumLoteComEmpresa): ?>
+                        <label class="form-label small fw-semibold">Categoria por lote (opcional)</label>
+                        <?php foreach ($lotesAtivosParaTermo as $entradaLote): ?>
+                            <?php $lote = $entradaLote['lote_atual']; ?>
+                            <?php if (LotePropostaVencedora::buscarPorLicitacaoELote($licitacao->id, $lote->id) !== null): ?>
+                                <div class="row g-2 align-items-center mb-2">
+                                    <div class="col-auto">
+                                        <span class="badge bg-secondary">Lote <?= htmlspecialchars($lote->numero) ?></span>
+                                    </div>
+                                    <div class="col">
+                                        <input type="text" name="categoria_lote[<?= $lote->id ?>]"
+                                               class="form-control form-control-sm"
+                                               placeholder="Ex.: AMPLA CONCORRÊNCIA, EXCLUSIVO ME/EPP/MEI">
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-dark btn-sm">Confirmar finalização</button>
+                    <button type="submit" class="btn btn-dark btn-sm">
+                        <i class="ti ti-file-download" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+                        Gerar e encerrar processo
+                    </button>
                 </div>
             </form>
         </div>

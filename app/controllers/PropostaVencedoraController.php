@@ -145,19 +145,43 @@ class PropostaVencedoraController
             return;
         }
 
-        $empresasPorLote = $this->resolverEmpresasPorLote($licitacao->id);
-
-        if (count($empresasPorLote) === 0) {
-            echo 'Nenhum lote tem empresa vencedora definida ainda. Salve pelo menos um lote antes de gerar o termo.';
+        // Cada lote precisa ter uma decisao (empresa vencedora OU fracassado/deserto)
+        // pra evitar que se gere o termo esquecendo lote em branco. Ver
+        // Licitacao::verificarResolucaoDosLotes().
+        $resolucao = $licitacao->verificarResolucaoDosLotes();
+        if (!$resolucao['ok']) {
+            if (count($resolucao['pendentes']) === 0) {
+                echo 'Esta licitação ainda não tem lotes definidos.';
+            } else {
+                $_SESSION['erro'] = 'Não é possível gerar o termo: '
+                    . (count($resolucao['pendentes']) === 1 ? 'o lote ' : 'os lotes ')
+                    . implode(', ', $resolucao['pendentes'])
+                    . (count($resolucao['pendentes']) === 1 ? ' ainda não tem' : ' ainda não têm')
+                    . ' resolução (empresa vencedora ou marcação de fracassado/deserto). '
+                    . 'Volte na tela "Conferir proposta vencedora" para completar antes.';
+                header('Location: index.php?action=ver_demanda&id=' . $licitacao->demandaId);
+                exit;
+            }
             return;
         }
 
+        $empresasPorLote = $this->resolverEmpresasPorLote($licitacao->id);
         $categoriasPorLote = [];
         foreach (($_GET['categoria_lote'] ?? []) as $loteId => $categoria) {
             $categoriasPorLote[(int) $loteId] = trim((string) $categoria);
         }
 
         $data = trim($_GET['data'] ?? '') ?: date('Y-m-d');
+
+        // Gerar o termo E encerrar oficialmente a licitacao viraram o mesmo ato:
+        // se ainda nao tinha data de homologacao, grava agora antes de emitir.
+        // O botao antigo "Finalizar processo" (LicitacaoController::finalizar) foi
+        // absorvido por este fluxo.
+        if (!$licitacao->estaFinalizada()) {
+            $licitacao->dataAdjudicacaoHomologacao = $data;
+            $licitacao->salvar();
+        }
+
         $lotesAtuais = array_column($licitacao->buscarLotesAtivos(), 'lote_atual');
 
         require_once __DIR__ . '/../models/GeradorTermoAdjudicacaoHomologacao.php';

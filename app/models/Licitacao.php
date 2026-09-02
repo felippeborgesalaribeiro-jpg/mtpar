@@ -246,6 +246,41 @@ class Licitacao
     }
 
     /**
+     * Verifica se TODOS os lotes ativos da licitacao ja tem uma resolucao -
+     * empresa vencedora salva (LotePropostaVencedora) OU marcados como
+     * fracassado/deserto (SituacaoLote). E o pre-requisito pra gerar o Termo
+     * de Adjudicacao/Homologacao: cada lote precisa de uma decisao consciente
+     * do agente antes de encerrar o processo (nao pode ficar lote "esquecido").
+     *
+     * @return array{ok: bool, pendentes: array<int, string>} - pendentes lista
+     * os numeros dos lotes ainda sem resolucao (vazio quando ok=true).
+     */
+    public function verificarResolucaoDosLotes(): array
+    {
+        require_once __DIR__ . '/LotePropostaVencedora.php';
+        require_once __DIR__ . '/SituacaoLote.php';
+
+        $lotesAtivos = $this->buscarLotesAtivos();
+
+        if (count($lotesAtivos) === 0) {
+            return ['ok' => false, 'pendentes' => []];
+        }
+
+        $pendentes = [];
+        foreach ($lotesAtivos as $entrada) {
+            $lote = $entrada['lote_atual'];
+            $temEmpresa = LotePropostaVencedora::buscarPorLicitacaoELote($this->id, $lote->id) !== null;
+            $fracassado = SituacaoLote::buscarPorLicitacaoELote($this->id, $lote->id) !== null;
+
+            if (!$temEmpresa && !$fracassado) {
+                $pendentes[] = $lote->numero;
+            }
+        }
+
+        return ['ok' => count($pendentes) === 0, 'pendentes' => $pendentes];
+    }
+
+    /**
      * @return array<int, array{lote_original: Lote, lote_atual: Lote, rodada: int}>
      *
      * Pra cada lote da Cotacao vinculada, segue a cadeia de republicacoes

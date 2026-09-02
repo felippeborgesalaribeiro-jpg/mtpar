@@ -75,10 +75,6 @@ require __DIR__ . '/partials/header.php';
                     <i class="ti ti-file-download" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
                     Gerar documento
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#modalAdjudicacao">
-                    <i class="ti ti-stamp" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
-                    Gerar Adjudicação/Homologação
-                </button>
             </div>
         </div>
     </div>
@@ -360,58 +356,6 @@ require __DIR__ . '/partials/header.php';
                 <button type="button" class="btn btn-sm btn-link text-muted" id="btnMarcarTodosLotes">Marcar todos</button>
                 <button type="button" class="btn btn-sm btn-primary" id="btnAplicarSelecaoLotes" data-bs-dismiss="modal">Aplicar</button>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal: Adjudicação/Homologação -->
-<div class="modal fade" id="modalAdjudicacao" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form method="get" action="index.php" id="formTermoAdjudicacao">
-                <input type="hidden" name="action" value="gerar_termo_adjudicacao">
-                <input type="hidden" name="id" value="<?= $licitacao->id ?>">
-                <div class="modal-header">
-                    <h5 class="modal-title">Gerar Termo de Adjudicação e Homologação</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Data da adjudicação e homologação</label>
-                        <input type="date" name="data" class="form-control form-control-sm" style="max-width: 220px;"
-                               value="<?= $licitacao->dataAdjudicacaoHomologacao ?? date('Y-m-d') ?>">
-                    </div>
-                    <?php $temLoteComEmpresa = false; ?>
-                    <?php foreach ($lotesAtivos as $entradaLote): ?>
-                        <?php $lote = $entradaLote['lote_atual']; ?>
-                        <?php $loteProposta = $lotesComEmpresa[$lote->id] ?? null; ?>
-                        <?php if ($loteProposta !== null): ?>
-                            <?php $temLoteComEmpresa = true; ?>
-                            <div class="row g-2 align-items-center mb-2">
-                                <div class="col-auto">
-                                    <span class="badge bg-secondary">Lote <?= htmlspecialchars($lote->numero) ?></span>
-                                </div>
-                                <div class="col">
-                                    <input type="text" name="categoria_lote[<?= $lote->id ?>]" class="form-control form-control-sm"
-                                           placeholder="Categoria (opcional) — ex.: AMPLA CONCORRÊNCIA, EXCLUSIVO ME/EPP/MEI">
-                                </div>
-                            </div>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-                    <?php if (!$temLoteComEmpresa): ?>
-                        <p class="text-muted small mb-0">
-                            <i class="ti ti-alert-circle" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
-                            Nenhum lote tem empresa vencedora definida ainda. Salve pelo menos um lote antes de gerar o termo.
-                        </p>
-                    <?php endif; ?>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary btn-sm" <?= !$temLoteComEmpresa ? 'disabled' : '' ?>>
-                        <i class="ti ti-file-download" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
-                        Gerar documento
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 </div>

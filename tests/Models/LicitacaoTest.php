@@ -4,12 +4,15 @@ namespace Tests\Models;
 
 use Cotacao;
 use Demanda;
+use Empresa;
 use Item;
 use Licitacao;
 use Lote;
+use LotePropostaVencedora;
 use Preco;
 use ProcessoVantajosidade;
 use Servidor;
+use SituacaoLote;
 use StatusAplic;
 use StatusLicitacao;
 use Tests\DatabaseTestCase;
@@ -26,6 +29,9 @@ require_once __DIR__ . '/../../app/models/Item.php';
 require_once __DIR__ . '/../../app/models/Preco.php';
 require_once __DIR__ . '/../../app/models/Parametro.php';
 require_once __DIR__ . '/../../app/models/ProcessoVantajosidade.php';
+require_once __DIR__ . '/../../app/models/LotePropostaVencedora.php';
+require_once __DIR__ . '/../../app/models/SituacaoLote.php';
+require_once __DIR__ . '/../../app/models/Empresa.php';
 require_once __DIR__ . '/../../app/models/Servidor.php';
 
 final class LicitacaoTest extends DatabaseTestCase
@@ -390,5 +396,77 @@ final class LicitacaoTest extends DatabaseTestCase
         $this->assertNotNull($primeira);
         $this->assertNotNull($segunda);
         $this->assertSame($primeira->id, $segunda->id);
+    }
+
+    /**
+     * Regra para habilitar o "Gerar Termo de Adjudicacao/Homologacao": cada
+     * lote ativo precisa ter uma decisao (empresa vencedora salva OU
+     * marcacao como fracassado/deserto). Se algum ficar em branco, o botao
+     * fica desabilitado e o backend recusa gerar o termo.
+     */
+    private function criarLicitacaoComDoisLotes(): array
+    {
+        $servidor = $this->criarServidor();
+        $demanda = $this->criarDemanda();
+
+        $cotacao = new Cotacao(
+            $demanda->numeroProcesso, $demanda->setorDemandante, '', '', $demanda->objeto,
+            $servidor->id, demandaId: $demanda->id
+        );
+        $cotacao->salvar();
+
+        $l1 = new Lote($cotacao->id, '01'); $l1->salvar();
+        (new Item($l1->id, 1, 'Item A', 'UN', 1))->salvar();
+        $l2 = new Lote($cotacao->id, '02'); $l2->salvar();
+        (new Item($l2->id, 1, 'Item B', 'UN', 1))->salvar();
+
+        $licitacao = Licitacao::criarApartirDeDemanda($demanda);
+
+        return [$licitacao, $l1, $l2];
+    }
+
+    public function testVerificarResolucaoDosLotesFalhaQuandoAlgumLoteFicaSemDecisao(): void
+    {
+        [$licitacao, $l1, $l2] = $this->criarLicitacaoComDoisLotes();
+
+        $empresa = new Empresa('Empresa A', '11222333000181');
+        $empresa->salvar();
+
+        // Só o lote 1 recebe empresa vencedora. O lote 2 fica em branco.
+        (new LotePropostaVencedora($licitacao->id, $l1->id, $empresa->id))->salvar();
+
+        $resolucao = $licitacao->verificarResolucaoDosLotes();
+
+        $this->assertFalse($resolucao['ok']);
+        $this->assertSame(['02'], $resolucao['pendentes']);
+    }
+
+    public function testVerificarResolucaoDosLotesAceitaMistoDeEmpresaEFracassado(): void
+    {
+        [$licitacao, $l1, $l2] = $this->criarLicitacaoComDoisLotes();
+
+        $empresa = new Empresa('Empresa A', '11222333000181');
+        $empresa->salvar();
+
+        // Lote 1: vencedora. Lote 2: fracassado. Todos "resolvidos".
+        (new LotePropostaVencedora($licitacao->id, $l1->id, $empresa->id))->salvar();
+        (new SituacaoLote($licitacao->id, $l2->id, SituacaoLote::FRACASSADO, 'Sem propostas', '2026-01-10'))->salvar();
+
+        $resolucao = $licitacao->verificarResolucaoDosLotes();
+
+        $this->assertTrue($resolucao['ok']);
+        $this->assertSame([], $resolucao['pendentes']);
+    }
+
+    public function testVerificarResolucaoDosLotesFalhaQuandoNaoHaLotes(): void
+    {
+        // Uma licitação recém-criada sem lotes ainda: não faz sentido gerar
+        // o termo, então precisa ficar bloqueada.
+        $demanda = $this->criarDemanda();
+        $licitacao = Licitacao::criarApartirDeDemanda($demanda);
+
+        $resolucao = $licitacao->verificarResolucaoDosLotes();
+
+        $this->assertFalse($resolucao['ok']);
     }
 }

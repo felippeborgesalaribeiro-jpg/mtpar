@@ -89,10 +89,6 @@ switch ($action) {
         (new LicitacaoController())->excluir();
         break;
 
-    case 'finalizar_licitacao':
-        (new LicitacaoController())->finalizar();
-        break;
-
     case 'orcamentos':
         (new OrcamentoController())->listar();
         break;

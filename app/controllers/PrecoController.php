@@ -74,9 +74,10 @@ class PrecoController
 
     public function excluir(): void
     {
+        exigir_csrf();
         exigirLogin();
 
-        $precoId = (int) ($_GET['id'] ?? 0);
+        $precoId = (int) ($_POST['id'] ?? 0);
 
         $preco = Preco::buscarPorId($precoId);
 

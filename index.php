@@ -4,6 +4,8 @@ session_start();
 
 require_once __DIR__ . '/app/helpers/auth.php';
 require_once __DIR__ . '/app/helpers/formatacao.php';
+require_once __DIR__ . '/app/helpers/csrf.php';
+require_once __DIR__ . '/app/helpers/forms.php';
 require_once __DIR__ . '/app/controllers/AuthController.php';
 require_once __DIR__ . '/app/controllers/DashboardController.php';
 require_once __DIR__ . '/app/controllers/DemandaController.php';

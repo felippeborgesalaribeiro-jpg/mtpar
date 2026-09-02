@@ -66,12 +66,7 @@ $statusLabel = [
                 Finalizar
             </a>
         <?php endif; ?>
-        <a href="index.php?action=excluir_vantajosidade&id=<?= $processo->id ?>"
-           class="btn btn-sm btn-outline-danger"
-           onclick="return confirm('Excluir todo o processo, incluindo itens e preços? Ele vai para a lixeira do Administrador, que pode restaurá-lo depois se precisar.')">
-            <i class="ti ti-trash" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
-            Excluir
-        </a>
+        <?= botao_excluir_form('excluir_vantajosidade', $processo->id, 'Excluir todo o processo, incluindo itens e preços? Ele vai para a lixeira do Administrador, que pode restaurá-lo depois se precisar.') ?>
     </div>
 </div>
 
@@ -167,12 +162,7 @@ $statusLabel = [
                     <i class="ti ti-edit" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
                     Editar
                 </button>
-                <a href="index.php?action=excluir_item_vantajosidade&id=<?= $item->id ?>"
-                   class="btn btn-sm btn-outline-light"
-                   onclick="return confirm('Excluir este item e todos os preços dele?')">
-                    <i class="ti ti-trash" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
-                    Excluir
-                </a>
+                <?= botao_excluir_form('excluir_item_vantajosidade', $item->id, 'Excluir este item e todos os preços dele?', 'Excluir', 'btn btn-sm btn-outline-light') ?>
             </div>
         </div>
         <div class="card-body">
@@ -215,11 +205,7 @@ $statusLabel = [
                                             data-bs-toggle="modal" data-bs-target="#modalEditarPreco<?= $preco->id ?>">
                                         <i class="ti ti-edit" aria-hidden="true" style="font-size: 12px;"></i>
                                     </button>
-                                    <a href="index.php?action=excluir_preco_vantajosidade&id=<?= $preco->id ?>"
-                                       class="btn btn-sm btn-outline-danger"
-                                       onclick="return confirm('Excluir este preço?')">
-                                        <i class="ti ti-trash" aria-hidden="true" style="font-size: 12px;"></i>
-                                    </a>
+                                    <?= botao_excluir_form('excluir_preco_vantajosidade', $preco->id, 'Excluir este preço?', '') ?>
                                 </td>
                             </tr>
 

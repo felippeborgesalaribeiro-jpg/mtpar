@@ -30,9 +30,10 @@ class LoteController
 
     public function excluir(): void
     {
+        exigir_csrf();
         exigirLogin();
 
-        $id = (int) ($_GET['id'] ?? 0);
+        $id = (int) ($_POST['id'] ?? 0);
         $lote = Lote::buscarPorId($id);
 
         if ($lote === null) {
@@ -179,9 +180,10 @@ class LoteController
 
     public function excluirItem(): void
     {
+        exigir_csrf();
         exigirLogin();
 
-        $itemId = (int) ($_GET['id'] ?? 0);
+        $itemId = (int) ($_POST['id'] ?? 0);
 
         $item = Item::buscarPorId($itemId);
 

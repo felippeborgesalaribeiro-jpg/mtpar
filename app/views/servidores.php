@@ -115,11 +115,7 @@ $senhaResetada = isset($_GET['senha_resetada']);
                                    onclick="return confirm('Resetar a senha deste servidor para o padrão (123)?')">
                                     <i class="ti ti-key" aria-hidden="true" style="font-size: 13px;"></i>
                                 </a>
-                                <a href="index.php?action=excluir_servidor&id=<?= $servidor->id ?>"
-                                   class="btn btn-sm btn-outline-danger"
-                                   onclick="return confirm('Excluir este servidor?')">
-                                    <i class="ti ti-trash" aria-hidden="true" style="font-size: 13px;"></i>
-                                </a>
+                                <?= botao_excluir_form('excluir_servidor', $servidor->id, 'Excluir este servidor?', '') ?>
                             </td>
                         </tr>
 

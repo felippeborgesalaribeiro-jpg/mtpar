@@ -79,12 +79,7 @@ require __DIR__ . '/../partials/header.php';
                                     <i class="ti ti-edit" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
                                     Editar
                                 </button>
-                                <a href="index.php?action=excluir_setor_demandante&id=<?= $setor->id ?>"
-                                   class="btn btn-sm btn-outline-danger"
-                                   onclick="return confirm('Excluir este setor demandante? Ele deixará de aparecer na busca (demandas já cadastradas com ele não são afetadas).')">
-                                    <i class="ti ti-trash" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
-                                    Excluir
-                                </a>
+                                <?= botao_excluir_form('excluir_setor_demandante', $setor->id, 'Excluir este setor demandante? Ele deixará de aparecer na busca (demandas já cadastradas com ele não são afetadas).') ?>
                             </td>
                         </tr>
 

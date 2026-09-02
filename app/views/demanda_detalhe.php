@@ -59,12 +59,7 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
                 <i class="ti ti-edit" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
                 Editar
             </a>
-            <a href="index.php?action=excluir_demanda&id=<?= $demanda->id ?>"
-               class="btn btn-sm btn-outline-danger"
-               onclick="return confirm('Excluir este processo? Ele vai para a lixeira do Administrador, que pode restaurá-lo depois se precisar.')">
-                <i class="ti ti-trash" aria-hidden="true" style="font-size:13px; vertical-align:-1px;"></i>
-                Excluir
-            </a>
+            <?= botao_excluir_form('excluir_demanda', $demanda->id, 'Excluir este processo? Ele vai para a lixeira do Administrador, que pode restaurá-lo depois se precisar.') ?>
         <?php endif; ?>
     </div>
 </div>

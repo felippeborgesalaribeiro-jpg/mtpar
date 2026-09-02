@@ -224,9 +224,10 @@ class CotacaoController
 
     public function excluir(): void
     {
+        exigir_csrf();
         exigirLogin();
 
-        $id = (int) ($_GET['id'] ?? 0);
+        $id = (int) ($_POST['id'] ?? 0);
         $cotacao = Cotacao::buscarPorId($id);
 
         if ($cotacao !== null) {

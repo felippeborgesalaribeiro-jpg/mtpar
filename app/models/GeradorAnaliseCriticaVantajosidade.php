@@ -5,6 +5,7 @@ require_once __DIR__ . '/ItemVantajosidade.php';
 require_once __DIR__ . '/Servidor.php';
 require_once __DIR__ . '/AnaliseVantajosidade.php';
 require_once __DIR__ . '/../helpers/extenso.php';
+require_once __DIR__ . '/../helpers/textos_legais.php';
 
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\SimpleType\Jc;
@@ -125,10 +126,7 @@ class GeradorAnaliseCriticaVantajosidade
 
         $secao->addText('Art. 32. As contratações destinam-se a assegurar a seleção da proposta mais vantajosa, inclusive no que se refere ao ciclo de vida do objeto, e a evitar operações em que se caracterize sobrepreço ou superfaturamento.', ['italic' => true, 'size' => 10], $citacao);
 
-        $secao->addText(
-            'Diante disso, com o advento da Lei 13.303/2016, a MTPAR editou seu Regulamento Interno de Licitações e Contratos (RILC/MTPAR), aprovado pelo Conselho de Administração, e instituído por meio da Resolução Nº 004/CONSELHO DE ADM/2020 do Conselho de Administração da empresa, com atualizações posteriores conforme aprovado pela Resolução Nº004/2023/CAD.',
-            [], $paragrafo
-        );
+        $secao->addText(TextosLegais::RILC_INSTITUICAO, [], $paragrafo);
 
         if ($this->processo->ehContratoAditivo()) {
             $secao->addText(

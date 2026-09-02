@@ -208,6 +208,38 @@ class ProcessoVantajosidade
         return self::fromArray($linha);
     }
 
+    /**
+     * Devolve um mapa {demanda_id => ProcessoVantajosidade} das vantajosidades
+     * vinculadas a cada uma das demandas pedidas. Usado pelas listagens pra
+     * evitar N+1. Demandas sem vantajosidade ficam ausentes do mapa.
+     *
+     * @param array<int, int> $demandaIds
+     * @return array<int, ProcessoVantajosidade>
+     */
+    public static function mapaPorDemandaIds(array $demandaIds): array
+    {
+        $demandaIds = array_values(array_unique(array_filter($demandaIds, fn($v) => $v !== null)));
+        if (count($demandaIds) === 0) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($demandaIds), '?'));
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare(
+            "SELECT * FROM processos_vantajosidade
+             WHERE demanda_id IN ($placeholders) AND deleted_at IS NULL"
+        );
+        $stmt->execute($demandaIds);
+
+        $mapa = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $linha) {
+            $processo = self::fromArray($linha);
+            $mapa[$processo->demandaId] ??= $processo;
+        }
+
+        return $mapa;
+    }
+
     public static function buscarTodos(): array
     {
         $pdo = Database::getConnection();

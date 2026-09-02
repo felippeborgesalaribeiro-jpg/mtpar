@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../models/Licitacao.php';
+require_once __DIR__ . '/../models/Servidor.php';
 require_once __DIR__ . '/../helpers/auth.php';
 
 class AplicController
@@ -21,6 +22,12 @@ class AplicController
                 StatusAplic::NaoAplicavel => $totalNaoAplicavel++,
             };
         }
+
+        // Evita N+1 na listagem (uma consulta em vez de N chamadas
+        // buscarServidorResponsavel por linha).
+        $mapaServidores = Servidor::mapaPorIds(array_map(
+            fn(Licitacao $l) => $l->servidorResponsavelId, $licitacoes
+        ));
 
         require __DIR__ . '/../views/painel_aplic.php';
     }

@@ -57,7 +57,8 @@ $statusLabel = [
                             $economicidadeReais = $licitacao->calcularEconomicidadeReais();
                             $economicidadePercentual = $licitacao->calcularEconomicidadePercentual();
                             $diasNaLicitacao = $licitacao->calcularDiasNaLicitacao();
-                            $servidorResponsavel = $licitacao->buscarServidorResponsavel();
+                            $servidorResponsavel = $licitacao->servidorResponsavelId !== null
+                                ? ($mapaServidores[$licitacao->servidorResponsavelId] ?? null) : null;
                             [$statusTexto, $statusClasse] = $statusLabel[$licitacao->status()->value];
                             ?>
                             <tr>

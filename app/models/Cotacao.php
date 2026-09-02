@@ -274,6 +274,41 @@ class Cotacao
         return self::fromArray($linha);
     }
 
+    /**
+     * Devolve um mapa {demanda_id => Cotacao} das cotacoes vinculadas a
+     * cada uma das demandas pedidas. Usado pelas listagens pra evitar N+1
+     * (uma consulta em vez de N chamadas a buscarPorDemandaId). Demandas
+     * sem cotacao vinculada ficam simplesmente ausentes do mapa.
+     *
+     * @param array<int, int> $demandaIds
+     * @return array<int, Cotacao>
+     */
+    public static function mapaPorDemandaIds(array $demandaIds): array
+    {
+        $demandaIds = array_values(array_unique(array_filter($demandaIds, fn($v) => $v !== null)));
+        if (count($demandaIds) === 0) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($demandaIds), '?'));
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare(
+            "SELECT * FROM cotacoes WHERE demanda_id IN ($placeholders) AND deleted_at IS NULL"
+        );
+        $stmt->execute($demandaIds);
+
+        $mapa = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $linha) {
+            $cotacao = self::fromArray($linha);
+            // Se uma demanda tem mais de uma cotacao no banco (nao deveria,
+            // ha um LIMIT 1 no buscarPorDemandaId), fica a primeira do
+            // resultado - alinhada com o comportamento single-record.
+            $mapa[$cotacao->demandaId] ??= $cotacao;
+        }
+
+        return $mapa;
+    }
+
     public static function buscarTodas(): array
     {
         $pdo = Database::getConnection();

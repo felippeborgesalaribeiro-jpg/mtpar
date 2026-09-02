@@ -60,6 +60,30 @@ class Licitacao
         $this->dataAdjudicacaoHomologacao = $dataAdjudicacaoHomologacao;
     }
 
+    /**
+     * Decide se uma Demanda recem-concluida deve virar Licitacao, e cria se
+     * for o caso. Regras:
+     *  - se ja existe uma Licitacao pra essa demanda, devolve a existente
+     *    (nao duplica em caso de reconclusao / reenvio de formulario);
+     *  - processos de Vantajosidade (adesao a ata) NAO viram licitacao - eles
+     *    seguem outra trilha, entao concluir uma demanda desse tipo nao pode
+     *    criar uma licitacao "fantasma" vazia;
+     *  - nos demais casos, cria a Licitacao a partir da Demanda.
+     */
+    public static function gerarAoConcluirDemanda(Demanda $demanda): ?Licitacao
+    {
+        $existente = self::buscarPorDemandaId($demanda->id);
+        if ($existente !== null) {
+            return $existente;
+        }
+
+        if ($demanda->buscarVantajosidadeVinculada() !== null) {
+            return null;
+        }
+
+        return self::criarApartirDeDemanda($demanda);
+    }
+
     public static function criarApartirDeDemanda(Demanda $demanda): Licitacao
     {
         require_once __DIR__ . '/Cotacao.php';

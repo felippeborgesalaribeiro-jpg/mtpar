@@ -14,6 +14,12 @@ class LicitacaoController
         $licitacoes = Licitacao::buscarTodas();
         $servidores = Servidor::buscarTodos();
 
+        // Evita N+1: em vez de cada linha da tabela chamar buscarServidorResponsavel,
+        // busca os servidores necessarios em uma unica consulta e passa como mapa.
+        $mapaServidores = Servidor::mapaPorIds(array_map(
+            fn(Licitacao $l) => $l->servidorResponsavelId, $licitacoes
+        ));
+
         require __DIR__ . '/../views/licitacoes.php';
     }
 

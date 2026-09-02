@@ -5,6 +5,7 @@ require_once __DIR__ . '/Servidor.php';
 require_once __DIR__ . '/AnalisePrecos.php';
 require_once __DIR__ . '/Parametro.php';
 require_once __DIR__ . '/../helpers/extenso.php';
+require_once __DIR__ . '/../helpers/textos_legais.php';
 
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\SimpleType\Jc;
@@ -142,10 +143,7 @@ class GeradorAnaliseCritica
         $secao->addText('Art. 40. As empresas públicas e as sociedades de economia mista deverão publicar e manter atualizado regulamento interno de licitações e contratos, compatível com o disposto nesta Lei, especialmente quanto a:', ['italic' => true, 'size' => 10], $citacao);
         $secao->addText('IV - procedimentos de licitação e contratação direta;', ['italic' => true, 'size' => 10], $citacao);
 
-        $secao->addText(
-            'Diante disso, com o advento da Lei 13.303/2016, a MTPAR editou seu Regulamento Interno de Licitações e Contratos (RILC/MTPAR), aprovado pelo Conselho de Administração, e instituído por meio da Resolução Nº 004/CONSELHO DE ADM/2020 do Conselho de Administração da empresa, com atualizações posteriores conforme aprovado pela Resolução Nº004/2023/CAD.',
-            [], $paragrafo
-        );
+        $secao->addText(TextosLegais::RILC_INSTITUICAO, [], $paragrafo);
 
         $secao->addText(
             'Neste sentido, a estimativa do valor do objeto e a justificativa de preço observam os parâmetros elencados no art. 9º do RILC/MTPAR, que estabelece:',

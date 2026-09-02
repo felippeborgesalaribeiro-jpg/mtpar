@@ -164,6 +164,36 @@ class Servidor
         return $servidores;
     }
 
+    /**
+     * Devolve um mapa {servidor_id => Servidor} contendo APENAS os ids
+     * pedidos. E o que as listagens usam pra evitar N+1: em vez de cada
+     * linha da tabela chamar buscarPorId, quem monta a tela chama
+     * mapaPorIds uma unica vez com todos os ids necessarios.
+     *
+     * @param array<int, int> $ids
+     * @return array<int, Servidor>
+     */
+    public static function mapaPorIds(array $ids): array
+    {
+        $ids = array_values(array_unique(array_filter($ids, fn($v) => $v !== null)));
+        if (count($ids) === 0) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare("SELECT * FROM servidores WHERE id IN ($placeholders)");
+        $stmt->execute($ids);
+
+        $mapa = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $linha) {
+            $servidor = self::fromArray($linha);
+            $mapa[$servidor->id] = $servidor;
+        }
+
+        return $mapa;
+    }
+
     private static function fromArray(array $linha): Servidor
     {
         return new Servidor(

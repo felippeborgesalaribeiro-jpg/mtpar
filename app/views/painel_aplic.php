@@ -107,7 +107,8 @@ $statusLicitacaoLabel = [
                     <tbody>
                         <?php foreach ($licitacoes as $licitacao): ?>
                             <?php
-                            $servidorResponsavel = $licitacao->buscarServidorResponsavel();
+                            $servidorResponsavel = $licitacao->servidorResponsavelId !== null
+                                ? ($mapaServidores[$licitacao->servidorResponsavelId] ?? null) : null;
                             $statusAplic = $licitacao->statusAplic();
                             [$aplicTexto, $aplicClasse] = $statusAplicLabel[$statusAplic->value];
                             [$etapaTexto, $etapaClasse] = $statusLicitacaoLabel[$licitacao->status()->value];

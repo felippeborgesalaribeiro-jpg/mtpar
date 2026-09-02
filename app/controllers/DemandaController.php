@@ -18,6 +18,20 @@ class DemandaController
 
         $demandas = Demanda::buscarTodas();
 
+        // Monta os mapas em lote uma unica vez pra view (evita N+1 - antes,
+        // pra cada linha da tabela chamavamos buscarServidorResponsavel,
+        // buscarCotacaoVinculada e buscarVantajosidadeVinculada, o que virava
+        // 3N consultas).
+        $servidorIds = array_values(array_filter(
+            array_map(fn(Demanda $d) => $d->servidorResponsavelId, $demandas),
+            fn($v) => $v !== null
+        ));
+        $demandaIds = array_map(fn(Demanda $d) => $d->id, $demandas);
+
+        $mapaServidores = Servidor::mapaPorIds($servidorIds);
+        $mapaCotacoes = Cotacao::mapaPorDemandaIds($demandaIds);
+        $mapaVantajosidades = ProcessoVantajosidade::mapaPorDemandaIds($demandaIds);
+
         require __DIR__ . '/../views/demandas.php';
     }
 

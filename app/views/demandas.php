@@ -131,9 +131,10 @@ $totalAtivas = count($demandas) - $totalConcluidas;
                         <?php foreach ($demandas as $demanda): ?>
                             <?php
                             $corStatus = $coresStatus[$demanda->status] ?? 'bg-secondary-subtle text-secondary';
-                            $servidorResp = $demanda->buscarServidorResponsavel();
-                            $cotacaoVinc = $demanda->buscarCotacaoVinculada();
-                            $vantajVinc  = $demanda->buscarVantajosidadeVinculada();
+                            $servidorResp = $demanda->servidorResponsavelId !== null
+                                ? ($mapaServidores[$demanda->servidorResponsavelId] ?? null) : null;
+                            $cotacaoVinc = $mapaCotacoes[$demanda->id] ?? null;
+                            $vantajVinc  = $mapaVantajosidades[$demanda->id] ?? null;
                             $temVinculo  = $cotacaoVinc !== null || $vantajVinc !== null;
                             $dias = $demanda->calcularDiasEmAberto();
                             $corUrgencia = $dias >= 60 ? 'bg-danger-subtle text-danger'

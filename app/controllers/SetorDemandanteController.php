@@ -78,7 +78,6 @@ class SetorDemandanteController
 
     public function excluir(): void
     {
-        exigir_csrf();
         exigirAdmin();
 
         $id = (int) ($_POST['id'] ?? 0);

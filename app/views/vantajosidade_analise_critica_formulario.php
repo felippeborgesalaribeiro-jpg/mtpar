@@ -24,6 +24,7 @@ $identificador = $processo->ehContratoAditivo() ? 'Aditivo do Contrato ' . $proc
         </p>
 
         <form method="post" action="index.php?action=gerar_analise_critica_vantajosidade">
+            <?= csrf_input() ?>
             <input type="hidden" name="processo_id" value="<?= $processo->id ?>">
 
             <div class="mb-3">

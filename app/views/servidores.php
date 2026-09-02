@@ -43,6 +43,7 @@ $senhaResetada = isset($_GET['senha_resetada']);
     <div class="card-body">
         <h6 class="card-subtitle mb-3 text-muted">Cadastrar novo servidor</h6>
         <form method="post" action="index.php?action=criar_servidor" class="row g-2">
+            <?= csrf_input() ?>
             <div class="col-md-3">
                 <input type="text" name="nome" class="form-control" placeholder="Nome completo" required>
             </div>
@@ -123,6 +124,7 @@ $senhaResetada = isset($_GET['senha_resetada']);
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <form method="post" action="index.php?action=editar_servidor">
+            <?= csrf_input() ?>
                                         <input type="hidden" name="servidor_id" value="<?= $servidor->id ?>">
                                         <div class="modal-header">
                                             <h5 class="modal-title">Editar servidor</h5>

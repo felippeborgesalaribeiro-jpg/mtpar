@@ -54,6 +54,7 @@ $iniciais = mb_strtoupper(mb_substr($servidorLogado->nome, 0, 1));
         </div>
 
         <form method="post" action="index.php?action=atualizar_perfil">
+            <?= csrf_input() ?>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Nome completo</label>

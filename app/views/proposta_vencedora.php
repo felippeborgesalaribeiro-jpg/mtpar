@@ -40,6 +40,7 @@ require __DIR__ . '/partials/header.php';
 <?php endif; ?>
 
 <form method="post" action="index.php?action=salvar_proposta_vencedora" id="formProposta">
+            <?= csrf_input() ?>
     <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
     <input type="hidden" name="operacao" id="campoOperacao" value="salvar">
     <input type="hidden" name="ultimo_item_id" id="campoUltimoItem" value="">
@@ -162,6 +163,7 @@ require __DIR__ . '/partials/header.php';
                         </div>
                     <?php else: ?>
                         <form method="post" action="index.php?action=republicar_lote">
+            <?= csrf_input() ?>
                             <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
                             <input type="hidden" name="lote_id" value="<?= $lote->id ?>">
                             <button type="submit" class="btn btn-sm btn-primary">
@@ -291,6 +293,7 @@ require __DIR__ . '/partials/header.php';
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post" action="index.php?action=marcar_situacao_lote">
+            <?= csrf_input() ?>
                 <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
                 <input type="hidden" name="lote_id" id="fracassoLoteId" value="">
                 <div class="modal-header">

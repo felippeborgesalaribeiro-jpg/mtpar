@@ -135,6 +135,7 @@ $statusLicitacaoLabel = [
                                 <td>
                                     <?php if ($statusAplic === StatusAplic::Pendente): ?>
                                         <form method="post" action="index.php?action=marcar_enviado_aplic">
+            <?= csrf_input() ?>
                                             <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
                                             <button type="submit" class="btn btn-sm btn-outline-primary">
                                                 <i class="ti ti-send" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
@@ -144,6 +145,7 @@ $statusLicitacaoLabel = [
                                     <?php elseif ($statusAplic === StatusAplic::Enviado): ?>
                                         <form method="post" action="index.php?action=desmarcar_enviado_aplic"
                                               onsubmit="return confirm('Desfazer a confirmação de envio deste processo ao Aplic?')">
+            <?= csrf_input() ?>
                                             <input type="hidden" name="licitacao_id" value="<?= $licitacao->id ?>">
                                             <button type="submit" class="btn btn-sm btn-outline-secondary">
                                                 <i class="ti ti-arrow-back-up" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>

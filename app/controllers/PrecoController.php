@@ -74,7 +74,6 @@ class PrecoController
 
     public function excluir(): void
     {
-        exigir_csrf();
         exigirLogin();
 
         $precoId = (int) ($_POST['id'] ?? 0);

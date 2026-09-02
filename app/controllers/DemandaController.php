@@ -185,7 +185,6 @@ class DemandaController
 
     public function excluir(): void
     {
-        exigir_csrf();
         exigirLogin();
 
         $id = (int) ($_POST['id'] ?? 0);

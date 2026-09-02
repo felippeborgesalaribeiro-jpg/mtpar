@@ -14,7 +14,12 @@
     <img src="public/img/logo.png" alt="MT Par" class="login-mark">
     <p class="login-tagline">Parcerias para fazer história</p>
 
-    <?php if ($erro): ?>
+    <?php if ($erro === 'bloqueado'): ?>
+        <div class="alert alert-warning small py-2">
+            <i class="ti ti-lock" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+            Muitas tentativas de login. Aguarde alguns minutos e tente novamente.
+        </div>
+    <?php elseif ($erro): ?>
         <div class="alert alert-danger small py-2">
             <i class="ti ti-alert-circle" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
             Usuário ou senha inválidos.
@@ -22,6 +27,7 @@
     <?php endif; ?>
 
     <form method="post" action="index.php?action=fazer_login">
+            <?= csrf_input() ?>
         <div class="mb-3">
             <label class="form-label">Usuário</label>
             <input type="text" name="usuario" class="form-control" required autofocus>

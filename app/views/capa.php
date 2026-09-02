@@ -31,6 +31,7 @@ require __DIR__ . '/partials/header.php';
         </table>
 
         <form method="post" action="index.php?action=criar_lote">
+            <?= csrf_input() ?>
             <button type="submit" class="btn btn-primary">+ Novo lote</button>
         </form>
     </div>

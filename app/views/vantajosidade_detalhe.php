@@ -213,6 +213,7 @@ $statusLabel = [
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <form method="post" action="index.php?action=editar_preco_vantajosidade">
+            <?= csrf_input() ?>
                                             <input type="hidden" name="preco_id" value="<?= $preco->id ?>">
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Editar preço de mercado</h5>
@@ -252,6 +253,7 @@ $statusLabel = [
             <?php endif; ?>
 
             <form method="post" action="index.php?action=adicionar_preco_vantajosidade" class="row g-2">
+            <?= csrf_input() ?>
                 <input type="hidden" name="item_id" value="<?= $item->id ?>">
                 <div class="col-md-3">
                     <select name="parametro" class="form-select form-select-sm">
@@ -293,6 +295,7 @@ $statusLabel = [
         <div class="modal-dialog">
             <div class="modal-content">
                 <form method="post" action="index.php?action=editar_item_vantajosidade">
+            <?= csrf_input() ?>
                     <input type="hidden" name="item_id" value="<?= $item->id ?>">
                     <div class="modal-header">
                         <h5 class="modal-title">Editar item</h5>
@@ -341,6 +344,7 @@ $statusLabel = [
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post" action="index.php?action=adicionar_item_vantajosidade">
+            <?= csrf_input() ?>
                 <input type="hidden" name="processo_id" value="<?= $processo->id ?>">
                 <div class="modal-header">
                     <h5 class="modal-title">Novo item</h5>

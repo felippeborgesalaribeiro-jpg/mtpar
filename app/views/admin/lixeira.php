@@ -74,6 +74,7 @@ require __DIR__ . '/../partials/header.php';
                         </td>
                         <td class="text-end">
                             <form method="POST" action="index.php?action=admin_restaurar_demanda" class="d-inline">
+            <?= csrf_input() ?>
                                 <input type="hidden" name="id" value="<?= $d->id ?>">
                                 <button type="submit" class="btn btn-sm btn-outline-success">
                                     <i class="ti ti-restore" aria-hidden="true" style="font-size:13px;"></i>
@@ -82,6 +83,7 @@ require __DIR__ . '/../partials/header.php';
                             </form>
                             <form method="POST" action="index.php?action=admin_excluir_definitivo_demanda" class="d-inline"
                                   onsubmit="return confirm('Excluir permanentemente? Esta ação não pode ser desfeita.')">
+            <?= csrf_input() ?>
                                 <input type="hidden" name="id" value="<?= $d->id ?>">
                                 <button type="submit" class="btn btn-sm btn-outline-danger">
                                     <i class="ti ti-trash" aria-hidden="true" style="font-size:13px;"></i>
@@ -131,6 +133,7 @@ require __DIR__ . '/../partials/header.php';
                         </td>
                         <td class="text-end">
                             <form method="POST" action="index.php?action=admin_restaurar_cotacao" class="d-inline">
+            <?= csrf_input() ?>
                                 <input type="hidden" name="id" value="<?= $c->id ?>">
                                 <button type="submit" class="btn btn-sm btn-outline-success">
                                     <i class="ti ti-restore" aria-hidden="true" style="font-size:13px;"></i>
@@ -139,6 +142,7 @@ require __DIR__ . '/../partials/header.php';
                             </form>
                             <form method="POST" action="index.php?action=admin_excluir_definitivo_cotacao" class="d-inline"
                                   onsubmit="return confirm('Excluir permanentemente? Esta ação não pode ser desfeita.')">
+            <?= csrf_input() ?>
                                 <input type="hidden" name="id" value="<?= $c->id ?>">
                                 <button type="submit" class="btn btn-sm btn-outline-danger">
                                     <i class="ti ti-trash" aria-hidden="true" style="font-size:13px;"></i>
@@ -188,6 +192,7 @@ require __DIR__ . '/../partials/header.php';
                         </td>
                         <td class="text-end">
                             <form method="POST" action="index.php?action=admin_restaurar_vantajosidade" class="d-inline">
+            <?= csrf_input() ?>
                                 <input type="hidden" name="id" value="<?= $v->id ?>">
                                 <button type="submit" class="btn btn-sm btn-outline-success">
                                     <i class="ti ti-restore" aria-hidden="true" style="font-size:13px;"></i>
@@ -196,6 +201,7 @@ require __DIR__ . '/../partials/header.php';
                             </form>
                             <form method="POST" action="index.php?action=admin_excluir_definitivo_vantajosidade" class="d-inline"
                                   onsubmit="return confirm('Excluir permanentemente? Esta ação não pode ser desfeita.')">
+            <?= csrf_input() ?>
                                 <input type="hidden" name="id" value="<?= $v->id ?>">
                                 <button type="submit" class="btn btn-sm btn-outline-danger">
                                     <i class="ti ti-trash" aria-hidden="true" style="font-size:13px;"></i>

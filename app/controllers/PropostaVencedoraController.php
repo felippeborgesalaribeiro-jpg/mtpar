@@ -198,6 +198,14 @@ class PropostaVencedoraController
             return;
         }
 
+        // Reenvio do formulario / duplo clique: se o lote ja foi marcado, nao
+        // tenta gravar de novo (a trava de unicidade no banco estouraria um
+        // erro fatal). Apenas volta pra tela, de forma idempotente.
+        if (SituacaoLote::buscarPorLicitacaoELote($licitacaoId, $loteId) !== null) {
+            header('Location: index.php?action=proposta_vencedora&id=' . $licitacaoId);
+            exit;
+        }
+
         (new SituacaoLote($licitacaoId, $loteId, $situacao, $motivo, date('Y-m-d')))->salvar();
 
         if ($republicarAgora) {
@@ -250,6 +258,13 @@ class PropostaVencedoraController
         $cotacaoOriginal = Cotacao::buscarPorDemandaId($licitacao->demandaId);
 
         if ($cotacaoOriginal === null) {
+            return;
+        }
+
+        // Ja republicado antes (reenvio de formulario / duplo clique): nao cria
+        // outra rodada. A trava de unicidade em republicacoes_lote (lote_anterior_id)
+        // estouraria um erro fatal se tentasse gravar de novo.
+        if (RepublicacaoLote::buscarPorLoteAnterior($loteAnterior->id) !== null) {
             return;
         }
 

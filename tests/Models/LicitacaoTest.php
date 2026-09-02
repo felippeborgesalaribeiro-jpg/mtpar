@@ -8,6 +8,7 @@ use Item;
 use Licitacao;
 use Lote;
 use Preco;
+use ProcessoVantajosidade;
 use Servidor;
 use StatusAplic;
 use StatusLicitacao;
@@ -24,6 +25,7 @@ require_once __DIR__ . '/../../app/models/Lote.php';
 require_once __DIR__ . '/../../app/models/Item.php';
 require_once __DIR__ . '/../../app/models/Preco.php';
 require_once __DIR__ . '/../../app/models/Parametro.php';
+require_once __DIR__ . '/../../app/models/ProcessoVantajosidade.php';
 require_once __DIR__ . '/../../app/models/Servidor.php';
 
 final class LicitacaoTest extends DatabaseTestCase
@@ -344,5 +346,49 @@ final class LicitacaoTest extends DatabaseTestCase
         ))[0];
 
         $this->assertSame('Objeto atualizado na listagem', $daListagem->objeto);
+    }
+
+    public function testGerarAoConcluirDemandaCriaLicitacaoQuandoNaoEhVantajosidade(): void
+    {
+        $demanda = $this->criarDemanda();
+
+        $licitacao = Licitacao::gerarAoConcluirDemanda($demanda);
+
+        $this->assertNotNull($licitacao);
+        $this->assertSame($demanda->id, $licitacao->demandaId);
+        $this->assertNotNull(Licitacao::buscarPorDemandaId($demanda->id));
+    }
+
+    public function testGerarAoConcluirDemandaNaoCriaLicitacaoParaProcessoDeVantajosidade(): void
+    {
+        // Regressao: concluir uma demanda que e de Vantajosidade (adesao a
+        // ata) nao pode gerar uma licitacao "fantasma" - vantajosidade segue
+        // outra trilha, sem fase de licitacao.
+        $servidor = $this->criarServidor();
+        $demanda = $this->criarDemanda();
+
+        $vantajosidade = new ProcessoVantajosidade(
+            'MTPAR-ATA-2026/00100', 'Órgão Gerenciador', 'Adesão a ata',
+            $servidor->id, ProcessoVantajosidade::STATUS_EM_ANDAMENTO,
+            demandaId: $demanda->id
+        );
+        $vantajosidade->salvar();
+
+        $licitacao = Licitacao::gerarAoConcluirDemanda($demanda);
+
+        $this->assertNull($licitacao);
+        $this->assertNull(Licitacao::buscarPorDemandaId($demanda->id));
+    }
+
+    public function testGerarAoConcluirDemandaNaoDuplicaSeJaExiste(): void
+    {
+        $demanda = $this->criarDemanda();
+
+        $primeira = Licitacao::gerarAoConcluirDemanda($demanda);
+        $segunda = Licitacao::gerarAoConcluirDemanda($demanda);
+
+        $this->assertNotNull($primeira);
+        $this->assertNotNull($segunda);
+        $this->assertSame($primeira->id, $segunda->id);
     }
 }

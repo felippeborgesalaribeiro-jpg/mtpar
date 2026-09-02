@@ -156,10 +156,9 @@ class DemandaController
         $mudouParaConcluido = $statusAnterior !== Demanda::STATUS_CONCLUIDO && $demanda->status === Demanda::STATUS_CONCLUIDO;
 
         if ($mudouParaConcluido) {
-            $licitacaoExistente = Licitacao::buscarPorDemandaId($demanda->id);
-            if ($licitacaoExistente === null) {
-                Licitacao::criarApartirDeDemanda($demanda);
-            }
+            // So gera Licitacao pra processos que realmente vao a licitacao -
+            // processos de Vantajosidade ficam de fora (ver gerarAoConcluirDemanda).
+            Licitacao::gerarAoConcluirDemanda($demanda);
         }
 
         $origem = trim($_POST['origem'] ?? '');

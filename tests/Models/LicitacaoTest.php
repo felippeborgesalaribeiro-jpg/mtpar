@@ -262,4 +262,58 @@ final class LicitacaoTest extends DatabaseTestCase
         $this->assertTrue($recarregada->estaFinalizada());
         $this->assertSame('2026-01-20', $recarregada->dataAdjudicacaoHomologacao);
     }
+
+    public function testEditarADemandaRefleteNaLicitacaoSemDivergir(): void
+    {
+        // Coracao do "Caminho A": os campos de identidade do processo (numero,
+        // setor, objeto, data, link, responsavel) moram so na Demanda. Editar
+        // a Demanda depois que a Licitacao ja existe precisa refletir na hora,
+        // sem que os dois fiquem com valores diferentes.
+        $servidor = $this->criarServidor();
+        $demanda = $this->criarDemanda();
+        $demanda->servidorResponsavelId = $servidor->id;
+        $demanda->salvar();
+
+        $licitacao = Licitacao::criarApartirDeDemanda($demanda);
+        $this->assertSame('MTPAR-PRO-2026/00100', $licitacao->numeroProcesso);
+        $this->assertSame('Setor de TI', $licitacao->setorDemandante);
+
+        // Depois de a Licitacao ja existir, a Demanda e corrigida/editada.
+        $outroServidor = new Servidor('Outro Servidor');
+        $outroServidor->salvar();
+
+        $demanda->numeroProcesso = 'MTPAR-PRO-2026/00100-CORRIGIDO';
+        $demanda->setorDemandante = 'Setor de Compras';
+        $demanda->objeto = 'Objeto corrigido';
+        $demanda->linkSigadoc = 'https://sigadoc/novo';
+        $demanda->dataRecebimento = '2026-02-02';
+        $demanda->servidorResponsavelId = $outroServidor->id;
+        $demanda->salvar();
+
+        $recarregada = Licitacao::buscarPorId($licitacao->id);
+
+        $this->assertSame('MTPAR-PRO-2026/00100-CORRIGIDO', $recarregada->numeroProcesso);
+        $this->assertSame('Setor de Compras', $recarregada->setorDemandante);
+        $this->assertSame('Objeto corrigido', $recarregada->objeto);
+        $this->assertSame('https://sigadoc/novo', $recarregada->linkSigadoc);
+        $this->assertSame('2026-02-02', $recarregada->dataRecebimento);
+        $this->assertSame($outroServidor->id, $recarregada->servidorResponsavelId);
+        $this->assertSame($outroServidor->id, $recarregada->buscarServidorResponsavel()->id);
+    }
+
+    public function testBuscarTodasTambemRefleteAIdentidadeAtualDaDemanda(): void
+    {
+        $demanda = $this->criarDemanda();
+        $licitacao = Licitacao::criarApartirDeDemanda($demanda);
+
+        $demanda->objeto = 'Objeto atualizado na listagem';
+        $demanda->salvar();
+
+        $daListagem = array_values(array_filter(
+            Licitacao::buscarTodas(),
+            fn(Licitacao $l) => $l->id === $licitacao->id
+        ))[0];
+
+        $this->assertSame('Objeto atualizado na listagem', $daListagem->objeto);
+    }
 }

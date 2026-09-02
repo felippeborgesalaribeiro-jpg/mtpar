@@ -160,6 +160,38 @@ class Licitacao
         return Servidor::buscarPorId($this->servidorResponsavelId);
     }
 
+    public function buscarDemanda(): ?Demanda
+    {
+        return Demanda::buscarPorId($this->demandaId);
+    }
+
+    /**
+     * Fonte unica de verdade: os campos de identidade do processo (numero,
+     * link SIGADOC, setor, data de recebimento, objeto e responsavel) moram
+     * na Demanda. A Licitacao apenas ESTENDE a Demanda com os dados da fase
+     * de licitacao (edital, valores, homologacao, Aplic). Por isso esses
+     * campos sao sempre relidos da Demanda vinculada ao carregar a Licitacao,
+     * nunca da copia que ficou gravada nas colunas de licitacoes - que agora
+     * sao so legado (mantidas porque numero_processo/data_recebimento sao NOT
+     * NULL no schema, mas ignoradas na leitura). Assim, editar a Demanda
+     * reflete na hora na Licitacao, sem risco de os dois divergirem.
+     */
+    private function preencherIdentidadeDaDemanda(): void
+    {
+        $demanda = Demanda::buscarPorId($this->demandaId);
+
+        if ($demanda === null) {
+            return;
+        }
+
+        $this->numeroProcesso        = $demanda->numeroProcesso;
+        $this->linkSigadoc           = $demanda->linkSigadoc;
+        $this->setorDemandante       = $demanda->setorDemandante;
+        $this->dataRecebimento       = $demanda->dataRecebimento;
+        $this->objeto                = $demanda->objeto;
+        $this->servidorResponsavelId = $demanda->servidorResponsavelId;
+    }
+
     /**
      * O valor estimado nunca e digitado a mao: e sempre o total do mapa de
      * pesquisa de precos da Cotacao vinculada a demanda desta licitacao.
@@ -420,6 +452,11 @@ class Licitacao
             $linha['data_adjudicacao_homologacao'] ?? null,
             $linha['enviado_aplic_em'] ?? null
         );
+
+        // Antes de qualquer coisa (inclusive antes de um eventual salvar dentro
+        // de sincronizarValorEstimado), sobrepoe os campos de identidade com os
+        // valores atuais da Demanda - ver preencherIdentidadeDaDemanda().
+        $licitacao->preencherIdentidadeDaDemanda();
 
         if ($sincronizar) {
             $licitacao->sincronizarValorEstimado();

@@ -327,17 +327,12 @@ $statusAplicDemanda = $licitacao->statusAplic();
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Servidor responsável</label>
-                        <select name="servidor_responsavel_id" class="form-select">
-                            <option value="">— Selecione —</option>
-                            <?php foreach ($servidores as $servidor): ?>
-                                <option value="<?= $servidor->id ?>" <?= $licitacao->servidorResponsavelId === $servidor->id ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($servidor->nome) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
+                    <p class="text-muted small mb-3">
+                        <i class="ti ti-info-circle" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
+                        O servidor responsável, o objeto, o setor e os demais dados do processo são
+                        os da própria Demanda — edite-os no formulário do processo, acima. Aqui ficam
+                        só os dados da fase de licitação.
+                    </p>
                     <div class="mb-3">
                         <label class="form-label">Edital de licitação</label>
                         <input type="text" name="edital_licitacao" class="form-control"

@@ -29,8 +29,9 @@ class LicitacaoController
             return;
         }
 
-        $servidorResponsavelId = trim($_POST['servidor_responsavel_id'] ?? '');
-        $licitacao->servidorResponsavelId = $servidorResponsavelId !== '' ? (int) $servidorResponsavelId : null;
+        // O servidor responsavel NAO e editado aqui: ele mora na Demanda
+        // (fonte unica de verdade), e a Licitacao so o le de la. Editar o
+        // responsavel e feito pelo formulario da Demanda, no topo da tela.
         $licitacao->editalLicitacao = trim($_POST['edital_licitacao'] ?? '');
         $licitacao->realizacaoSessaoPublica = trim($_POST['realizacao_sessao_publica'] ?? '') ?: null;
         $licitacao->valorAdjudicado = ($_POST['valor_adjudicado'] ?? '') !== ''

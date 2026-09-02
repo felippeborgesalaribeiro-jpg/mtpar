@@ -98,9 +98,10 @@ class ServidorController
 
     public function excluir(): void
     {
+        exigir_csrf();
         exigirAdmin();
 
-        $id = (int) ($_GET['id'] ?? 0);
+        $id = (int) ($_POST['id'] ?? 0);
 
         $servidor = Servidor::buscarPorId($id);
 

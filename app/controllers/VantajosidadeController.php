@@ -197,9 +197,10 @@ class VantajosidadeController
 
     public function excluir(): void
     {
+        exigir_csrf();
         exigirLogin();
 
-        $id = (int) ($_GET['id'] ?? 0);
+        $id = (int) ($_POST['id'] ?? 0);
         $processo = ProcessoVantajosidade::buscarPorId($id);
 
         if ($processo !== null) {
@@ -260,9 +261,10 @@ class VantajosidadeController
 
     public function excluirItem(): void
     {
+        exigir_csrf();
         exigirLogin();
 
-        $itemId = (int) ($_GET['id'] ?? 0);
+        $itemId = (int) ($_POST['id'] ?? 0);
         $item = ItemVantajosidade::buscarPorId($itemId);
 
         if ($item === null) {
@@ -325,9 +327,10 @@ class VantajosidadeController
 
     public function excluirPreco(): void
     {
+        exigir_csrf();
         exigirLogin();
 
-        $precoId = (int) ($_GET['id'] ?? 0);
+        $precoId = (int) ($_POST['id'] ?? 0);
         $preco = PrecoVantajosidade::buscarPorId($precoId);
 
         if ($preco === null) {

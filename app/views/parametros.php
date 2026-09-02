@@ -80,12 +80,7 @@ require __DIR__ . '/partials/header.php';
                                     <i class="ti ti-edit" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
                                     Editar
                                 </button>
-                                <a href="index.php?action=excluir_parametro&id=<?= $parametro->id ?>"
-                                   class="btn btn-sm btn-outline-danger"
-                                   onclick="return confirm('Excluir este parâmetro?')">
-                                    <i class="ti ti-trash" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
-                                    Excluir
-                                </a>
+                                <?= botao_excluir_form('excluir_parametro', $parametro->id, 'Excluir este parâmetro?') ?>
                             </td>
                         </tr>
 

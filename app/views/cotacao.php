@@ -79,12 +79,7 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
                 Finalizar cotação
             </a>
         <?php endif; ?>
-        <a href="index.php?action=excluir_cotacao&id=<?= $cotacao->id ?>"
-           class="btn btn-sm btn-outline-danger"
-           onclick="return confirm('Excluir toda a cotação, incluindo lotes, itens e preços? Ela vai para a lixeira do Administrador, que pode restaurá-la depois se precisar.')">
-            <i class="ti ti-trash" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
-            Excluir
-        </a>
+        <?= botao_excluir_form('excluir_cotacao', $cotacao->id, 'Excluir toda a cotação, incluindo lotes, itens e preços? Ela vai para a lixeira do Administrador, que pode restaurá-la depois se precisar.') ?>
     </div>
 </div>
 
@@ -173,12 +168,7 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
                         </button>
                     </form>
                 <?php endif; ?>
-                <a href="index.php?action=excluir_lote&id=<?= $lote->id ?>"
-                   class="btn btn-sm btn-outline-light"
-                   onclick="return confirm('Excluir este lote e todos os itens/preços dele?')">
-                    <i class="ti ti-trash" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
-                    Excluir lote
-                </a>
+                <?= botao_excluir_form('excluir_lote', $lote->id, 'Excluir este lote e todos os itens/preços dele?', 'Excluir lote', 'btn btn-sm btn-outline-light') ?>
             </div>
         </div>
         <div class="card-body">
@@ -212,12 +202,7 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
                                 <i class="ti ti-edit" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
                                 Editar
                             </button>
-                            <a href="index.php?action=excluir_item&id=<?= $item->id ?>"
-                               class="btn btn-sm btn-outline-danger"
-                               onclick="return confirm('Excluir este item e todos os preços dele?')">
-                                <i class="ti ti-trash" aria-hidden="true" style="font-size: 13px; vertical-align: -1px;"></i>
-                                Excluir item
-                            </a>
+                            <?= botao_excluir_form('excluir_item', $item->id, 'Excluir este item e todos os preços dele?', 'Excluir item') ?>
                             <?php if ($servidorLogado !== null && $servidorLogado->ehAdmin()): ?>
                                 <button type="button" class="btn btn-sm btn-outline-primary"
                                         data-bs-toggle="modal" data-bs-target="#modalMoverItem<?= $item->id ?>">
@@ -260,11 +245,7 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
                                         <i class="ti ti-edit" aria-hidden="true" style="font-size: 12px;"></i>
                                         Editar
                                     </button>
-                                    <a href="index.php?action=excluir_preco&id=<?= $precoPlanilha->id ?>"
-                                       class="btn btn-sm btn-outline-danger"
-                                       onclick="return confirm('Excluir o valor da planilha orçamentária deste item?')">
-                                        <i class="ti ti-trash" aria-hidden="true" style="font-size: 12px;"></i>
-                                    </a>
+                                    <?= botao_excluir_form('excluir_preco', $precoPlanilha->id, 'Excluir o valor da planilha orçamentária deste item?', '') ?>
                                 </div>
                             </div>
 
@@ -341,11 +322,7 @@ $ehPlanilhaOrcamentaria = $cotacao->criterioConsolidacao === AnalisePrecos::CRIT
                                                     data-bs-toggle="modal" data-bs-target="#modalEditarPreco<?= $preco->id ?>">
                                                 <i class="ti ti-edit" aria-hidden="true" style="font-size: 12px;"></i>
                                             </button>
-                                            <a href="index.php?action=excluir_preco&id=<?= $preco->id ?>"
-                                               class="btn btn-sm btn-outline-danger"
-                                               onclick="return confirm('Excluir este preço?')">
-                                                <i class="ti ti-trash" aria-hidden="true" style="font-size: 12px;"></i>
-                                            </a>
+                                            <?= botao_excluir_form('excluir_preco', $preco->id, 'Excluir este preço?', '') ?>
                                         </td>
                                     </tr>
 

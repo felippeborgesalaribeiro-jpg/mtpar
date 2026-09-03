@@ -2,6 +2,8 @@
 
 namespace Tests\Models;
 
+use Cotacao;
+use Demanda;
 use PDOException;
 use Servidor;
 use Tests\DatabaseTestCase;

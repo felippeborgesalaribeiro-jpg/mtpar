@@ -1,6 +1,16 @@
 <?php
 
 require_once __DIR__ . '/../app/models/Database.php';
+
+// Etapas do Processo foi revertido depois desta migracao ser escrita
+// (ver migrate_015 + reversao em app/models/EtapaProcesso.php). Se o
+// arquivo do model nao existir mais, esta migracao virou no-op: nao
+// tem nada pra ajustar.
+if (!file_exists(__DIR__ . '/../app/models/EtapaProcesso.php')) {
+    echo 'Migração 017 pulada: Etapas do Processo não é mais usada no sistema. Nada a fazer.';
+    return;
+}
+
 require_once __DIR__ . '/../app/models/EtapaProcesso.php';
 
 // Simplifica a lista de etapas do processo, a pedido do usuario: a lista

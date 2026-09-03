@@ -94,10 +94,28 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
                 </div>
                 <div class="col-md-4">
                     <label class="form-label small">Setor demandante</label>
-                    <input type="text" name="setor_demandante" class="form-control form-control-sm"
-                           value="<?= htmlspecialchars($demanda->setorDemandante) ?>"
-                           list="listaSetoresDemandantes" autocomplete="off">
-                    <?php require __DIR__ . '/partials/datalist_setores_demandantes.php'; ?>
+                    <?php
+                    // Se a demanda ja tem um setor gravado como texto livre
+                    // (de antes do cadastro de Setores Demandantes existir),
+                    // preserva-o como opcao extra pra nao sumir na edicao.
+                    $nomesCadastrados = array_map(fn($s) => $s->nome, $setoresDemandantes);
+                    $setorAtualPersistente = $demanda->setorDemandante !== ''
+                        && !in_array($demanda->setorDemandante, $nomesCadastrados, true);
+                    ?>
+                    <select name="setor_demandante" class="form-select form-select-sm">
+                        <option value="">Selecione...</option>
+                        <?php if ($setorAtualPersistente): ?>
+                            <option value="<?= htmlspecialchars($demanda->setorDemandante) ?>" selected>
+                                <?= htmlspecialchars($demanda->setorDemandante) ?> (não cadastrado)
+                            </option>
+                        <?php endif; ?>
+                        <?php foreach ($setoresDemandantes as $setor): ?>
+                            <option value="<?= htmlspecialchars($setor->nome) ?>"
+                                <?= $demanda->setorDemandante === $setor->nome ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($setor->nome) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
             </div>
             <div class="row g-3 mb-3">

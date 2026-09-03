@@ -97,11 +97,7 @@ $querystringOrigem = isset($_GET['origem']) ? '&origem=' . urlencode($_GET['orig
                     <input type="text" name="setor_demandante" class="form-control form-control-sm"
                            value="<?= htmlspecialchars($demanda->setorDemandante) ?>"
                            list="listaSetoresDemandantes" autocomplete="off">
-                    <datalist id="listaSetoresDemandantes">
-                        <?php foreach ($setoresDemandantes as $setor): ?>
-                            <option value="<?= htmlspecialchars($setor->nome) ?>">
-                        <?php endforeach; ?>
-                    </datalist>
+                    <?php require __DIR__ . '/partials/datalist_setores_demandantes.php'; ?>
                 </div>
             </div>
             <div class="row g-3 mb-3">

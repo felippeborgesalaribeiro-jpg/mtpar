@@ -7,6 +7,7 @@ require_once __DIR__ . '/../models/Servidor.php';
 require_once __DIR__ . '/../models/Demanda.php';
 require_once __DIR__ . '/../models/AnalisePrecos.php';
 require_once __DIR__ . '/../models/Parametro.php';
+require_once __DIR__ . '/../models/SetorDemandante.php';
 require_once __DIR__ . '/../helpers/auth.php';
 
 class CotacaoController
@@ -18,6 +19,7 @@ class CotacaoController
         $cotacoes = Cotacao::buscarTodas();
         $servidores = Servidor::buscarTodos();
         $demandasDisponiveis = Demanda::buscarEmAndamentoSemVinculo();
+        $setoresDemandantes = SetorDemandante::buscarTodos();
 
         require __DIR__ . '/../views/cotacoes.php';
     }

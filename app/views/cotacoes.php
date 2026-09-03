@@ -262,7 +262,10 @@ foreach ($cotacoes as $cotacao) {
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Setor demandante</label>
-                    <input type="text" id="novaDemandaSetor" class="form-control">
+                    <input type="text" id="novaDemandaSetor" class="form-control"
+                           list="listaSetoresDemandantes" autocomplete="off"
+                           placeholder="Comece a digitar para buscar...">
+                    <?php require __DIR__ . '/partials/datalist_setores_demandantes.php'; ?>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Data de recebimento</label>

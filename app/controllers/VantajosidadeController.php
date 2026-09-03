@@ -6,6 +6,7 @@ require_once __DIR__ . '/../models/PrecoVantajosidade.php';
 require_once __DIR__ . '/../models/Servidor.php';
 require_once __DIR__ . '/../models/Parametro.php';
 require_once __DIR__ . '/../models/Demanda.php';
+require_once __DIR__ . '/../models/SetorDemandante.php';
 require_once __DIR__ . '/../models/AnaliseVantajosidade.php';
 require_once __DIR__ . '/../helpers/auth.php';
 require_once __DIR__ . '/../helpers/formatacao.php';
@@ -20,6 +21,7 @@ class VantajosidadeController
         $processos = ProcessoVantajosidade::buscarTodos();
         $servidores = Servidor::buscarTodos();
         $demandasDisponiveis = Demanda::buscarEmAndamentoSemVinculo();
+        $setoresDemandantes = SetorDemandante::buscarTodos();
 
         require __DIR__ . '/../views/vantajosidade_lista.php';
     }

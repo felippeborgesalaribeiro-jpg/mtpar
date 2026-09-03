@@ -259,11 +259,7 @@ $coresStatus = [
                             <input type="text" name="setor_demandante" class="form-control"
                                    list="listaSetoresDemandantes" autocomplete="off"
                                    placeholder="Comece a digitar para buscar...">
-                            <datalist id="listaSetoresDemandantes">
-                                <?php foreach ($setoresDemandantes as $setor): ?>
-                                    <option value="<?= htmlspecialchars($setor->nome) ?>">
-                                <?php endforeach; ?>
-                            </datalist>
+                            <?php require __DIR__ . '/partials/datalist_setores_demandantes.php'; ?>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Status</label>

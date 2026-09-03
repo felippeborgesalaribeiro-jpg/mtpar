@@ -256,10 +256,14 @@ $coresStatus = [
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Setor demandante</label>
-                            <input type="text" name="setor_demandante" class="form-control"
-                                   list="listaSetoresDemandantes" autocomplete="off"
-                                   placeholder="Comece a digitar para buscar...">
-                            <?php require __DIR__ . '/partials/datalist_setores_demandantes.php'; ?>
+                            <select name="setor_demandante" class="form-select" required>
+                                <option value="">Selecione...</option>
+                                <?php foreach ($setoresDemandantes as $setor): ?>
+                                    <option value="<?= htmlspecialchars($setor->nome) ?>">
+                                        <?= htmlspecialchars($setor->nome) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Status</label>

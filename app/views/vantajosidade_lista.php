@@ -274,10 +274,14 @@ foreach ($processos as $processo) {
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Setor demandante</label>
-                    <input type="text" id="novaDemandaSetorVant" class="form-control"
-                           list="listaSetoresDemandantes" autocomplete="off"
-                           placeholder="Comece a digitar para buscar...">
-                    <?php require __DIR__ . '/partials/datalist_setores_demandantes.php'; ?>
+                    <select id="novaDemandaSetorVant" class="form-select">
+                        <option value="">Selecione...</option>
+                        <?php foreach ($setoresDemandantes as $setor): ?>
+                            <option value="<?= htmlspecialchars($setor->nome) ?>">
+                                <?= htmlspecialchars($setor->nome) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Data de recebimento</label>

@@ -6,6 +6,7 @@ use Cotacao;
 use Demanda;
 use Empresa;
 use Item;
+use ItemPropostaVencedora;
 use Licitacao;
 use Lote;
 use LotePropostaVencedora;
@@ -32,6 +33,7 @@ require_once __DIR__ . '/../../app/models/ProcessoVantajosidade.php';
 require_once __DIR__ . '/../../app/models/LotePropostaVencedora.php';
 require_once __DIR__ . '/../../app/models/SituacaoLote.php';
 require_once __DIR__ . '/../../app/models/Empresa.php';
+require_once __DIR__ . '/../../app/models/ItemPropostaVencedora.php';
 require_once __DIR__ . '/../../app/models/Servidor.php';
 
 final class LicitacaoTest extends DatabaseTestCase
@@ -468,5 +470,51 @@ final class LicitacaoTest extends DatabaseTestCase
         $resolucao = $licitacao->verificarResolucaoDosLotes();
 
         $this->assertFalse($resolucao['ok']);
+    }
+
+    public function testCalcularValorAdjudicadoSomaItensDaPropostaVencedora(): void
+    {
+        // Cotação com 2 itens (qtd 10 e 5). Proposta vencedora informa
+        // R$ 3,00 e R$ 20,00. Total esperado: 10*3 + 5*20 = 130.
+        $servidor = $this->criarServidor();
+        $demanda = $this->criarDemanda();
+
+        $cotacao = new Cotacao(
+            $demanda->numeroProcesso, $demanda->setorDemandante, '', '', $demanda->objeto,
+            $servidor->id, demandaId: $demanda->id
+        );
+        $cotacao->salvar();
+        $lote = new Lote($cotacao->id, '01');
+        $lote->salvar();
+        $item1 = new Item($lote->id, 1, 'A', 'UN', 10);
+        $item1->salvar();
+        $item2 = new Item($lote->id, 2, 'B', 'UN', 5);
+        $item2->salvar();
+
+        $licitacao = Licitacao::criarApartirDeDemanda($demanda);
+        (new ItemPropostaVencedora($licitacao->id, $item1->id, 3.00))->salvar();
+        (new ItemPropostaVencedora($licitacao->id, $item2->id, 20.00))->salvar();
+
+        $this->assertEqualsWithDelta(130.0, $licitacao->calcularValorAdjudicado(), 0.001);
+    }
+
+    public function testCalcularValorAdjudicadoDevolveNullQuandoNaoHaProposta(): void
+    {
+        $demanda = $this->criarDemanda();
+        $licitacao = Licitacao::criarApartirDeDemanda($demanda);
+
+        $this->assertNull($licitacao->calcularValorAdjudicado());
+    }
+
+    public function testProximoDiaUtilPulaSabadoEDomingoAteASegunda(): void
+    {
+        // 2026-09-04 é sexta => próximo dia útil = segunda 2026-09-07.
+        $this->assertSame('2026-09-07', Licitacao::proximoDiaUtil('2026-09-04'));
+        // sabado -> segunda
+        $this->assertSame('2026-09-07', Licitacao::proximoDiaUtil('2026-09-05'));
+        // domingo -> segunda
+        $this->assertSame('2026-09-07', Licitacao::proximoDiaUtil('2026-09-06'));
+        // segunda -> terca
+        $this->assertSame('2026-09-08', Licitacao::proximoDiaUtil('2026-09-07'));
     }
 }

@@ -174,11 +174,25 @@ class PropostaVencedoraController
         $data = trim($_GET['data'] ?? '') ?: date('Y-m-d');
 
         // Gerar o termo E encerrar oficialmente a licitacao viraram o mesmo ato:
-        // se ainda nao tinha data de homologacao, grava agora antes de emitir.
-        // O botao antigo "Finalizar processo" (LicitacaoController::finalizar) foi
-        // absorvido por este fluxo.
+        // se ainda nao tinha data de homologacao, grava agora antes de emitir,
+        // ja preenchendo automaticamente o valor_adjudicado (soma da proposta
+        // vencedora) e encaminhado_pactuacao_contrato (proximo dia util). Assim
+        // a economicidade aparece calculada em tempo real no card do processo,
+        // sem exigir digitacao manual pelo "Editar licitação". O botao antigo
+        // "Finalizar processo" (LicitacaoController::finalizar) foi absorvido
+        // por este fluxo.
         if (!$licitacao->estaFinalizada()) {
             $licitacao->dataAdjudicacaoHomologacao = $data;
+
+            $valorAdjudicadoCalculado = $licitacao->calcularValorAdjudicado();
+            if ($valorAdjudicadoCalculado !== null) {
+                $licitacao->valorAdjudicado = $valorAdjudicadoCalculado;
+            }
+
+            if ($licitacao->encaminhadoPactuacaoContrato === null) {
+                $licitacao->encaminhadoPactuacaoContrato = Licitacao::proximoDiaUtil($data);
+            }
+
             $licitacao->salvar();
         }
 

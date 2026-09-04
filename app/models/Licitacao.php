@@ -321,6 +321,53 @@ class Licitacao
         return $lotesAtivos;
     }
 
+    /**
+     * Soma o total ADJUDICADO desta licitacao a partir da conferencia de
+     * proposta vencedora: para cada item, valor_proposto x quantidade. Lotes
+     * marcados como fracassado/deserto ficam de fora (nao tem valor proposto).
+     * Devolve null se nao houver nenhum valor proposto registrado ainda.
+     *
+     * Usado como gatilho automatico ao gerar o Termo de Adjudicacao/Homologacao,
+     * pra preencher o campo valor_adjudicado da licitacao sem exigir digitacao.
+     */
+    public function calcularValorAdjudicado(): ?float
+    {
+        require_once __DIR__ . '/ItemPropostaVencedora.php';
+
+        $propostas = ItemPropostaVencedora::buscarMapaPorLicitacao($this->id);
+        if (count($propostas) === 0) {
+            return null;
+        }
+
+        $total = 0.0;
+        foreach ($this->buscarLotesAtivos() as $entrada) {
+            foreach ($entrada['lote_atual']->buscarItens() as $item) {
+                if (isset($propostas[$item->id])) {
+                    $total += $propostas[$item->id]->valorProposto * $item->quantidade;
+                }
+            }
+        }
+
+        return $total;
+    }
+
+    /**
+     * Devolve a data do proximo dia util depois da data informada -
+     * sabado e domingo pulam pra segunda. Nao trata feriados (nem os
+     * moveis nem os fixos do calendario nacional/estadual/municipal),
+     * porque manter esse calendario atualizado dentro do sistema exige
+     * cadastro periodico; o agente ajusta manualmente na licitacao se
+     * cair em feriado.
+     */
+    public static function proximoDiaUtil(string $dataYmd): string
+    {
+        $data = new DateTime($dataYmd);
+        do {
+            $data->modify('+1 day');
+        } while ((int) $data->format('N') >= 6); // 6 = sab, 7 = dom
+        return $data->format('Y-m-d');
+    }
+
     public function calcularDiasNaLicitacao(): int
     {
         $dataInicio = new DateTime($this->dataRecebimento);

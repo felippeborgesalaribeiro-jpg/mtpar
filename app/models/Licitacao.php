@@ -491,7 +491,16 @@ class Licitacao
     public static function buscarTodas(): array
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->query('SELECT * FROM licitacoes ORDER BY data_recebimento DESC');
+        // Ignora licitacoes cuja Demanda foi mandada pra lixeira (soft
+        // delete). Sem esse filtro, a linha continuaria aparecendo na
+        // listagem e clicar em "Ver processo" quebrava com "Demanda nao
+        // encontrada", porque a Demanda vinculada nao existe mais.
+        $stmt = $pdo->query(
+            'SELECT l.* FROM licitacoes l
+             INNER JOIN demandas d ON d.id = l.demanda_id
+             WHERE d.deleted_at IS NULL
+             ORDER BY l.data_recebimento DESC'
+        );
 
         $licitacoes = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $linha) {
@@ -503,8 +512,14 @@ class Licitacao
 
     public static function contarPublicadas(): int
     {
+        // Mesma trava do buscarTodas: licitacoes cuja Demanda foi mandada
+        // pra lixeira nao entram nos indicadores do dashboard.
         $pdo = Database::getConnection();
-        $stmt = $pdo->query("SELECT COUNT(*) FROM licitacoes WHERE edital_licitacao != ''");
+        $stmt = $pdo->query(
+            "SELECT COUNT(*) FROM licitacoes l
+             INNER JOIN demandas d ON d.id = l.demanda_id
+             WHERE l.edital_licitacao != '' AND d.deleted_at IS NULL"
+        );
 
         return (int) $stmt->fetchColumn();
     }
@@ -512,7 +527,11 @@ class Licitacao
     public static function contarHomologadas(): int
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->query('SELECT COUNT(*) FROM licitacoes WHERE data_adjudicacao_homologacao IS NOT NULL');
+        $stmt = $pdo->query(
+            'SELECT COUNT(*) FROM licitacoes l
+             INNER JOIN demandas d ON d.id = l.demanda_id
+             WHERE l.data_adjudicacao_homologacao IS NOT NULL AND d.deleted_at IS NULL'
+        );
 
         return (int) $stmt->fetchColumn();
     }
@@ -521,8 +540,11 @@ class Licitacao
     {
         $pdo = Database::getConnection();
         $stmt = $pdo->query(
-            'SELECT SUM(valor_adjudicado) FROM licitacoes
-             WHERE data_adjudicacao_homologacao IS NOT NULL AND valor_adjudicado IS NOT NULL'
+            'SELECT SUM(l.valor_adjudicado) FROM licitacoes l
+             INNER JOIN demandas d ON d.id = l.demanda_id
+             WHERE l.data_adjudicacao_homologacao IS NOT NULL
+               AND l.valor_adjudicado IS NOT NULL
+               AND d.deleted_at IS NULL'
         );
 
         return (float) ($stmt->fetchColumn() ?? 0);

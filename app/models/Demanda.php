@@ -262,6 +262,41 @@ class Demanda
         return (int) $stmt->fetchColumn();
     }
 
+    /**
+     * Verifica se ja existe outra Demanda ATIVA (nao na lixeira) com esse
+     * mesmo numero de processo. Usado no cadastro e na edicao pra impedir
+     * duplicidade - o numero e a chave que o setor usa pra localizar o
+     * processo, entao ter dois iguais gera confusao (o usuario nao sabe
+     * qual e qual, e um pode acabar sendo excluido "por engano").
+     *
+     * Demandas na lixeira ficam de fora do check de proposito: se o setor
+     * excluir um numero errado, dar pra cadastrar um novo com o mesmo
+     * numero sem precisar restaurar/limpar a lixeira antes.
+     *
+     * $ignorarId permite editar uma demanda mantendo seu proprio numero
+     * (senao a validacao ao salvar acusaria conflito com ela mesma).
+     */
+    public static function existeOutraComNumero(string $numeroProcesso, ?int $ignorarId = null): bool
+    {
+        $numero = trim($numeroProcesso);
+        if ($numero === '') {
+            return false;
+        }
+
+        $pdo = Database::getConnection();
+        $sql = 'SELECT COUNT(*) FROM demandas
+                WHERE deleted_at IS NULL AND numero_processo = :numero';
+        $params = ['numero' => $numero];
+        if ($ignorarId !== null) {
+            $sql .= ' AND id != :ignorar';
+            $params['ignorar'] = $ignorarId;
+        }
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+
+        return ((int) $stmt->fetchColumn()) > 0;
+    }
+
     public static function contarExcluidas(): int
     {
         $pdo = Database::getConnection();

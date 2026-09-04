@@ -123,6 +123,14 @@ class VantajosidadeController
             return;
         }
 
+        if (Demanda::existeOutraComNumero($numeroProcessoDemanda)) {
+            $_SESSION['erro'] = "Já existe um processo com o número <strong>"
+                . htmlspecialchars($numeroProcessoDemanda) . "</strong>. Use outro número ou "
+                . "abra o processo já cadastrado.";
+            header('Location: index.php?action=vantajosidades');
+            exit;
+        }
+
         $demanda = new Demanda($numeroProcessoDemanda, $dataRecebimento, '', $setorDemandante, $objetoDemanda);
         $demanda->salvar();
 

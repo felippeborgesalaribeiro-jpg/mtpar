@@ -136,6 +136,14 @@ class DemandaController
             return;
         }
 
+        if (Demanda::existeOutraComNumero($numeroProcesso)) {
+            $_SESSION['erro'] = "Já existe um processo com o número <strong>"
+                . htmlspecialchars($numeroProcesso) . "</strong>. Use outro número ou "
+                . "abra o processo já cadastrado.";
+            header('Location: index.php?action=demandas');
+            exit;
+        }
+
         $demanda = new Demanda($numeroProcesso, $dataRecebimento, $linkSigadoc, $setorDemandante, $objeto, $servidorResponsavelId, $status);
         $demanda->salvar();
 
@@ -155,9 +163,17 @@ class DemandaController
             return;
         }
 
+        $novoNumero = trim($_POST['numero_processo'] ?? '');
+        if ($novoNumero !== '' && Demanda::existeOutraComNumero($novoNumero, $demanda->id)) {
+            $_SESSION['erro'] = "Já existe outro processo com o número <strong>"
+                . htmlspecialchars($novoNumero) . "</strong>. Escolha um número diferente.";
+            header('Location: index.php?action=ver_demanda&id=' . $demanda->id . '&modo=editar');
+            exit;
+        }
+
         $statusAnterior = $demanda->status;
 
-        $demanda->numeroProcesso = trim($_POST['numero_processo'] ?? '');
+        $demanda->numeroProcesso = $novoNumero;
         $demanda->linkSigadoc = trim($_POST['link_sigadoc'] ?? '');
         $demanda->setorDemandante = trim($_POST['setor_demandante'] ?? '');
         $demanda->dataRecebimento = trim($_POST['data_recebimento'] ?? '');

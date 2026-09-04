@@ -59,4 +59,40 @@ final class DemandaTest extends DatabaseTestCase
 
         $this->assertSame(0, $demanda->calcularDiasEmAberto());
     }
+
+    public function testExisteOutraComNumeroDetectaDuplicidadeEmDemandaAtiva(): void
+    {
+        $demanda = new Demanda('MTPAR-PRO-2026/00940', '2026-02-01');
+        $demanda->salvar();
+
+        $this->assertTrue(Demanda::existeOutraComNumero('MTPAR-PRO-2026/00940'));
+        $this->assertFalse(Demanda::existeOutraComNumero('MTPAR-PRO-2026/09999'));
+    }
+
+    public function testExisteOutraComNumeroIgnoraDemandaNaLixeira(): void
+    {
+        // Se o setor excluiu um numero errado, precisa poder recadastrar com
+        // o mesmo numero sem ter que restaurar/limpar a lixeira antes.
+        $demanda = new Demanda('MTPAR-PRO-2026/00941', '2026-02-01');
+        $demanda->salvar();
+        $demanda->excluir();
+
+        $this->assertFalse(Demanda::existeOutraComNumero('MTPAR-PRO-2026/00941'));
+    }
+
+    public function testExisteOutraComNumeroIgnoraProprioIdNaEdicao(): void
+    {
+        // Ao editar mantendo o proprio numero, nao pode acusar conflito
+        // com ela mesma - dai o parametro $ignorarId.
+        $demanda = new Demanda('MTPAR-PRO-2026/00942', '2026-02-01');
+        $demanda->salvar();
+
+        $this->assertFalse(Demanda::existeOutraComNumero('MTPAR-PRO-2026/00942', $demanda->id));
+    }
+
+    public function testExisteOutraComNumeroRetornaFalseParaNumeroVazio(): void
+    {
+        $this->assertFalse(Demanda::existeOutraComNumero(''));
+        $this->assertFalse(Demanda::existeOutraComNumero('   '));
+    }
 }

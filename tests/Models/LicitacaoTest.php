@@ -517,4 +517,22 @@ final class LicitacaoTest extends DatabaseTestCase
         // segunda -> terca
         $this->assertSame('2026-09-08', Licitacao::proximoDiaUtil('2026-09-07'));
     }
+
+    public function testBuscarTodasNaoTrazLicitacaoDeDemandaNaLixeira(): void
+    {
+        // Regressao: mandar a Demanda pra lixeira (soft delete) deixava a
+        // Licitacao vinculada como "orfa" na listagem - clicar em "Ver
+        // processo" caia em "Demanda nao encontrada". buscarTodas() agora
+        // filtra via INNER JOIN em demandas.deleted_at IS NULL.
+        $demanda = $this->criarDemanda();
+        $licitacao = Licitacao::criarApartirDeDemanda($demanda);
+
+        $idsAntes = array_map(fn(Licitacao $l) => $l->id, Licitacao::buscarTodas());
+        $this->assertContains($licitacao->id, $idsAntes);
+
+        $demanda->excluir();
+
+        $idsDepois = array_map(fn(Licitacao $l) => $l->id, Licitacao::buscarTodas());
+        $this->assertNotContains($licitacao->id, $idsDepois);
+    }
 }

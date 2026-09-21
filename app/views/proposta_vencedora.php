@@ -241,7 +241,13 @@ require __DIR__ . '/partials/header.php';
                         <?php foreach ($itens as $item): ?>
                             <?php
                             $resultado = $item->analisar($cotacaoDoLote->criterioConsolidacao, null, $cotacaoDoLote->deveArredondarValorReferencia());
-                            $valorReferencia = $resultado['valor_referencia'] ?? 0;
+                            // Arredondar aqui para que o JS multiplique pelo
+                            // mesmo numero que aparece na tela - senao a
+                            // referencia bruta (ex.: 1031,6666...) x qtd gera
+                            // um subtotal 1 centavo diferente do valor exibido
+                            // no Mapa. Mesma regra do fix aplicado no Mapa/
+                            // Termo/calcularValorTotal.
+                            $valorReferencia = round($resultado['valor_referencia'] ?? 0, 2);
                             $propostaExistente = $valoresPropostos[$item->id] ?? null;
                             ?>
                             <tr data-item data-qtd="<?= $item->quantidade ?>" data-ref="<?= $valorReferencia ?>" id="item-<?= $item->id ?>">
@@ -387,6 +393,11 @@ tr.lote-subtotal.ok td { background-color: #d1e7dd; }
     function fmtPercent(n) {
         return n.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
     }
+    // Arredonda pra centavos - usado antes de somar para que a soma exibida
+    // bata com a conferencia manual dos totais visiveis.
+    function round2(n) {
+        return Math.round(n * 100) / 100;
+    }
 
     function recalcular() {
         var totalEstimadoGeral = 0;
@@ -412,7 +423,11 @@ tr.lote-subtotal.ok td { background-color: #d1e7dd; }
                 var chip = row.querySelector('.status .badge');
                 var totalCell = row.querySelector('td.total');
 
-                subEstimado += qtd * ref;
+                // round2 acompanha o PHP: cada total de item eh arredondado
+                // pra centavos ANTES de somar, para que a soma exibida bata
+                // com "sum(totais visiveis)" e nao com "sum(brutos)" - mesma
+                // logica dos fixes aplicados no Mapa/Termo.
+                subEstimado += round2(qtd * ref);
 
                 if (propostoUnit === null) {
                     chip.className = 'badge bg-secondary';
@@ -423,7 +438,7 @@ tr.lote-subtotal.ok td { background-color: #d1e7dd; }
                     return;
                 }
 
-                var totalItem = qtd * propostoUnit;
+                var totalItem = round2(qtd * propostoUnit);
                 subProposto += totalItem;
                 totalCell.textContent = fmtMoeda(totalItem);
 
@@ -458,9 +473,12 @@ tr.lote-subtotal.ok td { background-color: #d1e7dd; }
             }
 
             algumPendente = algumPendente || subTemPendente;
-            totalEstimadoGeral += subEstimado;
-            totalPropostoGeral += subProposto;
+            totalEstimadoGeral += round2(subEstimado);
+            totalPropostoGeral += round2(subProposto);
         });
+
+        totalEstimadoGeral = round2(totalEstimadoGeral);
+        totalPropostoGeral = round2(totalPropostoGeral);
 
         document.getElementById('totalEstimado').textContent = fmtMoeda(totalEstimadoGeral);
         document.getElementById('totalProposto').textContent = fmtMoeda(totalPropostoGeral) + (algumPendente ? ' *' : '');

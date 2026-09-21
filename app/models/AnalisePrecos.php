@@ -141,15 +141,19 @@ class AnalisePrecos
             return null;
         }
 
-        switch ($this->criterio) {
-            case self::CRITERIO_MEDIA:
-                return $this->calcularMedia($aprovados);
-            case self::CRITERIO_MENOR_PRECO:
-                return $this->calcularMenorPreco($aprovados);
-            case self::CRITERIO_MEDIANA:
-            default:
-                return $this->calcularMediana($aprovados);
-        }
+        $valor = match ($this->criterio) {
+            self::CRITERIO_MEDIA        => $this->calcularMedia($aprovados),
+            self::CRITERIO_MENOR_PRECO  => $this->calcularMenorPreco($aprovados),
+            default                     => $this->calcularMediana($aprovados),
+        };
+
+        // Arredonda pra 2 casas AQUI, na fronteira do calculo estatistico.
+        // Sem isso, medias como 3095/3 = 1031.6666... viam a tela como
+        // "R$ 1.031,67" e o total (valor * qtd) usava o numero cheio,
+        // produzindo "R$ 4.126,67" em vez do R$ 4.126,68 que o usuario
+        // confere no papel - diferenca de 1 centavo que quebrava validacao
+        // manual e conferencia de propostas.
+        return round($valor, 2);
     }
 
     public function calcularMedia(array $valores): float

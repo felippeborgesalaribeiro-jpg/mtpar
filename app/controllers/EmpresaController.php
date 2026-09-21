@@ -31,18 +31,36 @@ class EmpresaController
         $nomeFantasia = trim($_POST['nome_fantasia'] ?? '');
         $cnpj = Empresa::normalizarCnpj($_POST['cnpj'] ?? '');
 
-        if ($nome === '') {
-            $this->responderJson(['erro' => 'Nome é obrigatório.'], 422);
-            return;
-        }
-
         if (strlen($cnpj) !== 14) {
             $this->responderJson(['erro' => 'CNPJ inválido.'], 422);
             return;
         }
 
-        if (Empresa::buscarPorCnpj($cnpj) !== null) {
-            $this->responderJson(['erro' => 'Já existe uma empresa cadastrada com esse CNPJ.'], 422);
+        // Paliativo pra desbloquear troca de empresa em Lote ja com Vencedor
+        // definido: se o CNPJ ja existe, o botao "Cadastrar e usar neste lote"
+        // devolve a empresa existente pra que o front selecione ela no lote,
+        // em vez de recusar com "ja existe empresa com esse CNPJ" e travar o
+        // usuario. Fluxo original de rejeitar duplicidade sera revisto depois
+        // - por enquanto o efeito pratico e "cadastra se novo, seleciona se
+        // ja existente".
+        $empresaExistente = Empresa::buscarPorCnpj($cnpj);
+        if ($empresaExistente !== null) {
+            $this->responderJson([
+                'empresa' => [
+                    'id' => $empresaExistente->id,
+                    'nome' => $empresaExistente->nome,
+                    'nomeFantasia' => $empresaExistente->nomeFantasia,
+                    'cnpj' => $empresaExistente->cnpj,
+                    'licitacoesHomologadas' => $empresaExistente->contarLicitacoesHomologadas(),
+                ],
+            ]);
+            return;
+        }
+
+        // Empresa realmente nova: aqui sim o nome e obrigatorio (razao social
+        // fica no cadastro definitivo).
+        if ($nome === '') {
+            $this->responderJson(['erro' => 'Nome é obrigatório.'], 422);
             return;
         }
 

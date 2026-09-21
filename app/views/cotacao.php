@@ -250,7 +250,7 @@ $classesBadgeResultado = [
                                                         <div class="mb-3">
                                                             <label class="form-label">Preço</label>
                                                             <input type="text" name="valor" class="form-control"
-                                                                   value="<?= formatarNumero($preco->valor) ?>" required>
+                                                                   value="<?= formatarNumero($preco->valor, 4) ?>" required>
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
@@ -294,10 +294,10 @@ $classesBadgeResultado = [
                     <p class="mb-0 mt-3 small">
                         <i class="ti ti-target-arrow" aria-hidden="true" style="font-size: 14px; vertical-align: -1px; color: #1F3864;"></i>
                         <b>Valor de referência (<?= $cotacao->criterioConsolidacao ?>):</b>
-                        <?= formatarMoeda($resultado['valor_referencia'] ?? 0) ?>
+                        <?= formatarValorPreciso($resultado['valor_referencia'] ?? 0) ?>
                         &nbsp;—&nbsp;
-                        <b>Total (x <?= formatarNumero($item->quantidade) ?>):</b>
-                        <span class="badge bg-success"><?= formatarMoeda(($resultado['valor_referencia'] ?? 0) * $item->quantidade) ?></span>
+                        <b>Total (x <?= formatarNumero($item->quantidade, 4) ?>):</b>
+                        <span class="badge bg-success"><?= formatarValorPreciso(($resultado['valor_referencia'] ?? 0) * $item->quantidade) ?></span>
                     </p>
                 </div>
 
@@ -325,7 +325,7 @@ $classesBadgeResultado = [
                                         <div class="col-6">
                                             <label class="form-label">Quantidade</label>
                                             <input type="text" name="quantidade" class="form-control"
-                                                   value="<?= formatarNumero($item->quantidade) ?>">
+                                                   value="<?= formatarNumero($item->quantidade, 4) ?>">
                                         </div>
                                     </div>
                                 </div>

@@ -72,16 +72,16 @@ require __DIR__ . '/partials/header.php';
                                     <td>
                                         <?php if (isset($dadosItem['fornecedores'][$i])): ?>
                                             <div class="small text-muted"><?= htmlspecialchars($dadosItem['fornecedores'][$i]['fonte']) ?></div>
-                                            <div><?= formatarMoeda($dadosItem['fornecedores'][$i]['valor']) ?></div>
+                                            <div><?= formatarValorPreciso($dadosItem['fornecedores'][$i]['valor']) ?></div>
                                         <?php else: ?>
                                             —
                                         <?php endif; ?>
                                     </td>
                                 <?php endfor; ?>
-                                <td class="fw-bold"><?= formatarMoeda($dadosItem['valor_referencia']) ?></td>
+                                <td class="fw-bold"><?= formatarValorPreciso($dadosItem['valor_referencia']) ?></td>
                                 <td class="text-center"><?= htmlspecialchars($item->unidade) ?></td>
-                                <td class="text-center"><?= formatarNumero($item->quantidade) ?></td>
-                                <td class="fw-bold"><?= formatarMoeda($dadosItem['total']) ?></td>
+                                <td class="text-center"><?= formatarNumero($item->quantidade, 4) ?></td>
+                                <td class="fw-bold"><?= formatarValorPreciso($dadosItem['total']) ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -91,7 +91,7 @@ require __DIR__ . '/partials/header.php';
                 <span class="fs-5">
                     <b>Valor total do Lote <?= htmlspecialchars($lote->numero) ?>:</b>
                     <span class="badge bg-success fs-6">
-                        <?= formatarMoeda($dadosLote['valor_total']) ?>
+                        <?= formatarValorPreciso($dadosLote['valor_total']) ?>
                     </span>
                 </span>
             </div>

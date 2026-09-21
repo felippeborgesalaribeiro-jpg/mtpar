@@ -53,7 +53,7 @@ class LoteController
         $loteId = (int) ($_POST['lote_id'] ?? 0);
         $descricao = trim($_POST['descricao'] ?? '');
         $unidade = trim($_POST['unidade'] ?? 'UN');
-        $quantidade = (float) str_replace(',', '.', $_POST['quantidade'] ?? '1');
+        $quantidade = converterMoedaBrParaFloat($_POST['quantidade'] ?? '1');
 
         $lote = Lote::buscarPorId($loteId);
 
@@ -76,7 +76,7 @@ class LoteController
         $itemId = (int) ($_POST['item_id'] ?? 0);
         $descricao = trim($_POST['descricao'] ?? '');
         $unidade = trim($_POST['unidade'] ?? 'UN');
-        $quantidade = (float) str_replace(',', '.', $_POST['quantidade'] ?? '1');
+        $quantidade = converterMoedaBrParaFloat($_POST['quantidade'] ?? '1');
 
         $item = Item::buscarPorId($itemId);
 

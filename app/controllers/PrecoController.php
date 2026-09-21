@@ -13,7 +13,7 @@ class PrecoController
         exigirLogin();
 
         $itemId = (int) ($_POST['item_id'] ?? 0);
-        $valor = (float) str_replace(',', '.', $_POST['valor'] ?? '0');
+        $valor = converterMoedaBrParaFloat($_POST['valor'] ?? '0');
         $parametro = trim($_POST['parametro'] ?? '');
         $fonte = trim($_POST['fonte'] ?? '');
 
@@ -38,7 +38,7 @@ class PrecoController
         exigirLogin();
 
         $precoId = (int) ($_POST['preco_id'] ?? 0);
-        $valor = (float) str_replace(',', '.', $_POST['valor'] ?? '0');
+        $valor = converterMoedaBrParaFloat($_POST['valor'] ?? '0');
         $parametro = trim($_POST['parametro'] ?? '');
         $fonte = trim($_POST['fonte'] ?? '');
 

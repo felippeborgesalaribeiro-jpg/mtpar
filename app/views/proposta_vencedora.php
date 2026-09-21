@@ -665,15 +665,34 @@ tr.lote-subtotal.ok td { background-color: #d1e7dd; }
             form.append('nome', nome);
             form.append('nome_fantasia', nomeFantasia);
             form.append('cnpj', cnpj);
+            // Endpoint criar_empresa passa pelo exigir_csrf() central - sem
+            // esse token o servidor devolve 403 "Sessao invalida" e o
+            // fetch abaixo falha silenciosamente (nem alert, nem empresa
+            // selecionada, e a pagina fica com a empresa antiga do banco).
+            var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            var csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+            form.append('csrf_token', csrfToken);
 
-            fetch('index.php?action=criar_empresa', { method: 'POST', body: form })
-                .then(function (r) { return r.json(); })
+            fetch('index.php?action=criar_empresa', {
+                    method: 'POST',
+                    body: form,
+                    headers: { 'X-CSRF-Token': csrfToken }
+                })
+                .then(function (r) {
+                    if (!r.ok) {
+                        return r.text().then(function (texto) { throw new Error(texto || ('HTTP ' + r.status)); });
+                    }
+                    return r.json();
+                })
                 .then(function (data) {
                     if (data.erro) {
                         alert(data.erro);
                         return;
                     }
                     selecionar(data.empresa);
+                })
+                .catch(function (err) {
+                    alert('Nao foi possivel salvar a empresa: ' + (err && err.message ? err.message : 'erro desconhecido'));
                 });
         });
 

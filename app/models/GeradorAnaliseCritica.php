@@ -247,10 +247,10 @@ class GeradorAnaliseCritica
             foreach ($itens as $item) {
                 $precos          = $item->buscarPrecos();
                 $resultado       = $item->analisar($this->cotacao->criterioConsolidacao, $parametrosPrecoPublico, $arredondar, $precos);
-                $valorReferencia = $resultado['valor_referencia'] ?? 0;
-                // Mesma regra do Mapa: arredonda cada total de item pra
-                // centavos antes de somar, senao o "Valor Estimado Total"
-                // impresso no Termo diverge do que aparece na tela.
+                // Mesma regra do Mapa: valor de referencia arredondado pra
+                // centavos antes de multiplicar - o Termo impresso mostra o
+                // valor_referencia rounded, o total tem que ser rounded x qtd.
+                $valorReferencia = round($resultado['valor_referencia'] ?? 0, 2);
                 $valorTotalLote += round($valorReferencia * $item->quantidade, 2);
 
                 $this->montarTabelaItem($secao, $lote, $item, $precos, $resultado);
@@ -288,10 +288,9 @@ class GeradorAnaliseCritica
         $larguraTotal = $col1 + $col2 + $col3 + $col4;
         $larguraParam = $col1 + $col2 + $col3;
 
-        $valorReferencia = $resultado['valor_referencia'] ?? 0;
-        // Mantido consistente com a soma do lote acima: cada total de item
-        // e arredondado pra centavos, pra que "sum(totais impressos)" no
-        // Termo bata com o "Valor Estimado Total do Lote".
+        // Igual ao Mapa: mesmo numero exibido para valor de referencia e
+        // para o total, pra que "referencia x qtd" bata com o total impresso.
+        $valorReferencia = round($resultado['valor_referencia'] ?? 0, 2);
         $valorTotal      = round($valorReferencia * $item->quantidade, 2);
         $criterioLabel   = self::CRITERIO_LABEL[$this->cotacao->criterioConsolidacao] ?? 'mediana';
 

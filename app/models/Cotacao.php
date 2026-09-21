@@ -230,11 +230,13 @@ class Cotacao
         foreach ($this->buscarLotes() as $lote) {
             foreach ($lote->buscarItens() as $item) {
                 $resultado = $item->analisar($this->criterioConsolidacao, $parametrosPrecoPublico, $arredondar);
-                $valorReferencia = $resultado['valor_referencia'] ?? 0;
-                // Mesma regra do Mapa: arredonda o total do item pra centavos
-                // antes de somar - senao "sum(brutos)" nao bate com o que o
-                // usuario ve na tela e a Licitacao recebe um valor estimado
-                // 1 centavo diferente do "Valor global da cotacao" exibido.
+                // Arredonda o valor de referencia pros centavos antes de
+                // multiplicar. Cotacoes antigas nao arredondam a media/
+                // mediana por dentro, e "1031,6666 x 4" gera um total 1
+                // centavo diferente do que o usuario le na tela (1031,67 x 4).
+                // A Licitacao herda esse total como valor estimado, entao
+                // esse alinhamento tem que acontecer aqui tambem.
+                $valorReferencia = round($resultado['valor_referencia'] ?? 0, 2);
                 $valorTotal += round($valorReferencia * $item->quantidade, 2);
             }
         }

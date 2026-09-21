@@ -86,13 +86,16 @@ class MapaController
                     }
                 }
 
-                $valorReferencia = $resultado['valor_referencia'] ?? 0;
-                // Arredonda o total do item pra centavos AQUI, antes de somar
-                // no lote. Sem isso, um item com valor_ref x qtd fracionario
-                // (ex.: R$ 100,55 x 2,5 = R$ 251,375) entra bruto na soma do
-                // lote, e "R$ 251,38 + R$ 501,88" (o que o usuario ve na tela)
-                // vira "R$ 753,25" (a soma dos numeros crus) - 1 centavo a
-                // menos, e conferencia manual quebra.
+                // Arredonda o valor de referencia PARA A EXIBICAO antes de
+                // multiplicar pela quantidade. Cotacoes antigas (antes de
+                // DATA_CORTE_VALOR_REFERENCIA_ARREDONDADO) mantem por dentro
+                // a media/mediana com casas alem de 2 - se o total fosse
+                // calculado do valor bruto (ex.: 1031,6666... x 4 = 4126,6666
+                // => R$ 4.126,67), o usuario conferindo "1031,67 x 4 = 4126,68"
+                // veria diferenca de 1 centavo. Multiplicando pelo mesmo
+                // numero que aparece na tela, a conta sempre fecha, sem
+                // alterar o valor historico armazenado.
+                $valorReferencia = round($resultado['valor_referencia'] ?? 0, 2);
                 $total = round($valorReferencia * $item->quantidade, 2);
                 $valorTotalLote += $total;
 

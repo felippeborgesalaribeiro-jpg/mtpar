@@ -152,16 +152,19 @@ class GeradorComparacaoProposta
 
         foreach ($lote->buscarItens() as $item) {
             $resultado = $item->analisar($cotacaoDoLote->criterioConsolidacao, null, $cotacaoDoLote->deveArredondarValorReferencia());
-            $valorReferencia = $resultado['valor_referencia'] ?? 0;
+            // Mesma regra do Mapa: exibe e multiplica sempre o valor
+            // arredondado pra centavos, para que a conferencia manual
+            // "referencia x qtd" fecha com o subtotal impresso.
+            $valorReferencia = round($resultado['valor_referencia'] ?? 0, 2);
             $propostaItem = ItemPropostaVencedora::buscarPorLicitacaoEItem($this->licitacao->id, $item->id);
 
-            $subtotalRef += $valorReferencia * $item->quantidade;
+            $subtotalRef += round($valorReferencia * $item->quantidade, 2);
 
             $situacao = 'Aguardando proposta';
             $textoProposto = '—';
 
             if ($propostaItem !== null) {
-                $subtotalProposto += $propostaItem->valorProposto * $item->quantidade;
+                $subtotalProposto += round($propostaItem->valorProposto * $item->quantidade, 2);
                 $textoProposto = formatarMoeda($propostaItem->valorProposto);
                 $situacao = $propostaItem->valorProposto > $valorReferencia ? 'Acima da referência' : 'Dentro do valor';
             } else {

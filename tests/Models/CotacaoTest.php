@@ -183,7 +183,7 @@ final class CotacaoTest extends DatabaseTestCase
         $this->assertFalse($cotacaoAntiga->deveArredondarValorReferencia());
     }
 
-    public function testCalcularValorTotalNaoArredondaParaCotacaoDeAntesDaCorrecao(): void
+    public function testCalcularValorTotalArredondaMesmoParaCotacaoDeAntesDaCorrecao(): void
     {
         $servidor = $this->criarServidor();
         $cotacao = new Cotacao('MTPAR-PRO-2026/00010', '', '', '', '', $servidor->id, AnalisePrecos::CRITERIO_MEDIA);
@@ -202,10 +202,15 @@ final class CotacaoTest extends DatabaseTestCase
             (new Preco($item->id, $valor))->salvar();
         }
 
-        // Sem a correcao, o total bate com o bruto (13.865 x 100 = 1386.50),
-        // nao com o arredondado (13.86 x 100 = 1386.00) - preserva o numero
-        // que ja saiu num Mapa/Relatorio antigo.
-        $this->assertEqualsWithDelta(1386.50, $cotacao->calcularValorTotal(), 0.001);
+        // Antes esse teste esperava 1386.50 (13.865 x 100, calculo bruto)
+        // pra "preservar" o valor antigo. Mas isso deixava o Valor Estimado
+        // salvo na Licitacao 50 centavos maior que o total do Lote impresso
+        // no Mapa (que mostra 13,86 x 100 = 1386,00) - a mesma confusao de
+        // "centavo fantasma" que o usuario relatou. Agora o calculo bate
+        // com o que aparece na tela em qualquer cotacao, antiga ou nova.
+        // A media_dos_demais usada nas Etapas 1/2 (excessivo/inexequivel)
+        // segue com o valor bruto, pra nao mexer nas fronteiras 70/30.
+        $this->assertEqualsWithDelta(1386.00, $cotacao->calcularValorTotal(), 0.001);
     }
 
     public function testCotacaoDeRepublicacaoDeLoteNaoAparecemEmBuscarTodas(): void

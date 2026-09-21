@@ -248,10 +248,15 @@ class GeradorAnaliseCritica
                 $precos          = $item->buscarPrecos();
                 $resultado       = $item->analisar($this->cotacao->criterioConsolidacao, $parametrosPrecoPublico, $arredondar, $precos);
                 $valorReferencia = $resultado['valor_referencia'] ?? 0;
-                $valorTotalLote += $valorReferencia * $item->quantidade;
+                // Mesma regra do Mapa: arredonda cada total de item pra
+                // centavos antes de somar, senao o "Valor Estimado Total"
+                // impresso no Termo diverge do que aparece na tela.
+                $valorTotalLote += round($valorReferencia * $item->quantidade, 2);
 
                 $this->montarTabelaItem($secao, $lote, $item, $precos, $resultado);
             }
+
+            $valorTotalLote = round($valorTotalLote, 2);
 
             $secao->addText(
                 'Valor Estimado Total do Lote ' . $lote->numero . ' após a retirada dos Preços Excessivos e Inexequíveis 70/30: ' . formatarMoeda($valorTotalLote),
@@ -262,7 +267,7 @@ class GeradorAnaliseCritica
             $valorGlobalEstimado += $valorTotalLote;
         }
 
-        $this->valorGlobalEstimado = $valorGlobalEstimado;
+        $this->valorGlobalEstimado = round($valorGlobalEstimado, 2);
 
         $secao->addPageBreak();
     }
@@ -284,7 +289,10 @@ class GeradorAnaliseCritica
         $larguraParam = $col1 + $col2 + $col3;
 
         $valorReferencia = $resultado['valor_referencia'] ?? 0;
-        $valorTotal      = $valorReferencia * $item->quantidade;
+        // Mantido consistente com a soma do lote acima: cada total de item
+        // e arredondado pra centavos, pra que "sum(totais impressos)" no
+        // Termo bata com o "Valor Estimado Total do Lote".
+        $valorTotal      = round($valorReferencia * $item->quantidade, 2);
         $criterioLabel   = self::CRITERIO_LABEL[$this->cotacao->criterioConsolidacao] ?? 'mediana';
 
         $tabela = $secao->addTable($estiloTabela);

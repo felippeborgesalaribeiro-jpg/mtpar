@@ -87,7 +87,13 @@ class MapaController
                 }
 
                 $valorReferencia = $resultado['valor_referencia'] ?? 0;
-                $total = $valorReferencia * $item->quantidade;
+                // Arredonda o total do item pra centavos AQUI, antes de somar
+                // no lote. Sem isso, um item com valor_ref x qtd fracionario
+                // (ex.: R$ 100,55 x 2,5 = R$ 251,375) entra bruto na soma do
+                // lote, e "R$ 251,38 + R$ 501,88" (o que o usuario ve na tela)
+                // vira "R$ 753,25" (a soma dos numeros crus) - 1 centavo a
+                // menos, e conferencia manual quebra.
+                $total = round($valorReferencia * $item->quantidade, 2);
                 $valorTotalLote += $total;
 
                 $mapaItens[] = [
@@ -98,6 +104,11 @@ class MapaController
                 ];
             }
 
+            // Blindagem final contra ruido de ponto flutuante acumulado ao
+            // somar varios totais 2dp - o total do lote e o valor global
+            // sao os "orcamentos" que aparecem em Termos e Relatorios.
+            $valorTotalLote = round($valorTotalLote, 2);
+
             $mapaLotes[] = [
                 'lote' => $lote,
                 'itens' => $mapaItens,
@@ -106,6 +117,8 @@ class MapaController
 
             $valorGlobalCotacao += $valorTotalLote;
         }
+
+        $valorGlobalCotacao = round($valorGlobalCotacao, 2);
 
         return [$mapaLotes, $valorGlobalCotacao];
     }

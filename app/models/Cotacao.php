@@ -231,11 +231,15 @@ class Cotacao
             foreach ($lote->buscarItens() as $item) {
                 $resultado = $item->analisar($this->criterioConsolidacao, $parametrosPrecoPublico, $arredondar);
                 $valorReferencia = $resultado['valor_referencia'] ?? 0;
-                $valorTotal += $valorReferencia * $item->quantidade;
+                // Mesma regra do Mapa: arredonda o total do item pra centavos
+                // antes de somar - senao "sum(brutos)" nao bate com o que o
+                // usuario ve na tela e a Licitacao recebe um valor estimado
+                // 1 centavo diferente do "Valor global da cotacao" exibido.
+                $valorTotal += round($valorReferencia * $item->quantidade, 2);
             }
         }
 
-        return $valorTotal;
+        return round($valorTotal, 2);
     }
 
     public static function buscarPorId(int $id): ?Cotacao
